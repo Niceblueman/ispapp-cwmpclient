@@ -1,0 +1,233 @@
+# ISPAppD Build Wrapper Makefile
+# Provides convenient targets for building IPK packages and macOS binaries
+
+.PHONY: help clean ipk-all ipk macos check-tools setup-dev
+
+# Default target
+help:
+	@echo "ISPAppD Build System"
+	@echo "==================="
+	@echo ""
+	@echo "Available targets:"
+	@echo "  help          - Show this help message"
+	@echo "  ipk          - Build IPK for x86_64 (default)"
+	@echo "  ipk-all      - Build IPK for all architectures"
+	@echo "  macos        - Build for macOS ARM64"
+	@echo "  clean        - Clean build artifacts"
+	@echo "  check-tools  - Check required build tools"
+	@echo "  setup-dev    - Setup development environment"
+	@echo ""
+	@echo "IPK build options:"
+	@echo "  make ipk ARCH=mips_24kc     - Build for specific architecture"
+	@echo "  make ipk DEBUG=1            - Build with debug flags"
+	@echo "  make ipk CLEAN=1            - Clean build"
+	@echo ""
+	@echo "macOS build options:"
+	@echo "  make macos DEBUG=1          - Build with debug flags"
+	@echo "  make macos CLEAN=1          - Clean build"
+	@echo "  make macos PREFIX=/usr/local - Custom install prefix"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make ipk ARCH=arm_cortex-a53 DEBUG=1"
+	@echo "  make macos DEBUG=1 CLEAN=1"
+	@echo "  make ipk-all"
+
+# Default architecture for IPK builds
+ARCH ?= x86_64
+
+# Build flags
+DEBUG_FLAG := $(if $(DEBUG),--debug,)
+CLEAN_FLAG := $(if $(CLEAN),--clean,)
+VERBOSE_FLAG := $(if $(VERBOSE),--verbose,)
+PREFIX_FLAG := $(if $(PREFIX),--prefix $(PREFIX),)
+
+# Check if we're on macOS or Linux
+UNAME_S := $(shell uname -s)
+
+# Build single IPK package
+ipk:
+ifeq ($(UNAME_S),Darwin)
+	@echo "Error: IPK builds require Linux environment"
+	@echo "Use 'make macos' for macOS builds"
+	@exit 1
+endif
+	@echo "Building IPK package for $(ARCH)..."
+	./scripts/build-ipk.sh --arch $(ARCH) $(DEBUG_FLAG) $(CLEAN_FLAG) $(VERBOSE_FLAG)
+
+# Build IPK for all architectures
+ipk-all:
+ifeq ($(UNAME_S),Darwin)
+	@echo "Error: IPK builds require Linux environment"
+	@echo "Use 'make macos' for macOS builds"
+	@exit 1
+endif
+	@echo "Building IPK packages for all architectures..."
+	@for arch in mips_24kc mipsel_24kc arm_cortex-a7_neon-vfpv4 arm_cortex-a53 aarch64_cortex-a53 x86_64; do \
+		echo "Building for $$arch..."; \
+		./scripts/build-ipk.sh --arch $$arch $(DEBUG_FLAG) $(VERBOSE_FLAG) || exit 1; \
+		echo ""; \
+	done
+	@echo "All IPK builds completed!"
+
+# Build for macOS ARM64
+macos:
+ifneq ($(UNAME_S),Darwin)
+	@echo "Error: macOS builds require macOS environment"
+	@echo "Use 'make ipk' for OpenWrt IPK builds"
+	@exit 1
+endif
+	@echo "Building for macOS ARM64..."
+	./scripts/build-macos.sh $(DEBUG_FLAG) $(CLEAN_FLAG) $(VERBOSE_FLAG) $(PREFIX_FLAG)
+
+# Clean build artifacts
+clean:
+	@echo "Cleaning build artifacts..."
+	rm -rf openwrt-sdk-*
+	rm -f *.ipk *.tar.gz
+	rm -rf macos-stubs
+	rm -rf autom4te.cache
+	rm -f config.log config.status
+	rm -f Makefile bin/Makefile
+	@echo "Clean completed!"
+
+# Check required tools
+check-tools:
+	@echo "Checking build tools..."
+ifeq ($(UNAME_S),Darwin)
+	@printf "Checking macOS tools: "
+	@for tool in make gcc curl; do \
+		if command -v $$tool >/dev/null 2>&1; then \
+			printf "$$tool "; \
+		else \
+			echo ""; \
+			echo "Error: $$tool is not installed"; \
+			exit 1; \
+		fi; \
+	done
+	@echo "✓"
+	@printf "Checking optional macOS tools: "
+	@MISSING=""; \
+	for tool in brew autoconf automake wget; do \
+		if command -v $$tool >/dev/null 2>&1; then \
+			printf "$$tool "; \
+		else \
+			MISSING="$$MISSING $$tool"; \
+		fi; \
+	done; \
+	if [ -n "$$MISSING" ]; then \
+		echo ""; \
+		echo "Warning: Missing tools:$$MISSING (run 'make setup-dev')"; \
+	else \
+		echo "✓"; \
+	fi
+else
+	@printf "Checking Linux tools: "
+	@for tool in make gcc wget tar; do \
+		if command -v $$tool >/dev/null 2>&1; then \
+			printf "$$tool "; \
+		else \
+			echo ""; \
+			echo "Error: $$tool is not installed"; \
+			exit 1; \
+		fi; \
+	done
+	@echo "✓"
+	@printf "Checking optional Linux tools: "
+	@MISSING=""; \
+	for tool in curl xz; do \
+		if command -v $$tool >/dev/null 2>&1; then \
+			printf "$$tool "; \
+		else \
+			MISSING="$$MISSING $$tool"; \
+		fi; \
+	done; \
+	if [ -n "$$MISSING" ]; then \
+		echo ""; \
+		echo "Warning: Missing tools:$$MISSING (run 'make setup-dev')"; \
+	else \
+		echo "✓"; \
+	fi
+endif
+	@echo "Tool check completed!"
+
+# Setup development environment
+setup-dev:
+	@echo "Setting up development environment..."
+ifeq ($(UNAME_S),Darwin)
+	@echo "Setting up macOS development environment..."
+	@if ! command -v brew >/dev/null 2>&1; then \
+		echo "Installing Homebrew..."; \
+		/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; \
+	fi
+	@echo "Installing macOS dependencies..."
+	brew update
+	brew install autoconf automake libtool curl json-c pkg-config libmicrohttpd
+	@echo "macOS setup completed!"
+else
+	@echo "Setting up Linux development environment..."
+	@if command -v apt-get >/dev/null 2>&1; then \
+		echo "Installing Ubuntu/Debian dependencies..."; \
+		sudo apt-get update; \
+		if apt-cache show python3-distutils >/dev/null 2>&1; then \
+			PYTHON_PKG="python3-distutils"; \
+		else \
+			PYTHON_PKG="python3-setuptools python3-dev"; \
+		fi; \
+		sudo apt-get install -y build-essential wget curl tar xz-utils \
+			gcc g++ libc6-dev make git unzip libncurses5-dev \
+			libssl-dev zlib1g-dev $$PYTHON_PKG time; \
+	elif command -v yum >/dev/null 2>&1; then \
+		echo "Installing CentOS/RHEL dependencies..."; \
+		sudo yum groupinstall -y "Development Tools"; \
+		sudo yum install -y wget curl tar xz gcc gcc-c++ make git unzip \
+			ncurses-devel openssl-devel zlib-devel python3-setuptools; \
+	elif command -v pacman >/dev/null 2>&1; then \
+		echo "Installing Arch dependencies..."; \
+		sudo pacman -S --noconfirm base-devel wget curl tar xz gcc make git unzip \
+			ncurses openssl zlib python-setuptools; \
+	else \
+		echo "Unknown package manager. Please install build dependencies manually."; \
+		echo "Required: build-essential wget curl tar xz gcc g++ make git unzip"; \
+		echo "Python: python3-setuptools python3-dev (or python3-distutils on older systems)"; \
+	fi
+	@echo "Linux setup completed!"
+endif
+
+# Show available architectures
+list-archs:
+	@echo "Available OpenWrt architectures:"
+	@./scripts/build-ipk.sh --list-archs
+
+# Quick development test builds
+test-build:
+ifeq ($(UNAME_S),Darwin)
+	@echo "Running macOS test build..."
+	./scripts/build-macos.sh --debug --clean
+else
+	@echo "Running IPK test build..."
+	./scripts/build-ipk.sh --arch x86_64 --debug --clean
+endif
+
+# Show build status/info
+info:
+	@echo "ISPAppD Build Information"
+	@echo "========================"
+	@echo "Host system: $(UNAME_S)"
+	@echo "Build scripts:"
+	@echo "  IPK builder: scripts/build-ipk.sh"
+	@echo "  macOS builder: scripts/build-macos.sh"
+	@echo ""
+	@echo "Available architectures:"
+	@./scripts/build-ipk.sh --list-archs | head -10
+	@echo "  ... (use 'make list-archs' for full list)"
+	@echo ""
+	@echo "Recent build artifacts:"
+	@ls -la *.ipk *.tar.gz 2>/dev/null | head -5 || echo "  No build artifacts found"
+
+# Archive current build
+archive:
+	@DATE=$$(date +%Y%m%d-%H%M%S); \
+	ARCHIVE="ispappd-builds-$$DATE.tar.gz"; \
+	echo "Creating build archive: $$ARCHIVE"; \
+	tar -czf "$$ARCHIVE" *.ipk *.tar.gz 2>/dev/null || true; \
+	echo "Archive created: $$ARCHIVE"

@@ -1,0 +1,213 @@
+name: Local Development Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_arch:
+        description: 'Target architecture'
+        required: true
+        default: 'x86_64'
+        type: choice
+        options:
+        - 'x86_64'
+        - 'mips_24kc'
+        - 'mipsel_24kc'
+        - 'arm_cortex-a7_neon-vfpv4'
+        - 'arm_cortex-a53'
+        - 'aarch64_cortex-a53'
+        - 'aarch64_generic'
+      debug_build:
+        description: 'Enable debug build'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  OPENWRT_VERSION: "23.05.4"
+
+jobs:
+  build-single:
+    runs-on: ${{ 'ubuntu-latest' }}
+    name: Build for ${{ github.event.inputs.target_arch }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # - name: Setup macOS build environment
+    #   if: github.event.inputs.target_arch == 'macos-arm64'
+    #   run: |
+    #     brew update
+    #     brew install \
+    #       autoconf automake libtool \
+    #       curl json-c pkg-config \
+    #       libmicrohttpd
+
+    - name: Setup Ubuntu build environment
+      if: github.event.inputs.target_arch != 'macos-arm64'
+      run: |
+        chmod +x scripts/ci-install-deps.sh
+        ./scripts/ci-install-deps.sh
+
+    # - name: Build for macOS ARM64
+    #   if: github.event.inputs.target_arch == 'macos-arm64'
+    #   run: |
+    #     # Create stub libraries for macOS
+    #     mkdir -p macos-stubs/include macos-stubs/lib
+        
+    #     # Create stub headers
+    #     cat > macos-stubs/include/uci.h << 'EOF'
+    #     #ifndef __UCI_H
+    #     #define __UCI_H
+    #     struct uci_context;
+    #     struct uci_package;
+    #     struct uci_section;
+    #     struct uci_option;
+    #     #endif
+    #     EOF
+        
+    #     cat > macos-stubs/include/libubox.h << 'EOF'
+    #     #ifndef __LIBUBOX_H
+    #     #define __LIBUBOX_H
+    #     #endif
+    #     EOF
+        
+    #     cat > macos-stubs/include/libubus.h << 'EOF'
+    #     #ifndef __LIBUBUS_H
+    #     #define __LIBUBUS_H
+    #     #endif
+    #     EOF
+        
+    #     # Create stub libraries
+    #     ar rcs macos-stubs/lib/libuci.a
+    #     ar rcs macos-stubs/lib/libubox.a
+    #     ar rcs macos-stubs/lib/libubus.a
+        
+    #     # Install microxml
+    #     git clone https://github.com/pivasoftware/microxml.git /tmp/microxml
+    #     cd /tmp/microxml
+    #     autoreconf -fiv
+    #     ./configure --prefix=/opt/homebrew
+    #     make -j$(sysctl -n hw.ncpu)
+    #     sudo make install
+        
+    #     cd $GITHUB_WORKSPACE
+    #     autoreconf -fiv
+        
+    #     CONFIGURE_ARGS="--prefix=$HOME/ispappd-macos --enable-jsonc"
+    #     if [ "${{ github.event.inputs.debug_build }}" = "true" ]; then
+    #       CONFIGURE_ARGS="$CONFIGURE_ARGS --enable-debug --enable-devel"
+    #     fi
+        
+    #     ./configure $CONFIGURE_ARGS \
+    #       --with-uci-include-path=$(pwd)/macos-stubs/include \
+    #       --with-uci-lib-path=$(pwd)/macos-stubs/lib \
+    #       --with-libubox-include-path=$(pwd)/macos-stubs/include \
+    #       --with-libubox-lib-path=$(pwd)/macos-stubs/lib \
+    #       --with-libubus-include-path=$(pwd)/macos-stubs/include \
+    #       --with-libubus-lib-path=$(pwd)/macos-stubs/lib \
+    #       CFLAGS="-I/opt/homebrew/include -DMACOS_BUILD" \
+    #       LDFLAGS="-L/opt/homebrew/lib"
+        
+    #     make -j$(sysctl -n hw.ncpu)
+    #     make install DESTDIR=$HOME/ispappd-macos-dist
+        
+    #     cd $HOME/ispappd-macos-dist
+    #     tar -czf ispappd-macos-arm64.tar.gz .
+    #     mv ispappd-macos-arm64.tar.gz $GITHUB_WORKSPACE/
+
+    - name: Build OpenWrt IPK
+      if: github.event.inputs.target_arch != 'macos-arm64'
+      run: |
+        # Map target_arch to SDK
+        case "${{ github.event.inputs.target_arch }}" in
+          "mips_24kc") SDK="ath79/generic" ;;
+          "mipsel_24kc") SDK="ramips/mt7621" ;;
+          "arm_cortex-a7_neon-vfpv4") SDK="bcm27xx/bcm2710" ;;
+          "arm_cortex-a53") SDK="bcm27xx/bcm2711" ;;
+          "aarch64_cortex-a53") SDK="bcm27xx/bcm2711" ;;
+          "aarch64_generic") SDK="armsr/armv8" ;;
+          "x86_64") SDK="x86/64" ;;
+          *) echo "Unknown architecture"; exit 1 ;;
+        esac
+        
+        # Download SDK
+        SDK_FILENAME_TARGET=$(echo "$SDK" | sed 's#/#-#g')
+        wget -q https://downloads.openwrt.org/releases/${{ env.OPENWRT_VERSION }}/targets/$SDK/openwrt-sdk-${{ env.OPENWRT_VERSION }}-${SDK_FILENAME_TARGET}_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+        tar xf openwrt-sdk-*.tar.xz
+        SDK_DIR=$(find . -maxdepth 1 -type d -name "openwrt-sdk-*")
+        
+        # Copy package
+        mkdir -p $SDK_DIR/package/ispappd
+        # Copy source files (excluding SDK directory)
+        cp -r src/ $SDK_DIR/package/ispappd/
+        cp -r ext/ $SDK_DIR/package/ispappd/
+        cp -r bin/ $SDK_DIR/package/ispappd/
+        cp configure.ac $SDK_DIR/package/ispappd/
+        cp Makefile.am $SDK_DIR/package/ispappd/
+        # Use the OpenWrt Makefile instead of the autotools one
+        cp ext/openwrt/build/Makefile $SDK_DIR/package/ispappd/Makefile
+        cp ext/openwrt/build/Config.in $SDK_DIR/package/ispappd/Config.in
+        
+        # Configure
+        cd $SDK_DIR
+        echo "src-link ispappd_local $(pwd)/package" >> feeds.conf.default
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        
+        make defconfig
+        echo "CONFIG_PACKAGE_ispappd=m" >> .config
+        echo "CONFIG_ISPAPPD_SCRIPTS_FULL=y" >> .config
+        echo "CONFIG_ISPAPPD_DATA_MODEL_TR181=y" >> .config
+        
+        if [ "${{ github.event.inputs.debug_build }}" = "true" ]; then
+          echo "CONFIG_ISPAPPD_DEBUG=y" >> .config
+          echo "CONFIG_ISPAPPD_DEVEL=y" >> .config
+        fi
+        
+        make defconfig
+        
+        # Build
+        make package/ispappd/compile V=s
+        
+        # Find and copy ispappd IPK and its dependencies
+        find bin/ -name "ispappd*.ipk" -type f -exec cp {} $GITHUB_WORKSPACE/ \;
+        find bin/ -name "libubus*.ipk" -type f -exec cp {} $GITHUB_WORKSPACE/ \;
+        find bin/ -name "libuci*.ipk" -type f -exec cp {} $GITHUB_WORKSPACE/ \;
+        find bin/ -name "libubox*.ipk" -type f -exec cp {} $GITHUB_WORKSPACE/ \;
+        find bin/ -name "libmicroxml*.ipk" -type f -exec cp {} $GITHUB_WORKSPACE/ \;
+        find bin/ -name "libjson-c*.ipk" -type f -exec cp {} $GITHUB_WORKSPACE/ \;
+        find bin/ -name "libcurl*.ipk" -type f -exec cp {} $GITHUB_WORKSPACE/ \;
+        find bin/ -name "curl*.ipk" -type f -exec cp {} $GITHUB_WORKSPACE/ \;
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ispappd-${{ github.event.inputs.target_arch }}-${{ github.event.inputs.debug_build && 'debug' || 'release' }}
+        path: |
+          *.ipk
+          *.tar.gz
+        retention-days: 7
+
+    - name: Upload to Cloudflare R2
+      uses: ryand56/r2-upload-action@latest
+      if: success()
+      with:
+        r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+        r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+        r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        r2-bucket: ${{ secrets.R2_BUCKET }}
+        source-dir: ./
+        destination-dir: ${{ github.event.inputs.target_arch }}/
+        output-file-url: true
+        multipart-concurrent: true
+        include: |
+          ispappd*.ipk
+          libubus*.ipk
+          libuci*.ipk
+          libubox*.ipk
+          libmicroxml*.ipk
+          libjson-c*.ipk
+          libcurl*.ipk
+          curl*.ipk
+          *.tar.gz

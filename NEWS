@@ -1,0 +1,8 @@
+News for ispappd
+
+Version 1.0.0:
+- First release of ISPAppD CWMP client
+- Full TR-069 protocol implementation
+- Cross-platform support (OpenWrt, macOS)
+- JSON configuration support
+- Built-in HTTP server and client capabilities
