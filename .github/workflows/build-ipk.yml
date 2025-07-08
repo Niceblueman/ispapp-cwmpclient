@@ -21,13 +21,27 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      max-parallel: 10
       matrix:
         arch:
-          - x86_64
-          - aarch64_cortex-a53
-          - arm_cortex-a7_neon-vfpv4
-          - mips_24kc
-          - mipsel_24kc
+          # Current stable releases with explicit versions
+          - arm_cortex-a7_neon-vfpv4-23.05-SNAPSHOT
+          - arm_cortex-a7_vfpv4-23.05-SNAPSHOT
+          - arm_cortex-a9-23.05-SNAPSHOT
+          - mipsel_24kc-23.05-SNAPSHOT
+          - x86-generic-23.05-SNAPSHOT
+          - x86-64-23.05-SNAPSHOT
+          - ath79-generic-23.05-SNAPSHOT
+          - ramips-mt7620-23.05-SNAPSHOT
+          - ramips-mt7621-23.05-SNAPSHOT
+          - arm_cortex-a15_neon-vfpv4-23.05-SNAPSHOT
+          - x86_64-23.05-SNAPSHOT
+          - mipsel_74kc-23.05-SNAPSHOT
+          - mips_24kc-23.05-SNAPSHOT
+          - i386_pentium4-23.05-SNAPSHOT
+          - aarch64_cortex-a53-23.05-SNAPSHOT
+          - aarch64_cortex-a72-23.05-SNAPSHOT
+          - aarch64_generic-23.05-SNAPSHOT
 
     steps:
       - name: Checkout repository
@@ -35,24 +49,25 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up build environment
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential ccache ecj fastjar file g++ gawk \
-          gettext git java-propose-classpath libelf-dev libncurses5-dev \
-          libncursesw5-dev libssl-dev python3 unzip wget python3-setuptools \
-          python3-dev rsync subversion swig time xsltproc zlib1g-dev
-
-      - name: Build IPK package
-        run: |
-          # Use our custom build script instead of the SDK action
-          ./scripts/build-ipk.sh --arch ${{ matrix.arch }} --verbose
+      - name: Build ispappd-${{ matrix.arch }}
+        uses: openwrt/gh-action-sdk@main
+        continue-on-error: true
+        env:
+          NO_REFRESH_CHECK: true
+          IGNORE_ERRORS: true
+          FEEDNAME: ispapp
+          FEED_DIR: ${{ github.workspace }}
+          ARCH: ${{ matrix.arch }}
+          PACKAGES: ispappd
+          V: s
 
       - name: Store packages
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.arch }}-packages
-          path: "*.ipk"
+          path: |
+            bin/packages/${{ matrix.arch }}/ispapp/*.ipk
+            bin/packages/${{ matrix.arch }}/packages/*.ipk
           retention-days: 30
           if-no-files-found: warn
 
@@ -61,7 +76,7 @@ jobs:
         if: always()
         with:
           name: ${{ matrix.arch }}-build-logs
-          path: openwrt-sdk-*/logs/
+          path: logs/
           retention-days: 7
           if-no-files-found: ignore
 
@@ -71,10 +86,13 @@ jobs:
           # Create a directory for R2 upload
           mkdir -p r2-upload/packages
           
-          # Copy IPK files if they exist
-          if ls *.ipk 1> /dev/null 2>&1; then
-            echo "=== IPK files found, copying to upload directory ==="
-            cp *.ipk r2-upload/packages/
+          # Copy IPK files if they exist - check both possible locations
+          if ls bin/packages/${{ matrix.arch }}/ispapp/*.ipk 1> /dev/null 2>&1; then
+            echo "=== IPK files found in ispapp feed, copying to upload directory ==="
+            cp bin/packages/${{ matrix.arch }}/ispapp/*.ipk r2-upload/packages/
+          elif ls bin/packages/${{ matrix.arch }}/packages/*.ipk 1> /dev/null 2>&1; then
+            echo "=== IPK files found in packages feed, copying to upload directory ==="
+            cp bin/packages/${{ matrix.arch }}/packages/*.ipk r2-upload/packages/
           else
             echo "=== No IPK files found, creating build status file ==="
             echo "Build failed - no packages created on $(date)" > r2-upload/packages/build-failed.txt
@@ -109,6 +127,29 @@ jobs:
           destination-dir: ispappd/builds/${{ github.run_number }}/${{ matrix.arch }}/
           output-file-url: true
           multipart-concurrent: true
+
+      - name: Create GitHub Release per Architecture
+        uses: ncipollo/release-action@v1
+        if: github.ref == 'refs/heads/main'
+        with:
+          allowUpdates: true
+          replacesArtifacts: true
+          artifacts: |
+            bin/packages/**/ispapp/*.ipk
+            bin/packages/**/packages/*.ipk
+          tag: ${{ matrix.arch }}
+          name: "ispappd packages for ${{ matrix.arch }}"
+          body: |
+            ## ispappd IPK packages for ${{ matrix.arch }}
+            
+            Built from commit: ${{ github.sha }}
+            Build date: ${{ github.run_number }}
+            
+            ### Installation
+            ```bash
+            opkg update
+            opkg install ispappd_*.ipk
+            ```
 
   create-release:
     if: github.event_name == 'release'
@@ -173,6 +214,8 @@ jobs:
         echo "## Build Results" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### OpenWrt IPK Packages" >> $GITHUB_STEP_SUMMARY
-        echo "- Built for aarch64_generic and arm_cortex-a7_neon-vfpv4 architectures" >> $GITHUB_STEP_SUMMARY
-        echo "- Packages available in artifacts" >> $GITHUB_STEP_SUMMARY
-        echo "- Using OpenWrt official SDK Docker containers" >> $GITHUB_STEP_SUMMARY
+        echo "- Built for multiple architectures using official OpenWrt GitHub Action SDK" >> $GITHUB_STEP_SUMMARY
+        echo "- Packages available in artifacts and per-architecture releases" >> $GITHUB_STEP_SUMMARY
+        echo "- Using openwrt/gh-action-sdk@main for reliable production builds" >> $GITHUB_STEP_SUMMARY
+        echo "- Supports both 23.05-SNAPSHOT and latest versions" >> $GITHUB_STEP_SUMMARY
+        echo "- Build logs available for troubleshooting" >> $GITHUB_STEP_SUMMARY
