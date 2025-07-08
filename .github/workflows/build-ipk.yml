@@ -23,8 +23,11 @@ jobs:
       fail-fast: false
       matrix:
         arch:
-          - aarch64_generic
+          - x86_64
+          - aarch64_cortex-a53
           - arm_cortex-a7_neon-vfpv4
+          - mips_24kc
+          - mipsel_24kc
 
     steps:
       - name: Checkout repository
@@ -32,21 +35,24 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Build with OpenWrt SDK
-        uses: openwrt/gh-action-sdk@main
-        env:
-          ARCH: ${{ matrix.arch }}
-          FEEDNAME: ispappd
-          PACKAGES: ispappd
-          V: s
-          BUILD_LOG: 1
-          INDEX: 1
+      - name: Set up build environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential ccache ecj fastjar file g++ gawk \
+          gettext git java-propose-classpath libelf-dev libncurses5-dev \
+          libncursesw5-dev libssl-dev python3 unzip wget python3-setuptools \
+          python3-dev rsync subversion swig time xsltproc zlib1g-dev
+
+      - name: Build IPK package
+        run: |
+          # Use our custom build script instead of the SDK action
+          ./scripts/build-ipk.sh --arch ${{ matrix.arch }} --verbose
 
       - name: Store packages
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.arch }}-packages
-          path: bin/packages/${{ matrix.arch }}/packages/*.ipk
+          path: "*.ipk"
           retention-days: 30
           if-no-files-found: warn
 
@@ -55,7 +61,7 @@ jobs:
         if: always()
         with:
           name: ${{ matrix.arch }}-build-logs
-          path: logs/
+          path: openwrt-sdk-*/logs/
           retention-days: 7
           if-no-files-found: ignore
 
@@ -66,9 +72,9 @@ jobs:
           mkdir -p r2-upload/packages
           
           # Copy IPK files if they exist
-          if [ -d "bin/packages/${{ matrix.arch }}/packages" ] && [ "$(ls -A bin/packages/${{ matrix.arch }}/packages/*.ipk 2>/dev/null)" ]; then
+          if ls *.ipk 1> /dev/null 2>&1; then
             echo "=== IPK files found, copying to upload directory ==="
-            cp bin/packages/${{ matrix.arch }}/packages/*.ipk r2-upload/packages/
+            cp *.ipk r2-upload/packages/
           else
             echo "=== No IPK files found, creating build status file ==="
             echo "Build failed - no packages created on $(date)" > r2-upload/packages/build-failed.txt
