@@ -9,6 +9,10 @@ PKG_NAME:=ispappd
 PKG_VERSION:=1.0.0
 PKG_RELEASE:=1
 
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=
+PKG_HASH:=skip
+
 PKG_FIXUP:=autoreconf
 
 PKG_CONFIG_DEPENDS:= \
@@ -42,6 +46,15 @@ define Build/Prepare
 	$(CP) ./configure.ac $(PKG_BUILD_DIR)/
 	$(CP) ./Makefile.am $(PKG_BUILD_DIR)/
 	$(CP) ./bin $(PKG_BUILD_DIR)/
+endef
+
+define Package/ispappd/download
+# No download needed, using local source files
+endef
+
+define Build/Configure
+	cd $(PKG_BUILD_DIR) && autoreconf -fiv
+	$(call Build/Configure/Default)
 endef
 
 TARGET_CFLAGS += \
