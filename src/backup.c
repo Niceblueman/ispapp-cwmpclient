@@ -33,7 +33,7 @@ void backup_init(void)
 		ispappcwmp_uci_fini();
 		return;
 	}
-	backup_tree = mxmlLoadString(NULL, val, MXML_OPAQUE_CALLBACK);
+	backup_tree = roxml_load_buf(val);
 	ispappcwmp_uci_fini();
 #else
 	FILE *fp;
@@ -46,7 +46,7 @@ void backup_init(void)
 	}
 	fp = fopen(BACKUP_FILE, "r");
 	if (fp!=NULL) {
-		backup_tree = mxmlLoadFile(NULL, fp, MXML_OPAQUE_CALLBACK);
+		backup_tree = roxml_load_doc(BACKUP_FILE);
 		fclose(fp);
 	}
 #endif
@@ -60,9 +60,9 @@ mxml_node_t *backup_tree_init(void)
 {
 	mxml_node_t *xml;
 
-	backup_tree = mxmlLoadString(NULL, "<backup_file/>", MXML_OPAQUE_CALLBACK);
+	backup_tree = roxml_load_buf("<backup_file/>");
 	if (!backup_tree) return NULL;
-	xml = mxmlNewElement(backup_tree, "cwmp");
+	xml = roxml_add_node(backup_tree, 0, ROXML_ELM_NODE, "cwmp", NULL);
 	if (!xml) return NULL;
 	return xml;
 }
@@ -74,7 +74,7 @@ int backup_save_file(void) {
 	if (backup_tree == NULL)
 		return 0;
 	ispappcwmp_uci_init();
-	val = mxmlSaveAllocString(backup_tree, MXML_NO_CALLBACK);
+	roxml_commit_changes(backup_tree, NULL, &val, 0);
 	len = strlen(val);
 	if (len > 0 && val[len - 1] == '\n')
 		val[len - 1]= '\0';
@@ -94,7 +94,7 @@ int backup_save_file(void) {
 
 	fp = fopen(BACKUP_FILE, "w");
 	if (fp!=NULL) {
-		val = mxmlSaveAllocString(backup_tree, MXML_NO_CALLBACK);
+		roxml_commit_changes(backup_tree, NULL, &val, 0);
 		len = strlen(val);
 		if (len > 0 && val[len - 1] == '\n')
 			val[len - 1]= '\0';
@@ -113,10 +113,10 @@ void backup_add_acsurl(char *acs_url)
 	mxml_node_t *data, *b;
 
 	cwmp_clean();
-	mxmlDelete(backup_tree);
+	roxml_close(backup_tree);
 	b = backup_tree_init();
-	data = mxmlNewElement(b, "acs_url");
-	data = mxmlNewOpaque(data, acs_url);
+	data = roxml_add_node(b, 0, ROXML_ELM_NODE, "acs_url", NULL);
+	data = roxml_add_node(data, 0, ROXML_TXT_NODE, NULL, acs_url);
 	backup_save_file();
 	cwmp_add_event(EVENT_BOOTSTRAP, NULL, 0, EVENT_BACKUP);
 	cwmp_add_inform_timer();
@@ -126,9 +126,9 @@ void backup_check_acs_url(void)
 {
 	mxml_node_t *b;
 
-	b = mxmlFindElement(backup_tree, backup_tree, "acs_url", NULL, NULL, MXML_DESCEND);
-	if (!b || (b->child && b->child->type == MXML_OPAQUE && b->child->value.opaque &&
-		strcmp(config->acs->url, b->child->value.opaque) != 0)) {
+	b = roxml_get_chld(backup_tree, "acs_url", 0);
+	if (!b || (roxml_get_txt(b, 0) && 
+		strcmp(config->acs->url, roxml_get_content(roxml_get_txt(b, 0), NULL, 0, NULL)) != 0)) {
 		backup_add_acsurl(config->acs->url);
 	}
 }
@@ -137,20 +137,20 @@ void backup_check_software_version(void)
 {
 	mxml_node_t *data, *b;
 
-	b = mxmlFindElement(backup_tree, backup_tree, "cwmp", NULL, NULL, MXML_DESCEND);
+	b = roxml_get_chld(backup_tree, "cwmp", 0);
 	if (!b)
 		b = backup_tree_init();
 
-	data = mxmlFindElement(b, backup_tree, "software_version", NULL, NULL, MXML_DESCEND);
+	data = roxml_get_chld(b, "software_version", 0);
 	if (data) {
-		if (data->child && data->child->type == MXML_OPAQUE && data->child->value.opaque &&
-			strcmp(config->device->software_version, data->child->value.opaque) != 0) {
+		char *content = roxml_get_content(roxml_get_txt(data, 0), NULL, 0, NULL);
+		if (content && strcmp(config->device->software_version, content) != 0) {
 			cwmp_add_event(EVENT_VALUE_CHANGE, NULL, 0, EVENT_NO_BACKUP);
 		}
-		mxmlDelete(data);
+		roxml_del_node(data);
 	}
-	data = mxmlNewElement(b, "software_version");
-	data = mxmlNewOpaque(data, config->device->software_version);
+	data = roxml_add_node(b, 0, ROXML_ELM_NODE, "software_version", NULL);
+	data = roxml_add_node(data, 0, ROXML_TXT_NODE, NULL, config->device->software_version);
 	backup_save_file();
 	cwmp_add_inform_timer();	
 }
@@ -160,35 +160,35 @@ mxml_node_t *backup_add_transfer_complete(char *command_key, int fault_code, cha
 	mxml_node_t  *data, *m, *b;
 	char c[16];
 
-	data = mxmlFindElement(backup_tree, backup_tree, "cwmp", NULL, NULL, MXML_DESCEND);
+	data = roxml_get_chld(backup_tree, "cwmp", 0);
 	if (!data) return NULL;
 
-	m = mxmlNewElement(data, "transfer_complete");
+	m = roxml_add_node(data, 0, ROXML_ELM_NODE, "transfer_complete", NULL);
 	if (!m) return NULL;
-	b = mxmlNewElement(m, "command_key");
+	b = roxml_add_node(m, 0, ROXML_ELM_NODE, "command_key", NULL);
 	if (!b) return NULL;
-	b = mxmlNewOpaque(b, command_key);
+	b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, command_key);
 	if (!b) return NULL;
-	b = mxmlNewElement(m, "fault_code");
+	b = roxml_add_node(m, 0, ROXML_ELM_NODE, "fault_code", NULL);
 	if (!b) return NULL;
-	b = mxmlNewOpaque(b, fault_array[fault_code].code);
+	b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, fault_array[fault_code].code);
 	if (!b) return NULL;
-	b = mxmlNewElement(m, "fault_string");
+	b = roxml_add_node(m, 0, ROXML_ELM_NODE, "fault_string", NULL);
 	if (!b) return NULL;
-	b = mxmlNewOpaque(b, fault_array[fault_code].string);
+	b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, fault_array[fault_code].string);
 	if (!b) return NULL;
-	b = mxmlNewElement(m, "start_time");
+	b = roxml_add_node(m, 0, ROXML_ELM_NODE, "start_time", NULL);
 	if (!b) return NULL;
-	b = mxmlNewOpaque(b, start_time);
+	b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, start_time);
 	if (!b) return NULL;
-	b = mxmlNewElement(m, "complete_time");
+	b = roxml_add_node(m, 0, ROXML_ELM_NODE, "complete_time", NULL);
 	if (!b) return NULL;
-	b = mxmlNewOpaque(b, UNKNOWN_TIME);
+	b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, UNKNOWN_TIME);
 	if (!b) return NULL;
-	b = mxmlNewElement(m, "method_id");
+	b = roxml_add_node(m, 0, ROXML_ELM_NODE, "method_id", NULL);
 	if (!b) return NULL;
 	snprintf(c, sizeof(c), "%d", method_id);
-	b = mxmlNewOpaque(b, c);
+	b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, c);
 	if (!b) return NULL;
 
 	backup_save_file();
@@ -197,22 +197,24 @@ mxml_node_t *backup_add_transfer_complete(char *command_key, int fault_code, cha
 
 int backup_update_fault_transfer_complete(mxml_node_t *node, int fault_code)
 {
-	mxml_node_t  *b;
+	mxml_node_t  *b, *txt;
 
-	b = mxmlFindElement(node, node, "fault_code", NULL, NULL, MXML_DESCEND);
+	b = roxml_get_chld(node, "fault_code", 0);
 	if (!b) return -1;
-	if (b->child && b->child->type == MXML_OPAQUE) {
-		mxmlDelete(b->child);
+	txt = roxml_get_txt(b, 0);
+	if (txt) {
+		roxml_del_node(txt);
 	}
-	b = mxmlNewOpaque(b, fault_array[fault_code].code);
+	b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, fault_array[fault_code].code);
 	if (!b) return -1;
 
-	b = mxmlFindElement(node, node, "fault_string", NULL, NULL, MXML_DESCEND);
+	b = roxml_get_chld(node, "fault_string", 0);
 	if (!b) return -1;
-	if (b->child && b->child->type == MXML_OPAQUE) {
-		mxmlDelete(b->child);
+	txt = roxml_get_txt(b, 0);
+	if (txt) {
+		roxml_del_node(txt);
 	}
-	b = mxmlNewOpaque(b, fault_array[fault_code].string);
+	b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, fault_array[fault_code].string);
 	if (!b) return -1;
 
 	backup_save_file();
@@ -221,14 +223,15 @@ int backup_update_fault_transfer_complete(mxml_node_t *node, int fault_code)
 
 int backup_update_complete_time_transfer_complete(mxml_node_t *node)
 {
-	mxml_node_t  *b;
+	mxml_node_t  *b, *txt;
 
-	b = mxmlFindElement(node, node, "complete_time", NULL, NULL, MXML_DESCEND);
+	b = roxml_get_chld(node, "complete_time", 0);
 	if (!b) return -1;
-	if (b->child && b->child->type == MXML_OPAQUE) {
-		mxmlDelete(b->child);
+	txt = roxml_get_txt(b, 0);
+	if (txt) {
+		roxml_del_node(txt);
 	}
-	b = mxmlNewOpaque(b, mix_get_time());
+	b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, mix_get_time());
 	if (!b) return -1;
 
 	backup_save_file();
@@ -237,17 +240,27 @@ int backup_update_complete_time_transfer_complete(mxml_node_t *node)
 
 int backup_update_all_complete_time_transfer_complete(void)
 {
-	mxml_node_t  *b, *n = backup_tree;
-	while (n = mxmlFindElement(n, backup_tree, "transfer_complete", NULL, NULL, MXML_DESCEND)) {
-		b = mxmlFindElement(n, n, "complete_time", NULL, NULL, MXML_DESCEND);
-		if (!b) return -1;
-		if (b->child && b->child->type == MXML_OPAQUE && b->child->value.opaque) {
-			if (strcmp(b->child->value.opaque, UNKNOWN_TIME) != 0) continue;
-			mxmlDelete(b->child);
-			b = mxmlNewOpaque(b, mix_get_time());
-			if (!b) return -1;
+	int count, i;
+	mxml_node_t **nodes = roxml_xpath(backup_tree, ".//transfer_complete", &count);
+	
+	for (i = 0; i < count; i++) {
+		mxml_node_t *n = nodes[i];
+		mxml_node_t *b = roxml_get_chld(n, "complete_time", 0);
+		if (!b) {
+			roxml_release(nodes);
+			return -1;
+		}
+		
+		mxml_node_t *txt = roxml_get_txt(b, 0);
+		if (txt) {
+			char *content = roxml_get_content(txt, NULL, 0, NULL);
+			if (content && strcmp(content, UNKNOWN_TIME) != 0) continue;
+			roxml_del_node(txt);
+			roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, mix_get_time());
 		}
 	}
+	
+	roxml_release(nodes);
 	backup_save_file();
 	return 0;
 }
@@ -255,7 +268,7 @@ int backup_update_all_complete_time_transfer_complete(void)
 mxml_node_t *backup_check_transfer_complete(void)
 {
 	mxml_node_t *data;
-	data = mxmlFindElement(backup_tree, backup_tree, "transfer_complete", NULL, NULL, MXML_DESCEND);
+	data = roxml_get_chld(backup_tree, "transfer_complete", 0);
 	return data;
 }
 
@@ -622,29 +635,29 @@ mxml_node_t *backup_add_event(int code, char *key, int method_id)
 	mxml_node_t *b = backup_tree, *n, *data;
 	char *e = NULL, *c = NULL;
 
-	data = mxmlFindElement(backup_tree, backup_tree, "cwmp", NULL, NULL, MXML_DESCEND);
+	data = roxml_get_chld(backup_tree, "cwmp", 0);
 	if (!data) goto error;
-	n = mxmlNewElement(data, "event");
+	n = roxml_add_node(data, 0, ROXML_ELM_NODE, "event", NULL);
 	if (!n) goto error;
 
 	if (asprintf(&e, "%d", code) == -1) goto error;
-	b = mxmlNewElement(n, "event_number");
+	b = roxml_add_node(n, 0, ROXML_ELM_NODE, "event_number", NULL);
 	if (!b) goto error;
-	b = mxmlNewOpaque(b, e);
+	b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, e);
 	if (!b) goto error;
 
 	if(key) {
-		b = mxmlNewElement(n, "event_key");
+		b = roxml_add_node(n, 0, ROXML_ELM_NODE, "event_key", NULL);
 		if (!b) goto error;
-		b = mxmlNewOpaque(b, key);
+		b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, key);
 		if (!b) goto error;
 	}
 
 	if (method_id) {
 		if (asprintf(&c, "%d", method_id) == -1) goto error;
-		b = mxmlNewElement(n, "event_method_id");
+		b = roxml_add_node(n, 0, ROXML_ELM_NODE, "event_method_id", NULL);
 		if (!b) goto error;
-		b = mxmlNewOpaque(b, c);
+		b = roxml_add_node(b, 0, ROXML_TXT_NODE, NULL, c);
 		if (!b) goto error;
 	}
 

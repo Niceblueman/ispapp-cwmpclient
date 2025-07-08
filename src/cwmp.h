@@ -4,7 +4,17 @@
 #define _ispappcwmp_CWMP_H__
 
 #include <libubox/uloop.h>
-#include <microxml.h>
+#ifdef HAVE_LIBROXML
+#include <roxml.h>
+typedef node_t mxml_node_t;
+#elif HAVE_MXML
+#include <mxml.h>
+#elif NO_XML
+// Stub definitions when no XML library is available
+typedef void mxml_node_t;
+#else
+#error "No XML library available"
+#endif
 
 #define MAX_DOWNLOAD 10
 #define MAX_UPLOAD 10

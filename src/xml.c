@@ -2,8 +2,33 @@
 
 #include <stdbool.h>
 #include <libubox/uloop.h>
-#ifdef HAVE_MICROXML
-#include <microxml.h>
+#ifdef HAVE_LIBROXML
+#include <roxml.h>
+typedef node_t mxml_node_t;
+// Define compatibility constants for libroxml
+#define MXML_OPAQUE 0
+#define MXML_DESCEND 1
+#define MXML_NO_DESCEND 0
+#define MXML_DESCEND_FIRST 2
+#define MXML_WS_BEFORE_OPEN 0
+#define MXML_WS_AFTER_OPEN 1
+#define MXML_WS_BEFORE_CLOSE 2
+#define MXML_WS_AFTER_CLOSE 3
+#define MXML_ELEMENT 1
+#define MXML_OPAQUE_CALLBACK NULL
+#define MXML_NO_CALLBACK NULL
+// Compatibility functions
+#define mxmlLoadString(p, str, cb) roxml_load_buf(str)
+#define mxmlSaveAllocString(tree, cb) roxml_commit_buffer(tree, NULL, 0)
+#define mxmlDelete(tree) roxml_close(tree)
+#define mxmlNewElement(parent, name) roxml_add_node(parent, 0, ROXML_ELM_NODE, name, NULL)
+#define mxmlNewOpaque(parent, value) roxml_add_node(parent, 0, ROXML_TXT_NODE, NULL, value)
+#define mxmlNewInteger(parent, value) roxml_add_node_int(parent, value)
+#define mxmlFindElement(tree, top, name, attr, value, descend) roxml_get_chld_compat(tree, name, 0)
+#define mxmlWalkNext(node, top, descend) roxml_get_next_sibling_compat(node)
+#define mxmlElementSetAttr(node, name, value) roxml_add_node(node, 0, ROXML_ATTR_NODE, name, value)
+#define mxmlAdd(parent, where, child, node) roxml_append_node_compat(parent, node)
+#define mxmlFindElementOpaque(tree, top, value, descend) roxml_find_opaque_compat(tree, value)
 #elif HAVE_MXML
 #include <mxml.h>
 #elif NO_XML
@@ -34,6 +59,50 @@ typedef void mxml_node_t;
 #include "time.h"
 #include "json.h"
 #include "log.h"
+
+#ifdef HAVE_LIBROXML
+// Compatibility functions for libroxml
+static mxml_node_t *roxml_add_node_int(mxml_node_t *parent, int value) {
+    char buf[32];
+    snprintf(buf, sizeof(buf), "%d", value);
+    return roxml_add_node(parent, 0, ROXML_TXT_NODE, NULL, buf);
+}
+
+static mxml_node_t *roxml_get_chld_compat(mxml_node_t *tree, const char *name, int index) {
+    if (!tree) return NULL;
+    if (!name) return roxml_get_chld(tree, NULL, 0);
+    return roxml_get_chld(tree, (char*)name, index);
+}
+
+static mxml_node_t *roxml_get_next_sibling_compat(mxml_node_t *node) {
+    if (!node) return NULL;
+    return roxml_get_next_sibling(node);
+}
+
+static mxml_node_t *roxml_append_node_compat(mxml_node_t *parent, mxml_node_t *child) {
+    return child; // roxml_add_node already handles parenting
+}
+
+static mxml_node_t *roxml_find_opaque_compat(mxml_node_t *tree, const char *value) {
+    if (!tree || !value) return NULL;
+    // Use xpath to find text nodes with specific content
+    char xpath[256];
+    snprintf(xpath, sizeof(xpath), ".//text()[contains(., '%s')]", value);
+    int count;
+    mxml_node_t **nodes = roxml_xpath(tree, xpath, &count);
+    if (nodes && count > 0) {
+        mxml_node_t *result = nodes[0];
+        roxml_release(nodes);
+        return result;
+    }
+    return NULL;
+}
+
+static char *roxml_commit_buffer(mxml_node_t *tree, char **buffer, int human) {
+    int len = roxml_commit_changes(tree, NULL, buffer, human);
+    return *buffer;
+}
+#endif
 
 struct fault_code fault_array[]=
 {

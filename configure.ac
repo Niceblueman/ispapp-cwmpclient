@@ -65,22 +65,22 @@ AC_SUBST(LIBCURL_CFLAGS)
 AC_SUBST(LIBCURL_LDFLAGS)
 AC_SUBST(LIBCURL_LIBS)
 
-# Check for microxml first, then fall back to mxml variants, then continue without
-PKG_CHECK_MODULES(MICROXML, [microxml], [
-    AC_DEFINE([HAVE_MICROXML], [1], [Define if microxml is available])
-    AC_MSG_NOTICE([Using microxml])
+# Check for libroxml first, then fall back to mxml variants, then continue without
+PKG_CHECK_MODULES(MICROXML, [libroxml], [
+    AC_DEFINE([HAVE_LIBROXML], [1], [Define if libroxml is available])
+    AC_MSG_NOTICE([Using libroxml])
 ], [
     PKG_CHECK_MODULES(MICROXML, [mxml4], [
         AC_DEFINE([HAVE_MXML], [1], [Define if mxml4 is available])
-        AC_MSG_NOTICE([Using mxml4 instead of microxml])
+        AC_MSG_NOTICE([Using mxml4 instead of libroxml])
     ], [
         PKG_CHECK_MODULES(MICROXML, [mxml], [
             AC_DEFINE([HAVE_MXML], [1], [Define if mxml is available])
-            AC_MSG_NOTICE([Using mxml instead of microxml])
+            AC_MSG_NOTICE([Using mxml instead of libroxml])
         ], [
             PKG_CHECK_MODULES(MICROXML, [libmxml], [
                 AC_DEFINE([HAVE_MXML], [1], [Define if libmxml is available])
-                AC_MSG_NOTICE([Using libmxml instead of microxml])
+                AC_MSG_NOTICE([Using libmxml instead of libroxml])
             ], [
                 AC_MSG_WARN([No XML library found. XML functionality will be limited.])
                 AC_DEFINE([NO_XML], [1], [Define if no XML library is available])

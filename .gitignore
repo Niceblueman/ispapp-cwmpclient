@@ -6,10 +6,11 @@ configure
 depcomp
 install-sh
 missing
-Makefile
 Makefile.in
 bin/Makefile.in
-
+openwrt-sdk-*.tar.xz
+sdk/
+openwrt-sdk-*/
 # Build artifacts
 *.o
 *.a

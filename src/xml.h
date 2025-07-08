@@ -3,7 +3,17 @@
 #ifndef _ispappcwmp_XML_H__
 #define _ispappcwmp_XML_H__
 
-#include <microxml.h>
+#ifdef HAVE_LIBROXML
+#include <roxml.h>
+typedef node_t mxml_node_t;
+#elif HAVE_MXML
+#include <mxml.h>
+#elif NO_XML
+// Stub definitions when no XML library is available
+typedef void mxml_node_t;
+#else
+#error "No XML library available"
+#endif
 #include <libubox/uloop.h>
 
 #define SECDTOMSEC 1000
