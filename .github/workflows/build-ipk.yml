@@ -15,502 +15,98 @@ permissions:
   id-token: write
   attestations: write
 
-env:
-  OPENWRT_VERSION: "23.05.4"
-
 jobs:
-  build-matrix:
+  build:
+    name: ${{ matrix.arch }} build
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        target:
-          # Common OpenWrt targets
-          - arch: "mips_24kc"
-            sdk: "ath79/generic"
-            description: "MIPS 24Kc (TP-Link, etc.)"
-          - arch: "mipsel_24kc"
-            sdk: "ramips/mt7621"
-            description: "MIPS 24Kc Little Endian (MediaTek MT7621)"
-          - arch: "arm_cortex-a7_neon-vfpv4"
-            sdk: "bcm27xx/bcm2710"
-            description: "ARM Cortex-A7 (Raspberry Pi 2/3)"
-          - arch: "arm_cortex-a53"
-            sdk: "bcm27xx/bcm2711"
-            description: "ARM Cortex-A53 (Raspberry Pi 4)"
-          - arch: "arm_cortex-a15_neon-vfpv4"
-            sdk: "ipq806x/generic"
-            description: "ARM Cortex-A15 (Qualcomm IPQ806x)"
-          - arch: "aarch64_cortex-a53"
-            sdk: "bcm27xx/bcm2711"
-            description: "ARM64 Cortex-A53 (64-bit ARM)"
-          - arch: "aarch64_generic"
-            sdk: "armsr/armv8"
-            description: "ARM64 Generic (64-bit ARM)"
-          - arch: "x86_64"
-            sdk: "x86/64"
-            description: "x86_64 (Generic PC)"
+        arch:
+          - aarch64_generic
+          - arm_cortex-a7_neon-vfpv4
 
-    name: Build for ${{ matrix.target.description }}
-    
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Free up disk space
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /opt/ghc
-        sudo rm -rf "/usr/local/share/boost"
-        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-        df -h
+      - name: Build with OpenWrt SDK
+        uses: openwrt/gh-action-sdk@main
+        env:
+          ARCH: ${{ matrix.arch }}
+          FEEDNAME: ispappd
+          PACKAGES: ispappd
+          V: s
+          BUILD_LOG: 1
+          INDEX: 1
 
-    - name: Setup build environment
-      run: |
-        chmod +x scripts/ci-install-deps.sh
-        ./scripts/ci-install-deps.sh
+      - name: Store packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.arch }}-packages
+          path: bin/packages/${{ matrix.arch }}/packages/*.ipk
+          retention-days: 30
+          if-no-files-found: warn
 
-    - name: Download OpenWrt SDK
-      run: |
-        SDK_FILENAME_TARGET=$(echo "${{ matrix.target.sdk }}" | sed 's#/#-#g')
-        SDK_BASE_URL="https://downloads.openwrt.org/releases/${{ env.OPENWRT_VERSION }}/targets/${{ matrix.target.sdk }}"
-        
-        # Try different SDK filename patterns based on architecture
-        # Some targets use musl_eabi instead of musl
-        if [ "${{ matrix.target.sdk }}" = "ipq806x/generic" ]; then
-          SDK_FILENAME="openwrt-sdk-${{ env.OPENWRT_VERSION }}-${SDK_FILENAME_TARGET}_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
-        else
-          SDK_FILENAME="openwrt-sdk-${{ env.OPENWRT_VERSION }}-${SDK_FILENAME_TARGET}_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
-        fi
-        
-        echo "Downloading: $SDK_BASE_URL/$SDK_FILENAME"
-        wget -q "$SDK_BASE_URL/$SDK_FILENAME"
-        tar xf openwrt-sdk-*.tar.xz
-        SDK_DIR=$(find . -maxdepth 1 -type d -name "openwrt-sdk-*")
-        echo "SDK_DIR=$SDK_DIR" >> $GITHUB_ENV
+      - name: Store build logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.arch }}-build-logs
+          path: logs/
+          retention-days: 7
+          if-no-files-found: ignore
 
-    - name: Copy package to SDK
-      run: |
-        mkdir -p $SDK_DIR/package/ispappd
-        # Copy source files to the package directory
-        cp -r src/ $SDK_DIR/package/ispappd/
-        cp -r ext/ $SDK_DIR/package/ispappd/
-        cp -r bin/ $SDK_DIR/package/ispappd/
-        cp configure.ac $SDK_DIR/package/ispappd/
-        cp Makefile.am $SDK_DIR/package/ispappd/
-        # Use the OpenWrt Makefile instead of the autotools one
-        cp ext/openwrt/build/Makefile $SDK_DIR/package/ispappd/Makefile
-        cp ext/openwrt/build/Config.in $SDK_DIR/package/ispappd/Config.in
-        
-        # List what we copied
-        echo "=== Package directory structure ==="
-        ls -la $SDK_DIR/package/ispappd/
-        echo "=== Makefile content check ==="
-        head -10 $SDK_DIR/package/ispappd/Makefile
-
-    - name: Configure feeds
-      run: |
-        cd $SDK_DIR
-        echo "src-link ispappd_local $(pwd)/package" >> feeds.conf.default
-        
-        # Try feeds update with retry logic and timeout
-        echo "=== Updating feeds with retry logic ==="
-        for i in {1..3}; do
-          echo "Attempt $i/3..."
-          if timeout 300 ./scripts/feeds update -a; then
-            echo "✅ Feeds update successful"
-            break
-          else
-            echo "❌ Feeds update failed, attempt $i/3"
-            if [ $i -eq 3 ]; then
-              echo "All attempts failed, trying with shallow clone..."
-              # Try with shallow clone to reduce network load
-              sed -i 's|git clone |git clone --depth 1 |g' scripts/feeds || true
-              timeout 300 ./scripts/feeds update -a || {
-                echo "Final attempt failed, continuing without full feeds..."
-                # Create minimal feeds for our package
-                echo "src-link ispappd_local $(pwd)/package" > feeds.conf.default
-              }
-            fi
-            sleep 10
-          fi
-        done
-        
-        ./scripts/feeds install -a || echo "Some feeds installation failed, continuing..."
-
-    - name: Check available packages
-      run: |
-        cd $SDK_DIR
-        echo "=== Available packages ==="
-        ./scripts/feeds search mxml || echo "mxml not found"
-        ./scripts/feeds search microxml || echo "microxml not found"
-        ./scripts/feeds search libmicroxml || echo "libmicroxml not found"
-        ./scripts/feeds search libmxml || echo "libmxml not found"
-        echo "=== Checking if any XML packages are installed ==="
-        ./scripts/feeds list -i | grep -i xml || echo "No XML packages installed"
-        
-        # Try to install any available XML library
-        if ./scripts/feeds search mxml | grep -q "mxml"; then
-          echo "=== Installing mxml ==="
-          ./scripts/feeds install mxml || echo "mxml installation failed"
-        elif ./scripts/feeds search libmxml | grep -q "libmxml"; then
-          echo "=== Installing libmxml ==="
-          ./scripts/feeds install libmxml || echo "libmxml installation failed"
-        else
-          echo "=== No XML library found in feeds, will try to build without ==="
-        fi
-
-    - name: Configure build
-      run: |
-        cd $SDK_DIR
-        make defconfig
-        echo "CONFIG_PACKAGE_ispappd=m" >> .config
-        echo "CONFIG_ISPAPPD_SCRIPTS_FULL=y" >> .config
-        echo "CONFIG_ISPAPPD_DATA_MODEL_TR181=y" >> .config
-        # Try to enable mxml if available
-        echo "CONFIG_PACKAGE_mxml=y" >> .config || echo "mxml package not available"
-        make defconfig
-
-    - name: Debug build environment
-      run: |
-        cd $SDK_DIR
-        echo "=== SDK Directory structure ==="
-        ls -la
-        echo "=== Package directory ==="
-        ls -la package/
-        echo "=== ispappd package directory ==="
-        ls -la package/ispappd/
-        echo "=== Build config ==="
-        cat .config | grep -E "(PACKAGE_ispappd|ISPAPPD)" || echo "No ispappd config found"
-        echo "=== Available packages in SDK ==="
-        make package/list | grep -E "(ispappd|mxml|microxml|curl|json)" || echo "No relevant packages found"
-        echo "=== Check if ispappd package is recognized ==="
-        ls -la package/ispappd/Makefile
-        echo "=== First few lines of ispappd Makefile ==="
-        head -30 package/ispappd/Makefile
-
-    - name: Build package
-      run: |
-        cd $SDK_DIR
-        echo "=== Building ispappd package ==="
-        echo "=== Current directory contents ==="
-        ls -la package/ispappd/
-        echo "=== Package Makefile ==="
-        head -20 package/ispappd/Makefile
-        echo "=== Starting build ==="
-        
-        # First, let's try to see if the package is detected
-        echo "=== Check if package is available for building ==="
-        make package/ispappd/info || echo "Package info command failed"
-        
-        # Attempt to build the package with maximum verbosity
-        echo "=== Starting actual build ==="
-        if make package/ispappd/compile V=99 FORCE_UNSAFE_CONFIGURE=1 2>&1 | tee build.log; then
-          echo "=== Build completed successfully ==="
-          echo "BUILD_SUCCESS=true" >> $GITHUB_ENV
-        else
-          BUILD_EXIT_CODE=$?
-          echo "=== Build failed with exit code: $BUILD_EXIT_CODE ==="
-          echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
-          echo "=== Last 200 lines of build log ==="
-          tail -200 build.log || echo "Could not read build log"
-          echo "=== Searching for error patterns ==="
-          grep -i "error\|failed\|cannot\|missing" build.log | tail -20 || echo "No obvious errors found in log"
-        fi
-
-    - name: Debug build results
-      run: |
-        cd $SDK_DIR
-        echo "=== Build log tail ==="
-        tail -50 build.log || echo "No build.log found"
-        echo "=== Looking for any .ipk files ==="
-        find . -name "*.ipk" -type f 2>/dev/null || echo "No .ipk files found anywhere"
-        echo "=== bin directory structure ==="
-        find bin/ -type f 2>/dev/null || echo "bin directory not found or empty"
-        echo "=== package build directory ==="
-        find build_dir/ -name "*ispappd*" -type d 2>/dev/null || echo "No ispappd build directories found"
-
-    - name: Find built packages
-      run: |
-        cd $SDK_DIR
-        echo "=== Final package search ==="
-        find bin/ -name "*.ipk" -type f | tee ipk_files.txt || echo "No IPK files found"
-        # Also check alternative locations
-        find . -name "ispappd*.ipk" -type f | tee -a ipk_files.txt || echo "No ispappd IPK files found anywhere"
-
-    - name: Upload IPK files and build logs
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: ispappd-${{ matrix.target.arch }}-build-results
-        path: |
-          ${{ env.SDK_DIR }}/bin/packages/*/ispappd/ispappd*.ipk
-          ${{ env.SDK_DIR }}/bin/packages/*/*.ipk
-          ${{ env.SDK_DIR }}/build.log
-          ${{ env.SDK_DIR }}/r2-upload/packages/
-        retention-days: 30
-        if-no-files-found: warn
-
-    - name: Prepare packages for R2 upload
-      if: always()
-      run: |
-        cd $SDK_DIR
-        # Create a directory for R2 upload with only the packages we need
-        mkdir -p r2-upload/packages
-        
-        # Check if any IPK files exist first
-        IPK_COUNT=$(find . -name "*.ipk" -type f | wc -l)
-        echo "=== Found $IPK_COUNT IPK files total ==="
-        
-        if [ "$IPK_COUNT" -gt 0 ]; then
-          echo "=== IPK files found, copying to upload directory ==="
-          # Copy ispappd IPK file from various possible locations
-          find bin/packages/ -name "ispappd*.ipk" -type f -exec cp {} r2-upload/packages/ \; 2>/dev/null || true
-          find . -name "ispappd*.ipk" -type f -exec cp {} r2-upload/packages/ \; 2>/dev/null || true
+      - name: Prepare packages for R2 upload
+        if: always()
+        run: |
+          # Create a directory for R2 upload
+          mkdir -p r2-upload/packages
           
-          # Only copy ispappd-specific dependencies, not all packages
-          # Look for the architecture directory where ispappd would be
-          ARCH_DIR=$(find bin/packages/ -name "ispappd*.ipk" -type f -exec dirname {} \; | head -1)
-          if [ -n "$ARCH_DIR" ]; then
-            echo "=== Copying minimal dependencies from $ARCH_DIR ==="
-            # Only copy direct dependencies of ispappd
-            for dep in libuci20 libubox20 libubus20 libmicroxml libjson-c libcurl curl; do
-              find "$ARCH_DIR" -name "${dep}*.ipk" -type f -exec cp {} r2-upload/packages/ \; 2>/dev/null || true
-            done
+          # Copy IPK files if they exist
+          if [ -d "bin/packages/${{ matrix.arch }}/packages" ] && [ "$(ls -A bin/packages/${{ matrix.arch }}/packages/*.ipk 2>/dev/null)" ]; then
+            echo "=== IPK files found, copying to upload directory ==="
+            cp bin/packages/${{ matrix.arch }}/packages/*.ipk r2-upload/packages/
           else
-            echo "=== No ispappd package found, checking if any ispappd-related files exist ==="
-            # If we can't find ispappd in standard location, don't copy dependencies
-            find . -name "ispappd*.ipk" -type f -exec cp {} r2-upload/packages/ \; 2>/dev/null || true
+            echo "=== No IPK files found, creating build status file ==="
+            echo "Build failed - no packages created on $(date)" > r2-upload/packages/build-failed.txt
+            echo "Architecture: ${{ matrix.arch }}" >> r2-upload/packages/build-failed.txt
           fi
-        else
-          echo "=== No IPK files found, creating build status file ==="
-          echo "Build failed - no packages created on $(date)" > r2-upload/packages/build-failed.txt
-          echo "Architecture: ${{ matrix.target.arch }}" >> r2-upload/packages/build-failed.txt
-          echo "SDK: ${{ matrix.target.sdk }}" >> r2-upload/packages/build-failed.txt
-          echo "Build Success: ${BUILD_SUCCESS:-false}" >> r2-upload/packages/build-failed.txt
-        fi
-        
-        # List what we're uploading
-        echo "=== Packages prepared for R2 upload ==="
-        ls -la r2-upload/packages/
-        echo "=== Total package count: $(ls -1 r2-upload/packages/ | wc -l) ==="
-
-    - name: Check R2 upload readiness
-      if: always() && github.ref == 'refs/heads/main'
-      id: check-r2-files
-      run: |
-        cd $SDK_DIR
-        if [ -d "r2-upload/packages" ] && [ "$(ls -A r2-upload/packages)" ]; then
-          echo "has-files=true" >> $GITHUB_OUTPUT
-          echo "=== R2 upload directory is ready ==="
-          echo "Files to upload:"
+          
+          # List what we're uploading
+          echo "=== Packages prepared for R2 upload ==="
           ls -la r2-upload/packages/
-        else
-          echo "has-files=false" >> $GITHUB_OUTPUT
-          echo "=== R2 upload directory is empty, skipping upload ==="
-        fi
 
-    - name: Upload to Cloudflare R2
-      uses: ryand56/r2-upload-action@latest
-      if: always() && github.ref == 'refs/heads/main' && steps.check-r2-files.outputs.has-files == 'true'
-      with:
-        r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-        r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-        r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        r2-bucket: ${{ secrets.R2_BUCKET }}
-        source-dir: ${{ env.SDK_DIR }}/r2-upload/packages/
-        destination-dir: ispappd/builds/${{ github.run_number }}/${{ matrix.target.arch }}/
-        output-file-url: true
-        multipart-concurrent: true
+      - name: Check R2 upload readiness
+        if: always() && github.ref == 'refs/heads/main'
+        id: check-r2-files
+        run: |
+          if [ -d "r2-upload/packages" ] && [ "$(ls -A r2-upload/packages)" ]; then
+            echo "has-files=true" >> $GITHUB_OUTPUT
+            echo "=== R2 upload directory is ready ==="
+          else
+            echo "has-files=false" >> $GITHUB_OUTPUT
+            echo "=== R2 upload directory is empty, skipping upload ==="
+          fi
 
-    # - name: Generate build provenance attestation
-    #   uses: actions/attest-build-provenance@v1
-    #   if: success()
-    #   with:
-    #     subject-path: |
-    #       ${{ env.SDK_DIR }}/bin/packages/*/ispappd/ispappd*.ipk
-
-    - name: Upload build logs on failure
-      uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: ispappd-${{ matrix.target.arch }}-build-log
-        path: ${{ env.SDK_DIR }}/build.log
-        retention-days: 7
-        if-no-files-found: ignore
-
-#   build-macos-arm:
-#     runs-on: macos-latest
-#     name: Build for macOS ARM64
-    
-#     steps:
-#     - name: Checkout repository
-#       uses: actions/checkout@v4
-
-#     - name: Install dependencies
-#       run: |
-#         brew update
-#         brew install \
-#           autoconf automake libtool \
-#           curl json-c pkg-config \
-#           libmicrohttpd libmxml
-
-#     - name: Setup build environment
-#       run: |
-#         # Create a custom prefix for installation
-#         mkdir -p $HOME/ispappd-macos
-#         export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
-#         export CFLAGS="-I/opt/homebrew/include"
-#         export LDFLAGS="-L/opt/homebrew/lib"
-#         echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH" >> $GITHUB_ENV
-#         echo "CFLAGS=$CFLAGS" >> $GITHUB_ENV
-#         echo "LDFLAGS=$LDFLAGS" >> $GITHUB_ENV
-
-#     - name: Create stub UCI libraries for macOS
-#       run: |
-#         # Create stub UCI/ubus libraries for macOS compilation
-#         mkdir -p macos-stubs/include macos-stubs/lib macos-stubs/src
-        
-#         # Create stub headers
-#         cat > macos-stubs/include/uci.h << 'EOF'
-#         #ifndef __UCI_H
-#         #define __UCI_H
-#         // Stub UCI header for macOS builds
-#         struct uci_context;
-#         struct uci_package;
-#         struct uci_section;
-#         struct uci_option;
-#         #endif
-#         EOF
-        
-#         cat > macos-stubs/include/libubox.h << 'EOF'
-#         #ifndef __LIBUBOX_H
-#         #define __LIBUBOX_H
-#         // Stub libubox header for macOS builds
-#         #endif
-#         EOF
-        
-#         cat > macos-stubs/include/libubus.h << 'EOF'
-#         #ifndef __LIBUBUS_H
-#         #define __LIBUBUS_H
-#         // Stub libubus header for macOS builds
-#         #endif
-#         EOF
-        
-#         # Create stub source files
-#         cat > macos-stubs/src/uci_stub.c << 'EOF'
-#         // Stub UCI implementation for macOS builds
-#         void uci_stub_function(void) { }
-#         EOF
-        
-#         cat > macos-stubs/src/ubox_stub.c << 'EOF'
-#         // Stub libubox implementation for macOS builds
-#         void ubox_stub_function(void) { }
-#         EOF
-        
-#         cat > macos-stubs/src/ubus_stub.c << 'EOF'
-#         // Stub libubus implementation for macOS builds
-#         void ubus_stub_function(void) { }
-#         EOF
-        
-#         # Compile stub object files
-#         cd macos-stubs/src
-#         gcc -c uci_stub.c -o uci_stub.o
-#         gcc -c ubox_stub.c -o ubox_stub.o
-#         gcc -c ubus_stub.c -o ubus_stub.o
-        
-#         # Create stub libraries with object files
-#         ar rcs ../lib/libuci.a uci_stub.o
-#         ar rcs ../lib/libubox.a ubox_stub.o
-#         ar rcs ../lib/libubus.a ubus_stub.o
-        
-#         cd ../..
-
-#     - name: Setup XML library compatibility
-#       run: |
-#         # Create microxml.pc compatibility layer for mxml4 (from libmxml package)
-#         mkdir -p /opt/homebrew/lib/pkgconfig
-#         export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
-        
-#         if pkg-config --exists mxml4; then
-#           MXML_VERSION=$(pkg-config --modversion mxml4)
-#           MXML_CFLAGS=$(pkg-config --cflags mxml4)
-#           MXML_LIBS=$(pkg-config --libs mxml4)
-          
-#           cat > /opt/homebrew/lib/pkgconfig/microxml.pc << EOF
-#         prefix=/opt/homebrew
-#         exec_prefix=\${prefix}
-#         libdir=\${exec_prefix}/lib
-#         includedir=\${prefix}/include
-
-#         Name: microxml
-#         Description: Mini-XML compatibility layer using mxml4
-#         Version: $MXML_VERSION
-#         Libs: $MXML_LIBS
-#         Cflags: $MXML_CFLAGS
-#         EOF
-          
-#           echo "Created microxml compatibility layer for mxml4"
-#         else
-#           echo "Warning: mxml4 not found, creating stub"
-#           cat > /opt/homebrew/lib/pkgconfig/microxml.pc << EOF
-#         prefix=/opt/homebrew
-#         exec_prefix=\${prefix}
-#         libdir=\${exec_prefix}/lib
-#         includedir=\${prefix}/include
-
-#         Name: microxml
-#         Description: Stub microxml for compilation
-#         Version: 1.0.0
-#         Libs: 
-#         Cflags: -DNO_XML
-#         EOF
-#         fi
-
-#     - name: Configure build
-#       run: |
-#         autoreconf -fiv
-#         ./configure \
-#           --prefix=$HOME/ispappd-macos \
-#           --enable-jsonc \
-#           --with-uci-include-path=$(pwd)/macos-stubs/include \
-#           --with-uci-lib-path=$(pwd)/macos-stubs/lib \
-#           --with-libubox-include-path=$(pwd)/macos-stubs/include \
-#           --with-libubox-lib-path=$(pwd)/macos-stubs/lib \
-#           --with-libubus-include-path=$(pwd)/macos-stubs/include \
-#           --with-libubus-lib-path=$(pwd)/macos-stubs/lib \
-#           CFLAGS="$CFLAGS -DMACOS_BUILD" \
-#           LDFLAGS="$LDFLAGS"
-
-#     - name: Build
-#       run: |
-#         make -j$(sysctl -n hw.ncpu)
-
-#     - name: Install
-#       run: |
-#         make install DESTDIR=$HOME/ispappd-macos-dist
-
-#     - name: Create distribution package
-#       run: |
-#         cd $HOME/ispappd-macos-dist
-#         tar -czf ispappd-macos-arm64.tar.gz .
-#         mv ispappd-macos-arm64.tar.gz $GITHUB_WORKSPACE/
-
-#     - name: Upload macOS build
-#       uses: actions/upload-artifact@v4
-#       with:
-#         name: ispappd-macos-arm64
-#         path: ispappd-macos-arm64.tar.gz
-#         retention-days: 30
-
-#     - name: Generate build provenance attestation for macOS
-#       uses: actions/attest-build-provenance@v1
-#       with:
-#         subject-path: ispappd-macos-arm64.tar.gz
+      - name: Upload to Cloudflare R2
+        uses: ryand56/r2-upload-action@latest
+        if: always() && github.ref == 'refs/heads/main' && steps.check-r2-files.outputs.has-files == 'true'
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: r2-upload/packages/
+          destination-dir: ispappd/builds/${{ github.run_number }}/${{ matrix.arch }}/
+          output-file-url: true
+          multipart-concurrent: true
 
   create-release:
     if: github.event_name == 'release'
-    needs: [build-matrix]
+    needs: [build]
     runs-on: ubuntu-latest
     name: Upload release assets
     
@@ -532,10 +128,10 @@ jobs:
         # Create a directory structure for release packages
         mkdir -p release-packages
         
-        # Extract only IPK files from artifacts, focusing on ispappd and dependencies
+        # Extract only IPK files from artifacts
         find artifacts/ -name "*.ipk" -type f | while read ipk; do
           # Get the architecture from the artifact folder name
-          arch=$(echo "$ipk" | sed -n 's/.*ispappd-\([^-]*\)-ipk.*/\1/p')
+          arch=$(echo "$ipk" | grep -o '[^/]*-packages' | sed 's/-packages//')
           if [ -n "$arch" ]; then
             mkdir -p "release-packages/$arch"
             cp "$ipk" "release-packages/$arch/"
@@ -560,7 +156,7 @@ jobs:
         multipart-concurrent: true
 
   summary:
-    needs: [build-matrix]
+    needs: [build]
     runs-on: ubuntu-latest
     name: Build Summary
     if: always()
@@ -571,7 +167,6 @@ jobs:
         echo "## Build Results" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### OpenWrt IPK Packages" >> $GITHUB_STEP_SUMMARY
-        echo "- Built for multiple OpenWrt architectures" >> $GITHUB_STEP_SUMMARY
+        echo "- Built for aarch64_generic and arm_cortex-a7_neon-vfpv4 architectures" >> $GITHUB_STEP_SUMMARY
         echo "- Packages available in artifacts" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "- Distributed as tar.gz package" >> $GITHUB_STEP_SUMMARY
+        echo "- Using OpenWrt official SDK Docker containers" >> $GITHUB_STEP_SUMMARY
