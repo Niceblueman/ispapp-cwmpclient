@@ -54,7 +54,8 @@ jobs:
         continue-on-error: true
         env:
           NO_REFRESH_CHECK: true
-          IGNORE_ERRORS: true
+          # IGNORE_ERRORS: true
+          BUILD_LOG: logs/${{ matrix.arch }}-build.log
           FEEDNAME: ispapp
           FEED_DIR: ${{ github.workspace }}
           ARCH: ${{ matrix.arch }}
