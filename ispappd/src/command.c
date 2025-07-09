@@ -64,7 +64,7 @@ const char *safe_command_patterns[] = {
     "iw",
     "iwinfo",
     "luci-reload",
-    "/etc/init.d/"
+    "/etc/init.d/",
 	NULL
 };
 

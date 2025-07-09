@@ -365,7 +365,7 @@ int main (int argc, char **argv)
 	xml_exit();
 	config_exit();
 	cwmp_free_deviceid();
-	command_exit();
+	command_cleanup();
 
 	closelog();
 	close(fd);
