@@ -1,15 +1,15 @@
-# Copyright (C) 2012-2016 PIVA Software <www.pivasoftware.com>
-# 	Author: MOHAMED Kallel <mohamed.kallel@pivasoftware.com>
-# 	Author: ANIS ELLOUZE <anis.ellouze@pivasoftware.com>
 # Modified for ispappd
 
 include $(TOPDIR)/rules.mk
 
-PKG_MAINTAINER:=ispapp team <support@ispapp.co>
 PKG_NAME:=ispappd
 PKG_VERSION:=1.0.0
-PKG_RELEASE:=2024092
-PKG_LICENSE:=Apache-2.0
+PKG_RELEASE:=1
+
+# Source is local (no download needed)
+PKG_SOURCE:=
+PKG_SOURCE_URL:=
+PKG_HASH:=skip
 
 PKG_FIXUP:=autoreconf
 
@@ -25,7 +25,6 @@ define Package/ispappd
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=ISP App Daemon (CWMP client using libcurl)
-  URL:=https://ispapp.co
   DEPENDS:=+libubus +libuci +libubox +libroxml +libjson-c +libcurl +curl
 endef
 
@@ -37,15 +36,14 @@ define Package/ispappd/config
 	source "$(SOURCE)/Config.in"
 endef
 
-# Use local source files for feed
+# Use local source files for feeds (files are in feed directory)  
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./src $(PKG_BUILD_DIR)/
-	$(CP) ./ext $(PKG_BUILD_DIR)/
-	$(CP) ./configure.ac $(PKG_BUILD_DIR)/
-	$(CP) ./Makefile.am $(PKG_BUILD_DIR)/
-	$(CP) ./bin $(PKG_BUILD_DIR)/
-	$(CP) ./Config.in $(PKG_BUILD_DIR)/
+	$(CP) src $(PKG_BUILD_DIR)/
+	$(CP) ext $(PKG_BUILD_DIR)/
+	$(CP) configure.ac $(PKG_BUILD_DIR)/
+	$(CP) Makefile.am $(PKG_BUILD_DIR)/
+	$(CP) bin $(PKG_BUILD_DIR)/
 endef
 
 TARGET_CFLAGS += \
@@ -58,7 +56,7 @@ CONFIGURE_ARGS += \
 	--with-uci-include-path=$(STAGING_DIR)/usr/include \
 	--with-libubox-include-path=$(STAGING_DIR)/usr/include \
 	--with-libubus-include-path=$(STAGING_DIR)/usr/include \
-	PKG_CONFIG_PATH=$(STAGING_DIR)/usr/lib/pkgconfig
+	--enable-jsonc=1
 
 ifeq ($(CONFIG_ISPAPPD_DEBUG),y)
 CONFIGURE_ARGS += \

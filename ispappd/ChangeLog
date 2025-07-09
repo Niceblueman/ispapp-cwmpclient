@@ -1,8 +1,0 @@
-ChangeLog for ispappd
-
-Version 1.0.0:
-- Initial release of ISPAppD CWMP client
-- Support for TR-069/TR-098/TR-181 protocols
-- OpenWrt integration
-- JSON-C support
-- macOS build support with stub libraries

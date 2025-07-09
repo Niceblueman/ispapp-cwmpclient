@@ -4,6 +4,7 @@
 #define _ispappcwmp_CWMP_H__
 
 #include <libubox/uloop.h>
+#include "xml.h"
 #ifdef HAVE_LIBROXML
 #include <roxml.h>
 typedef node_t xml_node_t;
