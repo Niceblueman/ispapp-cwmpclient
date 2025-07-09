@@ -115,7 +115,7 @@ static inline void cwmp_retry_session() {
 	uloop_timeout_set(&inform_timer_retry, SECDTOMSEC * rtime);
 }
 
-static inline int rpc_transfer_complete(mxml_node_t *node, int *method_id)
+static inline int rpc_transfer_complete(xml_node_t *node, int *method_id)
 {
 	char *msg_in = NULL, *msg_out = NULL;
 	int error = 0, count = 0;
@@ -257,7 +257,7 @@ static void cwmp_handle_end_session(void)
 
 int cwmp_inform(void)
 {
-	mxml_node_t *node;
+	xml_node_t *node;
 	int method_id;
 
 	log_message(NAME, L_NOTICE, "start session\n");
@@ -430,7 +430,7 @@ void cwmp_download_launch(struct uloop_timeout *timeout)
 {
 	struct download *d;
 	char *start_time = NULL, *status = NULL, *fault = NULL;
-	mxml_node_t *node;
+	xml_node_t *node;
 	int code = FAULT_0;
 
 	d = container_of(timeout, struct download, handler_timer);
@@ -496,7 +496,7 @@ void cwmp_upload_launch(struct uloop_timeout *timeout)
 {
 	struct upload *d;
 	char *start_time = NULL, *status = NULL, *fault = NULL;
-	mxml_node_t *node;
+	xml_node_t *node;
 	int code = FAULT_0;
 
 	d = container_of(timeout, struct upload, handler_timer);
@@ -553,7 +553,7 @@ end_fault :
 	free(fault);
 }
 
-void cwmp_add_download(char *key, int delay, char *file_size, char *download_url, char *file_type, char *username, char *password, mxml_node_t *node)
+void cwmp_add_download(char *key, int delay, char *file_size, char *download_url, char *file_type, char *username, char *password, xml_node_t *node)
 {
 	struct download *d = NULL;
 
@@ -577,7 +577,7 @@ void cwmp_add_download(char *key, int delay, char *file_size, char *download_url
 	uloop_timeout_set(&d->handler_timer, SECDTOMSEC * delay);
 }
 
-void cwmp_add_upload(char *key, int delay, char *upload_url, char *file_type, char *username, char *password, mxml_node_t *node)
+void cwmp_add_upload(char *key, int delay, char *upload_url, char *file_type, char *username, char *password, xml_node_t *node)
 {
 	struct upload *d = NULL;
 

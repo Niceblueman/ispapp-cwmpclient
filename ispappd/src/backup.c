@@ -13,29 +13,29 @@
 #include "messages.h"
 #include "time.h"
 
-mxml_node_t *backup_tree = NULL;
+xml_node_t *backup_tree = NULL;
 
 #ifdef NO_XML
 // Stub implementations when no XML library is available
 
 void backup_init(void) { return; }
-mxml_node_t *backup_tree_init(void) { return NULL; }
+xml_node_t *backup_tree_init(void) { return NULL; }
 int backup_save_file(void) { return 0; }
 void backup_add_acsurl(char *acs_url) { return; }
 void backup_check_acs_url(void) { return; }
 void backup_check_software_version(void) { return; }
-mxml_node_t *backup_add_transfer_complete(char *command_key, int fault_code, char *start_time, int method_id) { return NULL; }
-int backup_update_fault_transfer_complete(mxml_node_t *node, int fault_code) { return 0; }
-int backup_update_complete_time_transfer_complete(mxml_node_t *node) { return 0; }
+xml_node_t *backup_add_transfer_complete(char *command_key, int fault_code, char *start_time, int method_id) { return NULL; }
+int backup_update_fault_transfer_complete(xml_node_t *node, int fault_code) { return 0; }
+int backup_update_complete_time_transfer_complete(xml_node_t *node) { return 0; }
 int backup_update_all_complete_time_transfer_complete(void) { return 0; }
-int backup_extract_transfer_complete(mxml_node_t *node, char **msg_out, int *method_id) { return 0; }
-int backup_remove_transfer_complete(mxml_node_t *node) { return 0; }
+int backup_extract_transfer_complete(xml_node_t *node, char **msg_out, int *method_id) { return 0; }
+int backup_remove_transfer_complete(xml_node_t *node) { return 0; }
 int backup_load_download(void) { return 0; }
 int backup_load_upload(void) { return 0; }
-int backup_remove_download(mxml_node_t *node) { return 0; }
-int backup_remove_upload(mxml_node_t *node) { return 0; }
+int backup_remove_download(xml_node_t *node) { return 0; }
+int backup_remove_upload(xml_node_t *node) { return 0; }
 int backup_load_event(void) { return 0; }
-int backup_remove_event(mxml_node_t *node) { return 0; }
+int backup_remove_event(xml_node_t *node) { return 0; }
 void str_replace_newline_byspace(char *str) { 
 	// Keep this function even in NO_XML mode as it might be used elsewhere
 	while(*str) {
@@ -101,12 +101,12 @@ void backup_init(void)
 #endif
 }
 
-mxml_node_t *backup_tree_init(void)
+xml_node_t *backup_tree_init(void)
 {
 #ifdef NO_XML
 	return NULL;
 #elif defined(HAVE_LIBROXML)
-	mxml_node_t *xml;
+	xml_node_t *xml;
 
 	backup_tree = roxml_load_buf("<backup_file/>");
 	if (!backup_tree) return NULL;
@@ -175,7 +175,7 @@ void backup_add_acsurl(char *acs_url)
 #ifdef NO_XML
 	return;
 #elif defined(HAVE_LIBROXML)
-	mxml_node_t *data, *b;
+	xml_node_t *data, *b;
 
 	cwmp_clean();
 	roxml_close(backup_tree);
@@ -195,7 +195,7 @@ void backup_check_acs_url(void)
 #ifdef NO_XML
 	return;
 #elif defined(HAVE_LIBROXML)
-	mxml_node_t *b;
+	xml_node_t *b;
 
 	b = roxml_get_chld(backup_tree, "acs_url", 0);
 	if (!b || (roxml_get_txt(b, 0) && 
@@ -212,7 +212,7 @@ void backup_check_software_version(void)
 #ifdef NO_XML
 	return;
 #elif defined(HAVE_LIBROXML)
-	mxml_node_t *data, *b;
+	xml_node_t *data, *b;
 
 	b = roxml_get_chld(backup_tree, "cwmp", 0);
 	if (!b)
@@ -235,9 +235,9 @@ void backup_check_software_version(void)
 #endif
 }
 
-mxml_node_t *backup_add_transfer_complete(char *command_key, int fault_code, char *start_time, int method_id)
+xml_node_t *backup_add_transfer_complete(char *command_key, int fault_code, char *start_time, int method_id)
 {
-	mxml_node_t  *data, *m, *b;
+	xml_node_t  *data, *m, *b;
 	char c[16];
 
 	data = roxml_get_chld(backup_tree, "cwmp", 0);
@@ -275,9 +275,9 @@ mxml_node_t *backup_add_transfer_complete(char *command_key, int fault_code, cha
 	return m;
 }
 
-int backup_update_fault_transfer_complete(mxml_node_t *node, int fault_code)
+int backup_update_fault_transfer_complete(xml_node_t *node, int fault_code)
 {
-	mxml_node_t  *b, *txt;
+	xml_node_t  *b, *txt;
 
 	b = roxml_get_chld(node, "fault_code", 0);
 	if (!b) return -1;
@@ -301,9 +301,9 @@ int backup_update_fault_transfer_complete(mxml_node_t *node, int fault_code)
 	return 0;
 }
 
-int backup_update_complete_time_transfer_complete(mxml_node_t *node)
+int backup_update_complete_time_transfer_complete(xml_node_t *node)
 {
-	mxml_node_t  *b, *txt;
+	xml_node_t  *b, *txt;
 
 	b = roxml_get_chld(node, "complete_time", 0);
 	if (!b) return -1;
@@ -321,17 +321,17 @@ int backup_update_complete_time_transfer_complete(mxml_node_t *node)
 int backup_update_all_complete_time_transfer_complete(void)
 {
 	int count, i;
-	mxml_node_t **nodes = roxml_xpath(backup_tree, ".//transfer_complete", &count);
+	xml_node_t **nodes = roxml_xpath(backup_tree, ".//transfer_complete", &count);
 	
 	for (i = 0; i < count; i++) {
-		mxml_node_t *n = nodes[i];
-		mxml_node_t *b = roxml_get_chld(n, "complete_time", 0);
+		xml_node_t *n = nodes[i];
+		xml_node_t *b = roxml_get_chld(n, "complete_time", 0);
 		if (!b) {
 			roxml_release(nodes);
 			return -1;
 		}
 		
-		mxml_node_t *txt = roxml_get_txt(b, 0);
+		xml_node_t *txt = roxml_get_txt(b, 0);
 		if (txt) {
 			char *content = roxml_get_content(txt, NULL, 0, NULL);
 			if (content && strcmp(content, UNKNOWN_TIME) != 0) continue;
@@ -345,17 +345,17 @@ int backup_update_all_complete_time_transfer_complete(void)
 	return 0;
 }
 
-mxml_node_t *backup_check_transfer_complete(void)
+xml_node_t *backup_check_transfer_complete(void)
 {
-	mxml_node_t *data;
+	xml_node_t *data;
 	data = roxml_get_chld(backup_tree, "transfer_complete", 0);
 	return data;
 }
 
-int backup_extract_transfer_complete( mxml_node_t *node, char **msg_out, int *method_id)
+int backup_extract_transfer_complete( xml_node_t *node, char **msg_out, int *method_id)
 {
-	mxml_node_t *tree_m, *n;
-	mxml_node_t *b, *txt;
+	xml_node_t *tree_m, *n;
+	xml_node_t *b, *txt;
 	char *val;
 
 	tree_m = mxmlLoadString(NULL, CWMP_TRANSFER_COMPLETE_MESSAGE, MXML_OPAQUE_CALLBACK);
@@ -452,16 +452,16 @@ error:
 	return -1;
 }
 
-int backup_remove_transfer_complete(mxml_node_t *node)
+int backup_remove_transfer_complete(xml_node_t *node)
 {
 	mxmlDelete(node);
 	backup_save_file();
 	return 0;
 }
 
-mxml_node_t *backup_add_download(char *key, int delay, char *file_size, char *download_url, char *file_type, char *username, char *password)
+xml_node_t *backup_add_download(char *key, int delay, char *file_size, char *download_url, char *file_type, char *username, char *password)
 {
-	mxml_node_t *data, *b, *n;
+	xml_node_t *data, *b, *n;
 	char time_execute[16];
 
 	if (snprintf(time_execute,sizeof(time_execute),"%u",delay + (unsigned int)time(NULL)) < 0) return NULL;
@@ -510,9 +510,9 @@ mxml_node_t *backup_add_download(char *key, int delay, char *file_size, char *do
 	return b;
 }
 
-mxml_node_t *backup_add_upload(char *key, int delay, char *upload_url, char *file_type, char *username, char *password)
+xml_node_t *backup_add_upload(char *key, int delay, char *upload_url, char *file_type, char *username, char *password)
 {
-	mxml_node_t *data, *b, *n;
+	xml_node_t *data, *b, *n;
 	char time_execute[16];
 
 	if (snprintf(time_execute,sizeof(time_execute),"%u",delay + (unsigned int)time(NULL)) < 0) return NULL;
@@ -560,7 +560,7 @@ int backup_load_download(void)
 {
 	int delay = 0;
 	unsigned int t;
-	mxml_node_t *data, *b, *c;
+	xml_node_t *data, *b, *c;
 	char *download_url = NULL, *file_size = NULL,
 		*command_key = NULL, *file_type = NULL,
 		*username = NULL, *password = NULL, *val = NULL;
@@ -649,7 +649,7 @@ int backup_load_upload(void)
 {
 	int delay = 0;
 	unsigned int t;
-	mxml_node_t *data, *b, *c;
+	xml_node_t *data, *b, *c;
 	char *upload_url = NULL,
 		*command_key = NULL, *file_type = NULL,
 		*username = NULL, *password = NULL, *val = NULL;
@@ -727,23 +727,23 @@ error:
 	return -1;
 }
 
-int backup_remove_download(mxml_node_t *node)
+int backup_remove_download(xml_node_t *node)
 {
 	mxmlDelete(node);
 	backup_save_file();
 	return 0;
 }
 
-int backup_remove_upload(mxml_node_t *node)
+int backup_remove_upload(xml_node_t *node)
 {
 	mxmlDelete(node);
 	backup_save_file();
 	return 0;
 }
 
-mxml_node_t *backup_add_event(int code, char *key, int method_id)
+xml_node_t *backup_add_event(int code, char *key, int method_id)
 {
-	mxml_node_t *b = backup_tree, *n, *data;
+	xml_node_t *b = backup_tree, *n, *data;
 	char *e = NULL, *c = NULL;
 
 	data = roxml_get_chld(backup_tree, "cwmp", 0);
@@ -787,7 +787,7 @@ error:
 
 int backup_load_event(void)
 {
-	mxml_node_t *data, *b, *c;
+	xml_node_t *data, *b, *c;
 	char *event_num = NULL, *key = NULL;
 	int method_id = 0;
 	struct event *e;
@@ -822,7 +822,7 @@ int backup_load_event(void)
 	return 0;
 }
 
-int backup_remove_event(mxml_node_t *b)
+int backup_remove_event(xml_node_t *b)
 {
 #ifdef HAVE_LIBROXML
 	roxml_del_node(b);

@@ -2,6 +2,8 @@
 #ifndef _ispappcwmp_ispappcwmp_H__
 #define _ispappcwmp_ispappcwmp_H__
 
+#include <stdlib.h>
+
 #define NAME	PACKAGE_NAME
 #define ispappcwmp_VERSION	PACKAGE_VERSION
 

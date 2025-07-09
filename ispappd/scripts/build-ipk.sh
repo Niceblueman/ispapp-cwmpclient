@@ -35,6 +35,7 @@ DEBUG_BUILD=false
 CLEAN_BUILD=false
 VERBOSE=false
 USE_DOCKER=true
+KEEP_RUNNING=false
 DOCKER_REGISTRY="openwrt/sdk"
 PARALLEL_JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo "4")
 
@@ -95,6 +96,7 @@ show_help() {
     echo "  -c, --clean          Clean build before starting"
     echo "  -j, --jobs N         Number of parallel jobs (default: $PARALLEL_JOBS)"
     echo "  --verbose            Enable verbose output"
+    echo "  --keep-running       Keep Docker container running after build for inspection"
     echo "  --no-docker          Use traditional SDK download instead of Docker (not recommended on macOS ARM)"
     echo "  --list-archs         List available architectures"
     echo "  -h, --help           Show this help message"
@@ -151,6 +153,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --verbose)
             VERBOSE=true
+            shift
+            ;;
+        --keep-running)
+            KEEP_RUNNING=true
             shift
             ;;
         --no-docker)
@@ -270,6 +276,7 @@ print_error() {
 DEBUG_BUILD=${DEBUG_BUILD:-false}
 VERBOSE=${VERBOSE:-false}
 PARALLEL_JOBS=${PARALLEL_JOBS:-4}
+KEEP_RUNNING=${KEEP_RUNNING:-false}
 
 print_status "Setting up ispappd package in SDK..."
 
@@ -339,6 +346,20 @@ for ipk in $IPK_FILES; do
 done
 
 print_success "Docker build completed successfully!"
+
+# Keep container running if requested
+if [[ "$KEEP_RUNNING" == true ]]; then
+    print_status "Keeping container running for inspection..."
+    print_status "Container will remain active for dependency analysis"
+    print_status "You can connect to it using: docker exec -it <container_id> /bin/bash"
+    print_status "Press Ctrl+C to exit and stop the container"
+    
+    # Keep the container running
+    while true; do
+        sleep 30
+        print_status "Container still running... (Ctrl+C to stop)"
+    done
+fi
 EOF
 
     chmod +x build-output/docker-build.sh

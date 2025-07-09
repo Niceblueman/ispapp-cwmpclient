@@ -6,12 +6,12 @@
 #include <libubox/uloop.h>
 #ifdef HAVE_LIBROXML
 #include <roxml.h>
-typedef node_t mxml_node_t;
+typedef node_t xml_node_t;
 #elif HAVE_MXML
 #include <mxml.h>
 #elif NO_XML
 // Stub definitions when no XML library is available
-typedef void mxml_node_t;
+typedef void xml_node_t;
 #else
 #error "No XML library available"
 #endif
@@ -67,7 +67,7 @@ struct event {
 	int code;
 	char *key;
 	int method_id;
-	mxml_node_t *backup_node;
+	xml_node_t *backup_node;
 };
 
 struct event_code
@@ -93,7 +93,7 @@ struct download {
 	char *username;
 	char *password;
 	time_t time_execute;
-	mxml_node_t *backup_node;
+	xml_node_t *backup_node;
 };
 
 struct upload {
@@ -105,7 +105,7 @@ struct upload {
 	char *username;
 	char *password;
 	time_t time_execute;
-	mxml_node_t *backup_node;
+	xml_node_t *backup_node;
 };
 
 struct notification {
@@ -149,11 +149,11 @@ static void cwmp_do_inform(struct uloop_timeout *timeout);
 static void cwmp_do_inform_retry(struct uloop_timeout *timeout);
 static inline int rpc_inform(void);
 static inline int rpc_get_rpc_methods(void);
-static inline int rpc_transfer_complete(mxml_node_t *node, int *method_id);
+static inline int rpc_transfer_complete(xml_node_t *node, int *method_id);
 
 void cwmp_add_scheduled_inform(char *key, int delay);
-void cwmp_add_download(char *key, int delay, char *file_size, char *download_url, char *file_type, char *username, char *password, mxml_node_t *node);
-void cwmp_add_upload(char *key, int delay, char *upload_url, char *file_type, char *username, char *password, mxml_node_t *node);
+void cwmp_add_download(char *key, int delay, char *file_size, char *download_url, char *file_type, char *username, char *password, xml_node_t *node);
+void cwmp_add_upload(char *key, int delay, char *upload_url, char *file_type, char *username, char *password, xml_node_t *node);
 void cwmp_download_launch(struct uloop_timeout *timeout);
 void cwmp_upload_launch(struct uloop_timeout *timeout);
 void cwmp_init(void);
