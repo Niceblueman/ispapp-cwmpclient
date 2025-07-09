@@ -30,13 +30,12 @@ config.h.in
 *.swp
 *.swo
 *~
-
 # macOS specific
 .DS_Store
 *.dSYM/
 
 # Build directories
-build/
+# build/
 dist/
 macos-stubs/
 
@@ -46,9 +45,8 @@ macos-stubs/
 *.zip
 
 # Binary files
-ispappd
 bin/ispappd
-
+ispappd/ispappd
 # PKG-config files (when created by build scripts)
 *.pc
 

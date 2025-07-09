@@ -1,232 +1,196 @@
-name: Build OpenWrt IPK Packages
+name: BUILD PACKAGES
 
 on:
   push:
-    branches: [ main, master, develop ]
-  pull_request:
-    branches: [ main, master, develop ]
-  release:
-    types: [ published ]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  actions: read
-  id-token: write
-  attestations: write
+    branches:
+      - main
+    paths:
+      - 'ispappd/**/*'
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
   build:
-    name: ${{ matrix.arch }} build
+    needs: changes
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       max-parallel: 10
       matrix:
         arch:
-          # Current stable releases with explicit versions
           - arm_cortex-a7_neon-vfpv4-23.05-SNAPSHOT
-          - arm_cortex-a7_vfpv4-23.05-SNAPSHOT
-          - arm_cortex-a9-23.05-SNAPSHOT
-          - mipsel_24kc-23.05-SNAPSHOT
-          - x86-generic-23.05-SNAPSHOT
-          - x86-64-23.05-SNAPSHOT
-          - ath79-generic-23.05-SNAPSHOT
-          - ramips-mt7620-23.05-SNAPSHOT
-          - ramips-mt7621-23.05-SNAPSHOT
-          - arm_cortex-a15_neon-vfpv4-23.05-SNAPSHOT
-          - x86_64-23.05-SNAPSHOT
-          - mipsel_74kc-23.05-SNAPSHOT
-          - mips_24kc-23.05-SNAPSHOT
-          - i386_pentium4-23.05-SNAPSHOT
-          - aarch64_cortex-a53-23.05-SNAPSHOT
-          - aarch64_cortex-a72-23.05-SNAPSHOT
-          - aarch64_generic-23.05-SNAPSHOT
-
+          # - arm_cortex-a7_vfpv4-23.05-SNAPSHOT
+          # - arm_cortex-a9-23.05-SNAPSHOT
+          # - mediatek-filogic-23.05-SNAPSHOT
+          # - mipsel_mips32-23.05-SNAPSHOT
+          # - ath79-mikrotik-23.05-SNAPSHOT
+          # - mipsel_24kc-23.05-SNAPSHOT
+          # - x86-generic-23.05-SNAPSHOT
+          # - arm_cortex-a7-23.05-SNAPSHOT
+          # - mvebu-cortexa53-23.05-SNAPSHOT
+          # - x86-64-23.05-SNAPSHOT
+          # - ath79-generic-23.05-SNAPSHOT
+          # - mediatek-mt7622-23.05-SNAPSHOT
+          # - ramips-mt76x8-23.05-SNAPSHOT
+          # - ramips-mt7620-23.05-SNAPSHOT
+          # - ramips-mt7621-23.05-SNAPSHOT
+          # - ramips-rt288x-23.05-SNAPSHOT
+          # - ramips-rt305x-23.05-SNAPSHOT
+          # - arm_cortex-a15_neon-vfpv4-23.05-SNAPSHOT
+          # - x86_64-23.05-SNAPSHOT
+          # - arm_cortex-a5_vfpv4-23.05-SNAPSHOT
+          # - ipq807x-generic-23.05-SNAPSHOT
+          # - ramips-rt3883-23.05-SNAPSHOT
+          # - bcm47xx-mips74k-23.05-SNAPSHOT
+          # - mipsel_74kc-23.05-SNAPSHOT
+          # - mips_mips32-23.05-SNAPSHOT
+          # - bmips-bcm63268-23.05-SNAPSHOT
+          # - bmips-bcm6368-23.05-SNAPSHOT
+          # - ipq40xx-mikrotik-23.05-SNAPSHOT
+          # - bmips-bcm6362-23.05-SNAPSHOT
+          # - i386_pentium4-23.05-SNAPSHOT
+          # - mips_24kc-23.05-SNAPSHOT
+          # - mips64_octeonplus-23.05-SNAPSHOT
+          # - bmips-bcm6358-23.05-SNAPSHOT
+          # - bmips-bcm6328-23.05-SNAPSHOT
+          # - mipsel_24kc_24kf-23.05-SNAPSHOT
+          # - mips_4kec-23.05-SNAPSHOT
+          # - ramips-rt3883-23.05-SNAPSHOT
+          # - mipsel_74kc-23.05-SNAPSHOT
+          # - mediatek-mt7629-23.05-SNAPSHOT
+          # - bmips-bcm6318-23.05-SNAPSHOT
+          
+          # new apk
+          # - arm_cortex-a7_neon-vfpv4
+          # - arm_cortex-a7_vfpv4
+          # - arm_cortex-a9
+          # - mediatek-filogic
+          # - mipsel_mips32
+          # - ath79-mikrotik
+          # - mipsel_24kc
+          # - x86-generic
+          # - arm_cortex-a7
+          # - mvebu-cortexa53
+          # - x86-64
+          # - ath79-generic
+          # - mediatek-mt7622
+          # - aarch64_cortex-a53
+          # - aarch64_generic
+          # # possible working archs for some skynet devices 
+          # - aarch64_generic-23.05-SNAPSHOT
+          # - aarch64_cortex-a53-23.05-SNAPSHOT
+          # - aarch64_cortex-a72-23.05-SNAPSHOT
+          # # end
+          # - arm_cortex-a15_neon-vfpv4
+          # - x86_64
+          # - arm_cortex-a5_vfpv4
+          # - mipsel_74kc
+          # - mips_mips32
+          # - i386_pentium4
+          # - mips_24kc
+          # - mipsel_24kc_24kf
+          # - mips_4kec
+          # - mipsel_74kc
+          # - bcm47xx-legacy-23.05-SNAPSHOT
+          # - bcm47xx-generic-23.05-SNAPSHOT
+          # - sunxi-cortexa53-23.05-SNAPSHOT
+          # - bcm4908-generic-23.05-SNAPSHOT
+          # - bcm27xx-bcm2710-23.05-SNAPSHOT
+          # - arm_cortex-a9_vfpv3-d16-23.05-SNAPSHOT
+          # - armsr-armv7-23.05-SNAPSHOT
+          # - lantiq-ase-23.05-SNAPSHOT
+          # - bcm63xx-smp-23.05-SNAPSHOT
+          # - bcm63xx-generic-23.05-SNAPSHOT
+          # - realtek-rtl931x-23.05-SNAPSHOT
+          # - realtek-rtl930x-23.05-SNAPSHOT
+          # - realtek-rtl839x-23.05-SNAPSHOT
+          # - malta-be-23.05-SNAPSHOT
+          # - lantiq-xway_legacy-23.05-SNAPSHOT
+          # - lantiq-xway-23.05-SNAPSHOT
+          # - lantiq-xrx200-23.05-SNAPSHOT
+          # - ath79-tiny-23.05-SNAPSHOT
+          # - ath79-nand-23.05-SNAPSHOT
+          # - at91-sama5-23.05-SNAPSHOT
+          # - rockchip-armv8-23.05-SNAPSHOT
+          # - octeontx-generic-23.05-SNAPSHOT
+          # - layerscape-armv8_64b-23.05-SNAPSHOT
+          # - armsr-armv8-23.05-SNAPSHOT
+          # - bcm27xx-bcm2708-23.05-SNAPSHOT
+          # - arm_arm1176jzf-s_vfp-23.05-SNAPSHOT
+          # - sifiveu-generic-23.05-SNAPSHOT
+          # - riscv64_riscv64-23.05-SNAPSHOT
+          # - zynq-generic-23.05-SNAPSHOT
+          # - imx-cortexa9-23.05-SNAPSHOT
+          # - arm_cortex-a9_neon-23.05-SNAPSHOT
+          # - mxs-generic-23.05-SNAPSHOT
+          # - at91-sam9x-23.05-SNAPSHOT
+          # - arm_arm926ej-s-23.05-SNAPSHOT
+          # - at91-sama7-23.05-SNAPSHOT
+          # - octeon-generic-23.05-SNAPSHOT
+          # - apm821xx-sata-23.05-SNAPSHOT
+          # - apm821xx-nand-23.05-SNAPSHOT
+          # - powerpc_464fp-23.05-SNAPSHOT
+          # - tegra-generic-23.05-SNAPSHOT
+          # - mvebu-cortexa9-23.05-SNAPSHOT
+          # - mpc85xx-p2020-23.05-SNAPSHOT
+          # - mpc85xx-p1020-23.05-SNAPSHOT
+          # - mpc85xx-p1010-23.05-SNAPSHOT
+          # - powerpc_8548-23.05-SNAPSHOT
+          # - oxnas-ox820-23.05-SNAPSHOT
+          # - arm_mpcore-23.05-SNAPSHOT
+          # - sunxi-cortexa7-23.05-SNAPSHOT
+          # - mediatek-mt7623-23.05-SNAPSHOT
+          # - layerscape-armv7-23.05-SNAPSHOT
+          # - ipq40xx-chromium-23.05-SNAPSHOT
+          # - ipq40xx-generic-23.05-SNAPSHOT
+          # - imx-cortexa7-23.05-SNAPSHOT
+          # - bcm27xx-bcm2709-23.05-SNAPSHOT
+          # - x86-geode-23.05-SNAPSHOT
+          # - x86-legacy-23.05-SNAPSHOT
+          # - i386_pentium-mmx-23.05-SNAPSHOT
+          # - sunxi-cortexa8-23.05-SNAPSHOT
+          # - arm_cortex-a8_vfpv3-23.05-SNAPSHOT
+          # - mvebu-cortexa72-23.05-SNAPSHOT
+          # - bcm27xx-bcm2711-23.05-SNAPSHOT
+          # - ipq806x-chromium-23.05-SNAPSHOT
+          # - ipq806x-generic-23.05-SNAPSHOT
+          # - pistachio-generic-23.05-SNAPSHOT
+          # - realtek-rtl838x-23.05-SNAPSHOT
+          # - kirkwood-generic-23.05-SNAPSHOT
+          # - arm_xscale-23.05-SNAPSHOT
+          # - gemini-generic-23.05-SNAPSHOT
+          # - arm_fa526-23.05-SNAPSHOT
+          # - bcm47xx-mips74k-23.05-SNAPSHOT
+          # - bcm53xx-generic-23.05-SNAPSHOT
+          # - armvirt-32-23.05-SNAPSHOT
+          # - armvirt-64-23.05-SNAPSHOT
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          # Ensure we have a complete git repository for the local source build
-          
-      - name: Verify git repository state
-        run: |
-          echo "=== Git repository verification ==="
-          git status
-          git log --oneline -5
-          echo "=== Repository files ==="
-          ls -la
-
       - name: Build ispappd-${{ matrix.arch }}
         uses: openwrt/gh-action-sdk@main
-        # continue-on-error: true
+        continue-on-error: true
         env:
           NO_REFRESH_CHECK: true
           IGNORE_ERRORS: true
-          BUILD_LOG: logs/${{ matrix.arch }}-build.log
           FEEDNAME: ispapp
           FEED_DIR: ${{ github.workspace }}
           ARCH: ${{ matrix.arch }}
           PACKAGES: ispappd
-          V: s
-          FEED_URL: ""
-
+          V: snapshot
+        
       - name: Store packages
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.arch }}-packages
-          path: |
-            bin/packages/**/ispapp/*.apk
-            bin/packages/**/ispapp/*.ipk
-          retention-days: 30
-          if-no-files-found: warn
-
-      - name: Store build logs
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: ${{ matrix.arch }}-build-logs
-          path: logs/
-          retention-days: 7
-          if-no-files-found: ignore
-
-      - name: Prepare packages for R2 upload
-        if: always()
-        run: |
-          # Create a directory for R2 upload
-          mkdir -p r2-upload/packages
-          
-          # Copy IPK files if they exist - check both possible locations
-          if ls bin/packages/${{ matrix.arch }}/ispapp/*.ipk 1> /dev/null 2>&1; then
-            echo "=== IPK files found in ispapp feed, copying to upload directory ==="
-            cp bin/packages/**/ispapp/*.ipk r2-upload/packages/
-          elif ls bin/packages/**/packages/*.ipk 1> /dev/null 2>&1; then
-            echo "=== IPK files found in packages feed, copying to upload directory ==="
-            cp bin/packages/**/packages/*.ipk r2-upload/packages/
-          else
-            echo "=== No IPK files found, creating build status file ==="
-            echo "Build failed - no packages created on $(date)" > r2-upload/packages/build-failed.txt
-            echo "Architecture: ${{ matrix.arch }}" >> r2-upload/packages/build-failed.txt
-          fi
-          
-          # List what we're uploading
-          echo "=== Packages prepared for R2 upload ==="
-          ls -la r2-upload/packages/
-
-      - name: Check R2 upload readiness
-        if: always() && github.ref == 'refs/heads/main'
-        id: check-r2-files
-        run: |
-          if [ -d "r2-upload/packages" ] && [ "$(ls -A r2-upload/packages)" ]; then
-            echo "has-files=true" >> $GITHUB_OUTPUT
-            echo "=== R2 upload directory is ready ==="
-          else
-            echo "has-files=false" >> $GITHUB_OUTPUT
-            echo "=== R2 upload directory is empty, skipping upload ==="
-          fi
-
-      - name: Upload to Cloudflare R2
-        uses: ryand56/r2-upload-action@latest
-        if: always() && github.ref == 'refs/heads/main' && steps.check-r2-files.outputs.has-files == 'true'
-        with:
-          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          r2-bucket: ${{ secrets.R2_BUCKET }}
-          source-dir: r2-upload/packages/
-          destination-dir: ispappd/builds/${{ github.run_number }}/${{ matrix.arch }}/
-          output-file-url: true
-          multipart-concurrent: true
-
-      - name: Create GitHub Release per Architecture
         uses: ncipollo/release-action@v1
-        if: github.ref == 'refs/heads/main'
         with:
           allowUpdates: true
           replacesArtifacts: true
           artifacts: |
-            bin/packages/**/ispapp/*.ipk
-            bin/packages/**/packages/*.ipk
+            bin/packages/**/ispappd/*.apk
           tag: ${{ matrix.arch }}
-          name: "ispappd packages for ${{ matrix.arch }}"
-          body: |
-            ## ispappd IPK packages for ${{ matrix.arch }}
-            
-            Built from commit: ${{ github.sha }}
-            Build date: ${{ github.run_number }}
-            
-            ### Installation
-            ```bash
-            opkg update
-            opkg install ispappd_*.ipk
-            ```
-
-  create-release:
-    if: github.event_name == 'release'
-    needs: [build]
-    runs-on: ubuntu-latest
-    name: Upload release assets
-    
-    steps:
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: artifacts
-
-    - name: Upload release assets to GitHub
-      uses: softprops/action-gh-release@v1
-      with:
-        files: artifacts/**/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Prepare release packages for R2
-      run: |
-        # Create a directory structure for release packages
-        mkdir -p release-packages
-        
-        # Extract only IPK files from artifacts
-        find artifacts/ -name "*.ipk" -type f | while read ipk; do
-          # Get the architecture from the artifact folder name
-          arch=$(echo "$ipk" | grep -o '[^/]*-packages' | sed 's/-packages//')
-          if [ -n "$arch" ]; then
-            mkdir -p "release-packages/$arch"
-            cp "$ipk" "release-packages/$arch/"
-          fi
-        done
-        
-        # List what we're uploading
-        echo "=== Release packages prepared for R2 upload ==="
-        find release-packages/ -name "*.ipk" -type f | sort
-        echo "=== Total release package count: $(find release-packages/ -name '*.ipk' -type f | wc -l) ==="
-
-    - name: Upload release assets to Cloudflare R2
-      uses: ryand56/r2-upload-action@latest
-      with:
-        r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-        r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-        r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        r2-bucket: ${{ secrets.R2_BUCKET }}
-        source-dir: release-packages/
-        destination-dir: ispappd/releases/${{ github.ref_name }}/
-        output-file-url: true
-        multipart-concurrent: true
-
-  summary:
-    needs: [build]
-    runs-on: ubuntu-latest
-    name: Build Summary
-    if: always()
-    
-    steps:
-    - name: Build Summary
-      run: |
-        echo "## Build Results" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### OpenWrt IPK Packages" >> $GITHUB_STEP_SUMMARY
-        echo "- Built for multiple architectures using official OpenWrt GitHub Action SDK" >> $GITHUB_STEP_SUMMARY
-        echo "- Packages available in artifacts and per-architecture releases" >> $GITHUB_STEP_SUMMARY
-        echo "- Using openwrt/gh-action-sdk@main for reliable production builds" >> $GITHUB_STEP_SUMMARY
-        echo "- Supports both 23.05-SNAPSHOT and latest versions" >> $GITHUB_STEP_SUMMARY
-        echo "- Build logs available for troubleshooting" >> $GITHUB_STEP_SUMMARY
