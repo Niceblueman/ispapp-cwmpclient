@@ -6,9 +6,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ispapp
 PKG_VERSION:=1.0.0
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
-
+PKG_SOURCE:=v$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/archive/refs/tags/
 PKG_FIXUP:=autoreconf
 
 PKG_CONFIG_DEPENDS:= \
@@ -23,7 +22,7 @@ define Package/ispapp
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=CWMP client (using libcurl)
-  DEPENDS:=+libubus +libuci +libubox +libmicroxml +libjson-c +libcurl +curl
+  DEPENDS:=+libubus +libuci +libubox +libroxml +libjson-c +libcurl +curl
 endef
 
 define Package/ispapp/description
