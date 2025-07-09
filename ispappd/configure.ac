@@ -1,6 +1,8 @@
-AC_INIT([ispappd], [1.0.0], [support@ispapp.co])
+AC_INIT([ispappd], [1.8.6], [support@ispapp.co])
+AM_INIT_AUTOMAKE
+AC_CONFIG_SRCDIR([src/ispappcwmp.c])
+
 AM_INIT_AUTOMAKE([subdir-objects])
-AC_CONFIG_SRCDIR([Makefile.am])
 
 AC_ARG_ENABLE(jsonc, [AS_HELP_STRING([--enable-jsonc], [build with jsonc])], [
  AC_DEFINE(JSONC)
@@ -65,35 +67,10 @@ AC_SUBST(LIBCURL_CFLAGS)
 AC_SUBST(LIBCURL_LDFLAGS)
 AC_SUBST(LIBCURL_LIBS)
 
-# Check for libroxml first, then fall back to mxml variants, then continue without
-PKG_CHECK_MODULES(MICROXML, [libroxml], [
-    AC_DEFINE([HAVE_LIBROXML], [1], [Define if libroxml is available])
-    AC_MSG_NOTICE([Using libroxml])
-], [
-    PKG_CHECK_MODULES(MICROXML, [mxml4], [
-        AC_DEFINE([HAVE_MXML], [1], [Define if mxml4 is available])
-        AC_MSG_NOTICE([Using mxml4 instead of libroxml])
-    ], [
-        PKG_CHECK_MODULES(MICROXML, [mxml], [
-            AC_DEFINE([HAVE_MXML], [1], [Define if mxml is available])
-            AC_MSG_NOTICE([Using mxml instead of libroxml])
-        ], [
-            PKG_CHECK_MODULES(MICROXML, [libmxml], [
-                AC_DEFINE([HAVE_MXML], [1], [Define if libmxml is available])
-                AC_MSG_NOTICE([Using libmxml instead of libroxml])
-            ], [
-                AC_MSG_WARN([No XML library found. XML functionality will be limited.])
-                AC_DEFINE([NO_XML], [1], [Define if no XML library is available])
-                MICROXML_CFLAGS=""
-                MICROXML_LDFLAGS=""
-                MICROXML_LIBS=""
-            ])
-        ])
-    ])
-])
-AC_SUBST(MICROXML_CFLAGS)
-AC_SUBST(MICROXML_LDFLAGS)
-AC_SUBST(MICROXML_LIBS)
+PKG_CHECK_MODULES(MICROXML, [microxml])
+AC_SUBST(LIBROXML_CFLAGS)
+AC_SUBST(LIBROXML_LDFLAGS)
+AC_SUBST(LIBROXML_LIBS)
 
 # checks for header files
 AC_CHECK_HEADERS([stdlib.h string.h])

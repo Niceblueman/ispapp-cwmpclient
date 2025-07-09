@@ -1,2 +1,3 @@
 MAINTAINERCLEANFILES = Makefile.in
 
+SUBDIRS = bin
