@@ -62,6 +62,9 @@ brew install autoconf automake libtool curl json-c pkg-config libmicrohttpd
 
 # Clean build with verbose output
 ./scripts/build-ipk.sh --arch arm_cortex-a53 --clean --verbose
+
+# Keep container running for dependency inspection
+./scripts/build-ipk.sh --arch x86_64 --keep-running
 ```
 
 #### Manual build:
@@ -257,6 +260,32 @@ gh workflow run dev-build.yml -f target_arch=x86_64 -f debug_build=true
 
 ### Testing Builds
 
+### Inspecting Build Dependencies
+
+For analyzing build dependencies and debugging build issues, you can keep the Docker container running after the build completes:
+
+```bash
+# Keep container running for inspection
+./scripts/build-ipk.sh --arch x86_64 --keep-running
+
+# In another terminal, connect to the running container
+docker ps  # Find the container name
+docker exec -it ispappd-build-<timestamp> /bin/bash
+
+# Inside the container, you can:
+# - Inspect installed packages: opkg list-installed
+# - Check build logs: find . -name "*.log" -type f
+# - Examine the SDK structure: ls -la /
+# - Review package configuration: cat .config
+# - Check feed sources: cat feeds.conf.default
+```
+
+This is particularly useful for:
+- Debugging build failures
+- Understanding dependency requirements
+- Verifying package configurations
+- Inspecting the OpenWrt SDK environment
+
 #### OpenWrt Testing
 ```bash
 # Test in OpenWrt buildroot
@@ -337,6 +366,28 @@ curl -I https://downloads.openwrt.org/releases/23.05.4/targets/x86/64/
 
 # Use alternative mirror
 export OPENWRT_MIRROR="https://archive.openwrt.org"
+```
+
+#### Docker Container Issues
+```bash
+# If Docker build fails or you need to inspect the build environment:
+
+# Keep container running for debugging
+./scripts/build-ipk.sh --arch x86_64 --keep-running
+
+# In another terminal, connect to the running container
+docker ps  # Find the container name (ispappd-build-<timestamp>)
+docker exec -it ispappd-build-<timestamp> /bin/bash
+
+# Inside the container, useful commands:
+opkg list-installed    # See installed packages
+cat .config            # View build configuration
+find . -name "*.log"   # Find build logs
+ls -la bin/packages/   # Check built packages
+./scripts/feeds update -a  # Update feeds manually
+
+# Stop the container when done
+docker stop ispappd-build-<timestamp>
 ```
 
 #### OpenWrt SDK Filename Pattern Issues
