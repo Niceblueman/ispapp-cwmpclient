@@ -48,6 +48,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Ensure we have a complete git repository for the local source build
+          
+      - name: Verify git repository state
+        run: |
+          echo "=== Git repository verification ==="
+          git status
+          git log --oneline -5
+          echo "=== Repository files ==="
+          ls -la
 
       - name: Build ispappd-${{ matrix.arch }}
         uses: openwrt/gh-action-sdk@main
@@ -61,6 +70,7 @@ jobs:
           ARCH: ${{ matrix.arch }}
           PACKAGES: ispappd
           V: s
+          FEED_URL: ""
 
       - name: Store packages
         uses: actions/upload-artifact@v4

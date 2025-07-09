@@ -9,7 +9,7 @@ PKG_MAINTAINER:=ispapp team <support@ispapp.co>
 PKG_NAME:=ispappd
 PKG_VERSION:=1.0.0
 PKG_RELEASE:=2024092
-PKG_LICENSE:=CC0-1.0
+PKG_LICENSE:=Apache-2.0
 
 PKG_FIXUP:=autoreconf
 
@@ -32,21 +32,21 @@ endef
 define Package/ispappd/description
  An ISP application daemon based on CWMP (TR-069) protocol
 endef
-define Package/ispappd/download
-# No download needed, using local source files
-endef
+
 define Package/ispappd/config
 	source "$(SOURCE)/Config.in"
 endef
 
-# Use local source files instead of downloading
+# Use local source files - proper feed preparation
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=file://$(realpath .)
+PKG_SOURCE_VERSION:=HEAD
+PKG_MIRROR_HASH:=skip
+
 define Build/Prepare
-	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./src $(PKG_BUILD_DIR)/
-	$(CP) ./ext $(PKG_BUILD_DIR)/
-	$(CP) ./configure.ac $(PKG_BUILD_DIR)/
-	$(CP) ./Makefile.am $(PKG_BUILD_DIR)/
-	$(CP) ./bin $(PKG_BUILD_DIR)/
+	$(call Build/Prepare/Default)
+	# Copy additional files that might not be in git
+	[ -d $(PKG_BUILD_DIR)/bin ] || mkdir -p $(PKG_BUILD_DIR)/bin
 endef
 
 TARGET_CFLAGS += \
