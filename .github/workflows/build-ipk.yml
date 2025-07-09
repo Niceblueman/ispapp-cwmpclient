@@ -51,10 +51,10 @@ jobs:
 
       - name: Build ispappd-${{ matrix.arch }}
         uses: openwrt/gh-action-sdk@main
-        continue-on-error: true
+        # continue-on-error: true
         env:
           NO_REFRESH_CHECK: true
-          # IGNORE_ERRORS: true
+          IGNORE_ERRORS: true
           BUILD_LOG: logs/${{ matrix.arch }}-build.log
           FEEDNAME: ispapp
           FEED_DIR: ${{ github.workspace }}
@@ -67,8 +67,8 @@ jobs:
         with:
           name: ${{ matrix.arch }}-packages
           path: |
-            bin/packages/${{ matrix.arch }}/ispapp/*.ipk
-            bin/packages/${{ matrix.arch }}/packages/*.ipk
+            bin/packages/**/ispapp/*.apk
+            bin/packages/**/ispapp/*.ipk
           retention-days: 30
           if-no-files-found: warn
 
@@ -90,10 +90,10 @@ jobs:
           # Copy IPK files if they exist - check both possible locations
           if ls bin/packages/${{ matrix.arch }}/ispapp/*.ipk 1> /dev/null 2>&1; then
             echo "=== IPK files found in ispapp feed, copying to upload directory ==="
-            cp bin/packages/${{ matrix.arch }}/ispapp/*.ipk r2-upload/packages/
-          elif ls bin/packages/${{ matrix.arch }}/packages/*.ipk 1> /dev/null 2>&1; then
+            cp bin/packages/**/ispapp/*.ipk r2-upload/packages/
+          elif ls bin/packages/**/packages/*.ipk 1> /dev/null 2>&1; then
             echo "=== IPK files found in packages feed, copying to upload directory ==="
-            cp bin/packages/${{ matrix.arch }}/packages/*.ipk r2-upload/packages/
+            cp bin/packages/**/packages/*.ipk r2-upload/packages/
           else
             echo "=== No IPK files found, creating build status file ==="
             echo "Build failed - no packages created on $(date)" > r2-upload/packages/build-failed.txt

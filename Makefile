@@ -5,9 +5,11 @@
 
 include $(TOPDIR)/rules.mk
 
+PKG_MAINTAINER:=ispapp team <support@ispapp.co>
 PKG_NAME:=ispappd
 PKG_VERSION:=1.0.0
-PKG_RELEASE:=1
+PKG_RELEASE:=2024092
+PKG_LICENSE:=CC0-1.0
 
 PKG_FIXUP:=autoreconf
 
@@ -23,6 +25,7 @@ define Package/ispappd
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=ISP App Daemon (CWMP client using libcurl)
+  URL:=https://ispapp.co
   DEPENDS:=+libubus +libuci +libubox +libroxml +libjson-c +libcurl +curl
 endef
 

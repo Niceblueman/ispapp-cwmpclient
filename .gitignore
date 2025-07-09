@@ -22,7 +22,6 @@ openwrt-sdk-*/
 # Configuration files
 config.log
 config.status
-config.h
 config.h.in
 
 # IDE and editor files
