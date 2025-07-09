@@ -194,3 +194,19 @@ jobs:
           artifacts: |
             bin/packages/**/ispappd/*.apk
           tag: ${{ matrix.arch }}
+      - name: Create directory for R2 upload
+        run: mkdir -p r2-upload/packages/${{ matrix.arch }}
+      - name: Move packages to R2 upload directory
+        run: |
+          mv bin/packages/${{ matrix.arch }}/ispappd/*.apk r2-upload/packages/${{ matrix.arch }}/
+      - name: Upload to Cloudflare R2
+        uses: ryand56/r2-upload-action@latest
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: r2-upload/packages/
+          destination-dir: ispappd/builds/${{ github.run_number }}/${{ matrix.arch }}/
+          output-file-url: true
+          multipart-concurrent: true
