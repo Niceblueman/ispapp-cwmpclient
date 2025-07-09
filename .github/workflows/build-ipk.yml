@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'ispappd/**/*'
+      - 'feeds/**/*'
 
 jobs:
   changes:
@@ -181,7 +181,7 @@ jobs:
           NO_REFRESH_CHECK: true
           IGNORE_ERRORS: true
           FEEDNAME: ispapp
-          FEED_DIR: ${{ github.workspace }}
+          FEED_DIR: ${{ github.workspace }}/feeds/
           ARCH: ${{ matrix.arch }}
           PACKAGES: ispappd
           V: snapshot

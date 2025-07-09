@@ -1,0 +1,41 @@
+if PACKAGE_ispappd
+
+config ISPAPPCWMP_SCRIPTS_FULL
+	bool "Install all ispappd scripts"
+	default y
+	
+if ISPAPPCWMP_SCRIPTS_FULL
+choice
+	prompt "Selected Data Model"
+	default ISPAPPCWMP_DATA_MODEL_TR181
+
+	config ISPAPPCWMP_DATA_MODEL_TR181
+		bool "TR-181 Data Model"
+		
+	config ISPAPPCWMP_DATA_MODEL_TR98
+		bool "TR-098 Data Model"
+
+endchoice
+endif
+
+choice
+	prompt "Save Backup Data"
+	default ISPAPPCWMP_BACKUP_DATA_FILE
+
+	config ISPAPPCWMP_BACKUP_DATA_FILE
+		bool "/etc/ispappd/.backup.xml"
+		
+	config ISPAPPCWMP_BACKUP_DATA_CONFIG
+		bool "ispappd config"
+
+endchoice
+
+config ISPAPPCWMP_DEBUG
+	bool "Compile with debug options"
+	default n
+
+config ISPAPPCWMP_DEVEL
+	bool "Compile with development options"
+	default n
+
+endif

@@ -1,0 +1,25 @@
+name: Release OpenWrt Package
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release-source-tarball:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create source tarball (ispappd only)
+        run: |
+          VERSION=$(echo ${{ github.ref }} | sed 's|refs/tags/||')
+          tar --exclude-vcs -czf ispappd-$VERSION.tar.gz ispappd
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ispappd-${{ github.ref_name }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
