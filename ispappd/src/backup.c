@@ -1,7 +1,11 @@
 
+#define _GNU_SOURCE
 #include <unistd.h>
 #include <sys/stat.h>
+#include <string.h>
+#include <stdlib.h>
 #include <uci.h>
+#include <roxml.h>
 #include "backup.h"
 #include "config.h"
 #include "xml.h"
@@ -10,6 +14,39 @@
 #include "time.h"
 
 mxml_node_t *backup_tree = NULL;
+
+#ifdef NO_XML
+// Stub implementations when no XML library is available
+
+void backup_init(void) { return; }
+mxml_node_t *backup_tree_init(void) { return NULL; }
+int backup_save_file(void) { return 0; }
+void backup_add_acsurl(char *acs_url) { return; }
+void backup_check_acs_url(void) { return; }
+void backup_check_software_version(void) { return; }
+mxml_node_t *backup_add_transfer_complete(char *command_key, int fault_code, char *start_time, int method_id) { return NULL; }
+int backup_update_fault_transfer_complete(mxml_node_t *node, int fault_code) { return 0; }
+int backup_update_complete_time_transfer_complete(mxml_node_t *node) { return 0; }
+int backup_update_all_complete_time_transfer_complete(void) { return 0; }
+int backup_extract_transfer_complete(mxml_node_t *node, char **msg_out, int *method_id) { return 0; }
+int backup_remove_transfer_complete(mxml_node_t *node) { return 0; }
+int backup_load_download(void) { return 0; }
+int backup_load_upload(void) { return 0; }
+int backup_remove_download(mxml_node_t *node) { return 0; }
+int backup_remove_upload(mxml_node_t *node) { return 0; }
+int backup_load_event(void) { return 0; }
+int backup_remove_event(mxml_node_t *node) { return 0; }
+void str_replace_newline_byspace(char *str) { 
+	// Keep this function even in NO_XML mode as it might be used elsewhere
+	while(*str) {
+		if(*str == '\n' || *str == '\r')
+			*str = ' ';
+		str++;
+	}
+}
+
+#else
+// Real implementations when XML library is available
 
 void str_replace_newline_byspace(char *str)
 {
@@ -23,6 +60,10 @@ void str_replace_newline_byspace(char *str)
 
 void backup_init(void)
 {
+#ifdef NO_XML
+	// No XML library available - backup functionality disabled
+	return;
+#elif defined(HAVE_LIBROXML)
 #ifdef BACKUP_DATA_IN_CONFIG
 	char *val;
 	ispappcwmp_uci_init();
@@ -54,10 +95,17 @@ void backup_init(void)
 	backup_load_upload();
 	backup_load_event();
 	backup_update_all_complete_time_transfer_complete();
+#elif defined(HAVE_MXML)
+	// TODO: Implement mxml support or disable backup functionality
+	return;
+#endif
 }
 
 mxml_node_t *backup_tree_init(void)
 {
+#ifdef NO_XML
+	return NULL;
+#elif defined(HAVE_LIBROXML)
 	mxml_node_t *xml;
 
 	backup_tree = roxml_load_buf("<backup_file/>");
@@ -65,9 +113,18 @@ mxml_node_t *backup_tree_init(void)
 	xml = roxml_add_node(backup_tree, 0, ROXML_ELM_NODE, "cwmp", NULL);
 	if (!xml) return NULL;
 	return xml;
+#elif defined(HAVE_MXML)
+	// TODO: Implement mxml support
+	return NULL;
+#else
+	return NULL;
+#endif
 }
 
 int backup_save_file(void) {
+#ifdef NO_XML
+	return 0;
+#elif defined(HAVE_LIBROXML)
 #ifdef BACKUP_DATA_IN_CONFIG
 	char *val;
 	int len;
@@ -106,10 +163,18 @@ int backup_save_file(void) {
 	}
 	return -1;
 #endif
+#elif defined(HAVE_MXML)
+	return 0;
+#else
+	return 0;
+#endif
 }
 
 void backup_add_acsurl(char *acs_url)
 {
+#ifdef NO_XML
+	return;
+#elif defined(HAVE_LIBROXML)
 	mxml_node_t *data, *b;
 
 	cwmp_clean();
@@ -120,10 +185,16 @@ void backup_add_acsurl(char *acs_url)
 	backup_save_file();
 	cwmp_add_event(EVENT_BOOTSTRAP, NULL, 0, EVENT_BACKUP);
 	cwmp_add_inform_timer();
+#elif defined(HAVE_MXML)
+	return;
+#endif
 }
 
 void backup_check_acs_url(void)
 {
+#ifdef NO_XML
+	return;
+#elif defined(HAVE_LIBROXML)
 	mxml_node_t *b;
 
 	b = roxml_get_chld(backup_tree, "acs_url", 0);
@@ -131,10 +202,16 @@ void backup_check_acs_url(void)
 		strcmp(config->acs->url, roxml_get_content(roxml_get_txt(b, 0), NULL, 0, NULL)) != 0)) {
 		backup_add_acsurl(config->acs->url);
 	}
+#elif defined(HAVE_MXML)
+	return;
+#endif
 }
 
 void backup_check_software_version(void)
 {
+#ifdef NO_XML
+	return;
+#elif defined(HAVE_LIBROXML)
 	mxml_node_t *data, *b;
 
 	b = roxml_get_chld(backup_tree, "cwmp", 0);
@@ -152,7 +229,10 @@ void backup_check_software_version(void)
 	data = roxml_add_node(b, 0, ROXML_ELM_NODE, "software_version", NULL);
 	data = roxml_add_node(data, 0, ROXML_TXT_NODE, NULL, config->device->software_version);
 	backup_save_file();
-	cwmp_add_inform_timer();	
+	cwmp_add_inform_timer();
+#elif defined(HAVE_MXML)
+	return;
+#endif
 }
 
 mxml_node_t *backup_add_transfer_complete(char *command_key, int fault_code, char *start_time, int method_id)
@@ -274,7 +354,8 @@ mxml_node_t *backup_check_transfer_complete(void)
 
 int backup_extract_transfer_complete( mxml_node_t *node, char **msg_out, int *method_id)
 {
-	mxml_node_t *tree_m, *b, *n;
+	mxml_node_t *tree_m, *n;
+	mxml_node_t *b, *txt;
 	char *val;
 
 	tree_m = mxmlLoadString(NULL, CWMP_TRANSFER_COMPLETE_MESSAGE, MXML_OPAQUE_CALLBACK);
@@ -282,56 +363,86 @@ int backup_extract_transfer_complete( mxml_node_t *node, char **msg_out, int *me
 
 	if(xml_add_cwmpid(tree_m)) goto error;
 
-	b = mxmlFindElement(node, node, "command_key", NULL, NULL, MXML_DESCEND);
+	// Extract command_key using roxml
+	b = roxml_get_chld(node, "command_key", 0);
 	if (!b) goto error;
 	n = mxmlFindElement(tree_m, tree_m, "CommandKey", NULL, NULL, MXML_DESCEND);
 	if (!n) goto error;
-	if (b->child && b->child->type == MXML_OPAQUE && b->child->value.opaque) {
-		b = b->child;
-		val = xml_get_value_with_whitespace(&b, b->parent);
-		n = mxmlNewOpaque(n, val);
-		FREE(val);
-	}
-	else
+	txt = roxml_get_txt(b, 0);
+	if (txt) {
+		val = roxml_get_content(txt, NULL, 0, NULL);
+		n = mxmlNewOpaque(n, val ? val : "");
+	} else {
 		n = mxmlNewOpaque(n, "");
+	}
 	if (!n) goto error;
 
-	b = mxmlFindElement(node, node, "fault_code", NULL, NULL, MXML_DESCEND);
+	// Extract fault_code using roxml
+	b = roxml_get_chld(node, "fault_code", 0);
 	if (!b) goto error;
 	n = mxmlFindElement(tree_m, tree_m, "FaultCode", NULL, NULL, MXML_DESCEND);
 	if (!n) goto error;
-	n = mxmlNewOpaque(n, b->child->value.opaque);
+	txt = roxml_get_txt(b, 0);
+	if (txt) {
+		val = roxml_get_content(txt, NULL, 0, NULL);
+		n = mxmlNewOpaque(n, val ? val : "0");
+	} else {
+		n = mxmlNewOpaque(n, "0");
+	}
 	if (!n) goto error;
 
-	b = mxmlFindElement(node, node, "fault_string", NULL, NULL, MXML_DESCEND);
+	// Extract fault_string using roxml
+	b = roxml_get_chld(node, "fault_string", 0);
 	if (!b) goto error;
-	if (b->child && b->child->type == MXML_OPAQUE && b->child->value.opaque) {
-		n = mxmlFindElement(tree_m, tree_m, "FaultString", NULL, NULL, MXML_DESCEND);
-		if (!n) goto error;
-		b = b->child;
-		char *c = xml_get_value_with_whitespace(&b, b->parent);
-		n = mxmlNewOpaque(n, c);
-		free(c);
-		if (!n) goto error;
+	n = mxmlFindElement(tree_m, tree_m, "FaultString", NULL, NULL, MXML_DESCEND);
+	if (!n) goto error;
+	txt = roxml_get_txt(b, 0);
+	if (txt) {
+		val = roxml_get_content(txt, NULL, 0, NULL);
+		n = mxmlNewOpaque(n, val ? val : "");
+	} else {
+		n = mxmlNewOpaque(n, "");
 	}
+	if (!n) goto error;
 
-	b = mxmlFindElement(node, node, "start_time", NULL, NULL, MXML_DESCEND);
+	// Extract start_time using roxml
+	b = roxml_get_chld(node, "start_time", 0);
 	if (!b) goto error;
 	n = mxmlFindElement(tree_m, tree_m, "StartTime", NULL, NULL, MXML_DESCEND);
 	if (!n) goto error;
-	n = mxmlNewOpaque(n, b->child->value.opaque);
+	txt = roxml_get_txt(b, 0);
+	if (txt) {
+		val = roxml_get_content(txt, NULL, 0, NULL);
+		n = mxmlNewOpaque(n, val ? val : "");
+	} else {
+		n = mxmlNewOpaque(n, "");
+	}
 	if (!n) goto error;
 
-	b = mxmlFindElement(node, node, "complete_time", NULL, NULL, MXML_DESCEND);
+	// Extract complete_time using roxml
+	b = roxml_get_chld(node, "complete_time", 0);
 	if (!b) goto error;
 	n = mxmlFindElement(tree_m, tree_m, "CompleteTime", NULL, NULL, MXML_DESCEND);
 	if (!n) goto error;
-	n = mxmlNewOpaque(n,  b->child->value.opaque);
+	txt = roxml_get_txt(b, 0);
+	if (txt) {
+		val = roxml_get_content(txt, NULL, 0, NULL);
+		n = mxmlNewOpaque(n, val ? val : "");
+	} else {
+		n = mxmlNewOpaque(n, "");
+	}
 	if (!n) goto error;
 
-	b = mxmlFindElement(node, node, "method_id", NULL, NULL, MXML_DESCEND);
+	// Extract method_id using roxml
+	b = roxml_get_chld(node, "method_id", 0);
 	if (!b) goto error;
-	*method_id = atoi(b->child->value.opaque);
+	txt = roxml_get_txt(b, 0);
+	if (txt) {
+		val = roxml_get_content(txt, NULL, 0, NULL);
+		*method_id = val ? atoi(val) : 0;
+	} else {
+		*method_id = 0;
+	}
 
 	*msg_out = mxmlSaveAllocString(tree_m, xml_format_cb);
 	mxmlDelete(tree_m);
@@ -350,49 +461,49 @@ int backup_remove_transfer_complete(mxml_node_t *node)
 
 mxml_node_t *backup_add_download(char *key, int delay, char *file_size, char *download_url, char *file_type, char *username, char *password)
 {
-	mxml_node_t *tree, *data, *b, *n;
+	mxml_node_t *data, *b, *n;
 	char time_execute[16];
 
 	if (snprintf(time_execute,sizeof(time_execute),"%u",delay + (unsigned int)time(NULL)) < 0) return NULL;
 
-	data = mxmlFindElement(backup_tree, backup_tree, "cwmp", NULL, NULL, MXML_DESCEND);
+	data = roxml_get_chld(backup_tree, "cwmp", 0);
 	if (!data) return NULL;
-	b = mxmlNewElement(data, "download");
+	b = roxml_add_node(data, 0, ROXML_ELM_NODE, "download", NULL);
 	if (!b) return NULL;
 
-	n = mxmlNewElement(b, "command_key");
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "command_key", NULL);
 	if (!n) return NULL;
-	n = mxmlNewOpaque(n, key);
-	if (!n) return NULL;
-
-	n = mxmlNewElement(b, "file_type");
-	if (!n) return NULL;
-	n = mxmlNewOpaque(n, file_type);
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, key);
 	if (!n) return NULL;
 
-	n = mxmlNewElement(b, "url");
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "file_type", NULL);
 	if (!n) return NULL;
-	n = mxmlNewOpaque(n, download_url);
-	if (!n) return NULL;
-
-	n = mxmlNewElement(b, "username");
-	if (!n) return NULL;
-	n = mxmlNewOpaque(n, username);
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, file_type);
 	if (!n) return NULL;
 
-	n = mxmlNewElement(b, "password");
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "url", NULL);
 	if (!n) return NULL;
-	n = mxmlNewOpaque(n, password);
-	if (!n) return NULL;
-
-	n = mxmlNewElement(b, "file_size");
-	if (!n) return NULL;
-	n = mxmlNewOpaque(n, file_size);
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, download_url);
 	if (!n) return NULL;
 
-	n = mxmlNewElement(b, "time_execute");
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "username", NULL);
 	if (!n) return NULL;
-	n = mxmlNewOpaque(n, time_execute);
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, username);
+	if (!n) return NULL;
+
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "password", NULL);
+	if (!n) return NULL;
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, password);
+	if (!n) return NULL;
+
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "file_size", NULL);
+	if (!n) return NULL;
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, file_size);
+	if (!n) return NULL;
+
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "time_execute", NULL);
+	if (!n) return NULL;
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, time_execute);
 	if (!n) return NULL;
 
 	backup_save_file();
@@ -401,44 +512,44 @@ mxml_node_t *backup_add_download(char *key, int delay, char *file_size, char *do
 
 mxml_node_t *backup_add_upload(char *key, int delay, char *upload_url, char *file_type, char *username, char *password)
 {
-	mxml_node_t *tree, *data, *b, *n;
+	mxml_node_t *data, *b, *n;
 	char time_execute[16];
 
 	if (snprintf(time_execute,sizeof(time_execute),"%u",delay + (unsigned int)time(NULL)) < 0) return NULL;
 
-	data = mxmlFindElement(backup_tree, backup_tree, "cwmp", NULL, NULL, MXML_DESCEND);
+	data = roxml_get_chld(backup_tree, "cwmp", 0);
 	if (!data) return NULL;
-	b = mxmlNewElement(data, "upload");
+	b = roxml_add_node(data, 0, ROXML_ELM_NODE, "upload", NULL);
 	if (!b) return NULL;
 
-	n = mxmlNewElement(b, "command_key");
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "command_key", NULL);
 	if (!n) return NULL;
-	n = mxmlNewOpaque(n, key);
-	if (!n) return NULL;
-
-	n = mxmlNewElement(b, "file_type");
-	if (!n) return NULL;
-	n = mxmlNewOpaque(n, file_type);
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, key);
 	if (!n) return NULL;
 
-	n = mxmlNewElement(b, "url");
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "file_type", NULL);
 	if (!n) return NULL;
-	n = mxmlNewOpaque(n, upload_url);
-	if (!n) return NULL;
-
-	n = mxmlNewElement(b, "username");
-	if (!n) return NULL;
-	n = mxmlNewOpaque(n, username);
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, file_type);
 	if (!n) return NULL;
 
-	n = mxmlNewElement(b, "password");
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "url", NULL);
 	if (!n) return NULL;
-	n = mxmlNewOpaque(n, password);
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, upload_url);
 	if (!n) return NULL;
 
-	n = mxmlNewElement(b, "time_execute");
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "username", NULL);
 	if (!n) return NULL;
-	n = mxmlNewOpaque(n, time_execute);
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, username);
+	if (!n) return NULL;
+
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "password", NULL);
+	if (!n) return NULL;
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, password);
+	if (!n) return NULL;
+
+	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "time_execute", NULL);
+	if (!n) return NULL;
+	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, time_execute);
 	if (!n) return NULL;
 
 	backup_save_file();
@@ -713,7 +824,13 @@ int backup_load_event(void)
 
 int backup_remove_event(mxml_node_t *b)
 {
+#ifdef HAVE_LIBROXML
+	roxml_del_node(b);
+#elif defined(HAVE_MXML)
 	mxmlDelete(b);
+#endif
 	backup_save_file();
 	return 0;
 }
+
+#endif // NO_XML

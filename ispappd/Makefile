@@ -57,7 +57,8 @@ TARGET_LDFLAGS += \
 CONFIGURE_ARGS += \
 	--with-uci-include-path=$(STAGING_DIR)/usr/include \
 	--with-libubox-include-path=$(STAGING_DIR)/usr/include \
-	--with-libubus-include-path=$(STAGING_DIR)/usr/include
+	--with-libubus-include-path=$(STAGING_DIR)/usr/include \
+	PKG_CONFIG_PATH=$(STAGING_DIR)/usr/lib/pkgconfig
 
 ifeq ($(CONFIG_ISPAPPD_DEBUG),y)
 CONFIGURE_ARGS += \
