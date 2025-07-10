@@ -4,8 +4,9 @@ PKG_NAME:=ispappd
 PKG_VERSION:=1.0.3
 PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
-PKG_FIXUP:=autoreconf
 PKG_HASH:=f342a3ed8aebc1f3c77ac44f456788077599562ae8fae1377d9400cc162965b7
+
+PKG_FIXUP:=autoreconf
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_ISPAPPCWMP_DEBUG \
