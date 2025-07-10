@@ -1,5 +1,5 @@
-#ifndef _ispappcwmp_COMMAND_H__
-#define _ispappcwmp_COMMAND_H__
+#ifndef _ISPAPPCWMP_COMMAND_H__
+#define _ISPAPPCWMP_COMMAND_H__
 
 #include <time.h>
 #include <sys/time.h>

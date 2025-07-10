@@ -1,7 +1,7 @@
 
 
-#ifndef _ispappcwmp_CONFIG_H__
-#define _ispappcwmp_CONFIG_H__
+#ifndef _ISPAPPCWMP_CONFIG_H__
+#define _ISPAPPCWMP_CONFIG_H__
 
 #include <uci.h>
 #include <time.h>
@@ -14,11 +14,11 @@ int config_remove_event(char *event);
 int config_check_acs_url(void);
 
 #ifdef BACKUP_DATA_IN_CONFIG
-int ispappcwmp_uci_init(void);
-int ispappcwmp_uci_fini(void);
-char *ispappcwmp_uci_get_value(char *package, char *section, char *option);
-char *ispappcwmp_uci_set_value(char *package, char *section, char *option, char *value);
-int ispappcwmp_uci_commit(void);
+int ISPAPPCWMP_uci_init(void);
+int ISPAPPCWMP_uci_fini(void);
+char *ISPAPPCWMP_uci_get_value(char *package, char *section, char *option);
+char *ISPAPPCWMP_uci_set_value(char *package, char *section, char *option, char *value);
+int ISPAPPCWMP_uci_commit(void);
 #endif
 
 struct device {

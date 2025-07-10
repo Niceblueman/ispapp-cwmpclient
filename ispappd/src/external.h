@@ -1,7 +1,7 @@
 
 
-#ifndef _ispappcwmp_EXTERNAL_H__
-#define _ispappcwmp_EXTERNAL_H__
+#ifndef _ISPAPPCWMP_EXTERNAL_H__
+#define _ISPAPPCWMP_EXTERNAL_H__
 #include <libubox/list.h>
 
 static char *fc_script = "/usr/sbin/ispappcwmp";

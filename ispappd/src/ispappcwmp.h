@@ -1,11 +1,11 @@
 
-#ifndef _ispappcwmp_ispappcwmp_H__
-#define _ispappcwmp_ispappcwmp_H__
+#ifndef _ISPAPPCWMP_ISPAPPCWMP_H__
+#define _ISPAPPCWMP_ISPAPPCWMP_H__
 
 #include <stdlib.h>
 
 #define NAME	PACKAGE_NAME
-#define ispappcwmp_VERSION	PACKAGE_VERSION
+#define ISPAPPCWMP_VERSION	PACKAGE_VERSION
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
@@ -37,8 +37,8 @@ enum start_event_enum {
 	START_GET_RPC_METHOD = 0x2
 };
 
-void ispappcwmp_reload(void);
-void ispappcwmp_notify(void);
+void ISPAPPCWMP_reload(void);
+void ISPAPPCWMP_notify(void);
 
 #define TRACE(MESSAGE,args...) { \
   const char *A[] = {MESSAGE}; \

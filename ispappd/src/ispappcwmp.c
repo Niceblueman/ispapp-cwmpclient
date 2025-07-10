@@ -26,13 +26,13 @@
 #include "http.h"
 #include "xml.h"
 
-static void ispappcwmp_do_reload(struct uloop_timeout *timeout);
-static void ispappcwmp_do_notify(struct uloop_timeout *timeout);
+static void ISPAPPCWMP_do_reload(struct uloop_timeout *timeout);
+static void ISPAPPCWMP_do_notify(struct uloop_timeout *timeout);
 static void netlink_new_msg(struct uloop_fd *ufd, unsigned events);
 
 static struct uloop_fd netlink_event = { .cb = netlink_new_msg };
-static struct uloop_timeout reload_timer = { .cb = ispappcwmp_do_reload };
-static struct uloop_timeout notify_timer = { .cb = ispappcwmp_do_notify };
+static struct uloop_timeout reload_timer = { .cb = ISPAPPCWMP_do_reload };
+static struct uloop_timeout notify_timer = { .cb = ISPAPPCWMP_do_notify };
 
 struct option long_opts[] = {
 	{"foreground", no_argument, NULL, 'f'},
@@ -55,10 +55,10 @@ static void print_help(void)
 
 static void print_version(void)
 {
-	printf("%s version: %s\n", NAME, ispappcwmp_VERSION);
+	printf("%s version: %s\n", NAME, ISPAPPCWMP_VERSION);
 }
 
-static void ispappcwmp_do_reload(struct uloop_timeout *timeout)
+static void ISPAPPCWMP_do_reload(struct uloop_timeout *timeout)
 {
 	log_message(NAME, L_NOTICE, "configuration reload\n");
 	if (external_init()) {
@@ -69,7 +69,7 @@ static void ispappcwmp_do_reload(struct uloop_timeout *timeout)
 	external_exit();
 }
 
-static void ispappcwmp_do_notify(struct uloop_timeout *timeout)
+static void ISPAPPCWMP_do_notify(struct uloop_timeout *timeout)
 {
 	log_message(NAME, L_NOTICE, "checking if there is notify value change\n");
 	if (external_init()) {
@@ -81,18 +81,18 @@ static void ispappcwmp_do_notify(struct uloop_timeout *timeout)
 	external_exit();
 }
 
-void ispappcwmp_reload(void)
+void ISPAPPCWMP_reload(void)
 {
 	uloop_timeout_set(&reload_timer, 100);
 }
 
-void ispappcwmp_notify(void)
+void ISPAPPCWMP_notify(void)
 {
 	uloop_timeout_set(&notify_timer, 1);
 }
 
 
-static void ispappcwmp_netlink_interface(struct nlmsghdr *nlh)
+static void ISPAPPCWMP_netlink_interface(struct nlmsghdr *nlh)
 {
 	struct ifaddrmsg *ifa = (struct ifaddrmsg *) NLMSG_DATA(nlh);
 	struct rtattr *rth = IFA_RTA(ifa);
@@ -173,7 +173,7 @@ netlink_new_msg(struct uloop_fd *ufd, unsigned events)
 		}
 
 		if (nlh->nlmsg_type == RTM_NEWADDR)
-			ispappcwmp_netlink_interface(nlh);
+			ISPAPPCWMP_netlink_interface(nlh);
 
 		msg_size -= NLMSG_ALIGN(len);
 		nlh = (struct nlmsghdr*)((char*)nlh + NLMSG_ALIGN(len));

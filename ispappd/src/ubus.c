@@ -30,7 +30,7 @@ ispappcwmpd_handle_notify(struct ubus_context *ctx, struct ubus_object *obj,
 {
 	log_message(NAME, L_NOTICE, "triggered ubus notification\n");
 
-	ispappcwmp_notify();
+	ISPAPPCWMP_notify();
 
 	return 0;
 }
@@ -95,7 +95,7 @@ ispappcwmpd_handle_command(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (!strcmp("reload", cmd)) {
 		log_message(NAME, L_NOTICE, "triggered ubus reload\n");
-		ispappcwmp_reload();
+		ISPAPPCWMP_reload();
 		blobmsg_add_u32(&b, "status", 0);
 		if (asprintf(&info, "ispappcwmpd reloaded") == -1)
 			goto error;
@@ -126,20 +126,20 @@ error:
 
 }
 
-static const struct ubus_method ispappcwmp_methods[] = {
+static const struct ubus_method ISPAPPCWMP_methods[] = {
 	UBUS_METHOD_NOARG("notify", ispappcwmpd_handle_notify),
 	UBUS_METHOD("inform", ispappcwmpd_handle_inform, inform_policy),
 	UBUS_METHOD("command", ispappcwmpd_handle_command, command_policy),
 };
 
 static struct ubus_object_type main_object_type =
-	UBUS_OBJECT_TYPE("ispappcwmpd", ispappcwmp_methods);
+	UBUS_OBJECT_TYPE("ispappcwmpd", ISPAPPCWMP_methods);
 
 static struct ubus_object main_object = {
 	.name = "tr069",
 	.type = &main_object_type,
-	.methods = ispappcwmp_methods,
-	.n_methods = ARRAY_SIZE(ispappcwmp_methods),
+	.methods = ISPAPPCWMP_methods,
+	.n_methods = ARRAY_SIZE(ISPAPPCWMP_methods),
 };
 
 int

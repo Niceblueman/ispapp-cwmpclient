@@ -1,7 +1,7 @@
 
 
-#ifndef _ispappcwmp_JSON_H__
-#define _ispappcwmp_JSON_H__
+#ifndef _ISPAPPCWMP_JSON_H__
+#define _ISPAPPCWMP_JSON_H__
 
 #ifdef JSONC
  #include <json-c/json.h>

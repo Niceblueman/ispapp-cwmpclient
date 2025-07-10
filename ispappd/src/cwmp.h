@@ -1,7 +1,7 @@
 
 
-#ifndef _ispappcwmp_CWMP_H__
-#define _ispappcwmp_CWMP_H__
+#ifndef _ISPAPPCWMP_CWMP_H__
+#define _ISPAPPCWMP_CWMP_H__
 
 #include <libubox/uloop.h>
 #include "xml.h"

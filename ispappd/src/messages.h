@@ -1,7 +1,7 @@
 
 
-#ifndef _ispappcwmp_MESSAGES_H__
-#define _ispappcwmp_MESSAGES_H__
+#ifndef _ISPAPPCWMP_MESSAGES_H__
+#define _ISPAPPCWMP_MESSAGES_H__
 
 #define CWMP_INFORM_MESSAGE \
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"					\

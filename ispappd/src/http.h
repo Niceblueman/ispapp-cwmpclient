@@ -1,14 +1,14 @@
 
 
-#ifndef _ispappcwmp_HTTP_H__
-#define _ispappcwmp_HTTP_H__
+#ifndef _ISPAPPCWMP_HTTP_H__
+#define _ISPAPPCWMP_HTTP_H__
 
 #include <stdint.h>
 
 #include <libubox/uloop.h>
 #include <curl/curl.h>
 
-static char *fc_cookies = "/tmp/ispappcwmp_cookies";
+static char *fc_cookies = "/tmp/ISPAPPCWMP_cookies";
 struct http_client
 {
 	struct curl_slist *header_list;

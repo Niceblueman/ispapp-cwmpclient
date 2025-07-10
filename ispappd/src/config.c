@@ -24,7 +24,7 @@ static bool first_run = true;
 static struct uci_context *uci_ctx;
 static struct uci_package *uci_ispappcwmp;
 #ifdef BACKUP_DATA_IN_CONFIG
-static struct uci_context *ispappcwmp_uci_ctx = NULL;
+static struct uci_context *ISPAPPCWMP_uci_ctx = NULL;
 #endif
 
 struct core_config *config;
@@ -364,24 +364,24 @@ error:
 }
 
 #ifdef BACKUP_DATA_IN_CONFIG
-int ispappcwmp_uci_init(void)
+int ISPAPPCWMP_uci_init(void)
 {
-	ispappcwmp_uci_ctx = uci_alloc_context();
-	if (!ispappcwmp_uci_ctx) {
+	ISPAPPCWMP_uci_ctx = uci_alloc_context();
+	if (!ISPAPPCWMP_uci_ctx) {
 		return -1;
 	}
 	return 0;
 }
 
-int ispappcwmp_uci_fini(void)
+int ISPAPPCWMP_uci_fini(void)
 {
-	if (ispappcwmp_uci_ctx) {
-		uci_free_context(ispappcwmp_uci_ctx);
+	if (ISPAPPCWMP_uci_ctx) {
+		uci_free_context(ISPAPPCWMP_uci_ctx);
 	}
 	return 0;
 }
 
-static bool ispappcwmp_uci_validate_section(const char *str)
+static bool ISPAPPCWMP_uci_validate_section(const char *str)
 {
 	if (!*str)
 		return false;
@@ -397,7 +397,7 @@ static bool ispappcwmp_uci_validate_section(const char *str)
 	return true;
 }
 
-int ispappcwmp_uci_init_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value)
+int ISPAPPCWMP_uci_init_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value)
 {
 	char *last = NULL;
 	char *tmp;
@@ -427,7 +427,7 @@ int ispappcwmp_uci_init_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *
 	}
 
 lastval:
-	if (ptr->section && !ispappcwmp_uci_validate_section(ptr->section))
+	if (ptr->section && !ISPAPPCWMP_uci_validate_section(ptr->section))
 		ptr->flags |= UCI_LOOKUP_EXTENDED;
 
 	return 0;
@@ -436,7 +436,7 @@ error:
 	return -1;
 }
 
-char *ispappcwmp_uci_get_value(char *package, char *section, char *option)
+char *ISPAPPCWMP_uci_get_value(char *package, char *section, char *option)
 {
 	struct uci_ptr ptr;
 	char *val = "";
@@ -444,10 +444,10 @@ char *ispappcwmp_uci_get_value(char *package, char *section, char *option)
 	if (!section || !option)
 		return val;
 
-	if (ispappcwmp_uci_init_ptr(ispappcwmp_uci_ctx, &ptr, package, section, option, NULL)) {
+	if (ISPAPPCWMP_uci_init_ptr(ISPAPPCWMP_uci_ctx, &ptr, package, section, option, NULL)) {
 		return val;
 	}
-	if (uci_lookup_ptr(ispappcwmp_uci_ctx, &ptr, NULL, true) != UCI_OK) {
+	if (uci_lookup_ptr(ISPAPPCWMP_uci_ctx, &ptr, NULL, true) != UCI_OK) {
 		return val;
 	}
 
@@ -460,7 +460,7 @@ char *ispappcwmp_uci_get_value(char *package, char *section, char *option)
 		return val;
 }
 
-char *ispappcwmp_uci_set_value(char *package, char *section, char *option, char *value)
+char *ISPAPPCWMP_uci_set_value(char *package, char *section, char *option, char *value)
 {
 	struct uci_ptr ptr;
 	int ret = UCI_OK;
@@ -468,17 +468,17 @@ char *ispappcwmp_uci_set_value(char *package, char *section, char *option, char 
 	if (!section)
 		return "";
 
-	if (ispappcwmp_uci_init_ptr(ispappcwmp_uci_ctx, &ptr, package, section, option, value)) {
+	if (ISPAPPCWMP_uci_init_ptr(ISPAPPCWMP_uci_ctx, &ptr, package, section, option, value)) {
 		return "";
 	}
-	if (uci_lookup_ptr(ispappcwmp_uci_ctx, &ptr, NULL, true) != UCI_OK) {
+	if (uci_lookup_ptr(ISPAPPCWMP_uci_ctx, &ptr, NULL, true) != UCI_OK) {
 		return "";
 	}
 
-	uci_set(ispappcwmp_uci_ctx, &ptr);
+	uci_set(ISPAPPCWMP_uci_ctx, &ptr);
 
 	if (ret == UCI_OK)
-		ret = uci_save(ispappcwmp_uci_ctx, ptr.p);
+		ret = uci_save(ISPAPPCWMP_uci_ctx, ptr.p);
 
 	if (ptr.o && ptr.o->v.string)
 		return ptr.o->v.string;
@@ -486,7 +486,7 @@ char *ispappcwmp_uci_set_value(char *package, char *section, char *option, char 
 	return "";
 }
 
-int ispappcwmp_uci_commit(void)
+int ISPAPPCWMP_uci_commit(void)
 {
 	struct uci_element *e;
 	struct uci_context *ctx;
@@ -497,8 +497,8 @@ int ispappcwmp_uci_commit(void)
 		return -1;
 	}
 
-	uci_foreach_element(&ispappcwmp_uci_ctx->root, e) {
-		if (ispappcwmp_uci_init_ptr(ctx, &ptr, e->name, NULL, NULL, NULL)) {
+	uci_foreach_element(&ISPAPPCWMP_uci_ctx->root, e) {
+		if (ISPAPPCWMP_uci_init_ptr(ctx, &ptr, e->name, NULL, NULL, NULL)) {
 			return -1;
 		}
 		if (uci_lookup_ptr(ctx, &ptr, NULL, true) != UCI_OK) {
