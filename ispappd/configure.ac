@@ -70,7 +70,12 @@ AC_SUBST(LIBCURL_CFLAGS)
 AC_SUBST(LIBCURL_LDFLAGS)
 AC_SUBST(LIBCURL_LIBS)
 
-PKG_CHECK_MODULES(LIBXML2, [lxml2])
+# Try to find libxml2 with pkg-config, but fallback to manual config if not found
+PKG_CHECK_MODULES(LIBXML2, [libxml2], [], [
+  AC_MSG_WARN([libxml2 not found via pkg-config, using default settings])
+  LIBXML2_CFLAGS="-I/usr/include/libxml2"
+  LIBXML2_LIBS="-lxml2"
+])
 AC_SUBST(LIBXML2_CFLAGS)
 AC_SUBST(LIBXML2_LDFLAGS)
 AC_SUBST(LIBXML2_LIBS)

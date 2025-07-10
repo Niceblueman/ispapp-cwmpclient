@@ -6,7 +6,7 @@ PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
 PKG_HASH:=f47b35f5ca7e36527cb54227d119f2b2c258f16de8be9e509046c5e3299e3a57
 
-#PKG_FIXUP:=autoreconf
+PKG_FIXUP:=autoreconf
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_ISPAPPCWMP_DEBUG \
@@ -113,7 +113,9 @@ define Build/Configure
 		--localstatedir=/var \
 		$(CONFIGURE_ARGS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" )
+		LDFLAGS="$(TARGET_LDFLAGS)" \
+		LIBXML2_CFLAGS="-I$(STAGING_DIR)/usr/include/libxml2" \
+		LIBXML2_LIBS="-lxml2" )
 endef
 
 $(eval $(call BuildPackage,ispappd))
