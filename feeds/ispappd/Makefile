@@ -4,7 +4,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=ispapp
+PKG_NAME:=ispappd
 PKG_VERSION:=1.0.1
 PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
@@ -19,18 +19,18 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/ispapp
+define Package/ispappd
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=CWMP client (using libcurl)
   DEPENDS:=+libubus +libuci +libubox +libroxml +libjson-c +libcurl +curl
 endef
 
-define Package/ispapp/description
+define Package/ispappd/description
  An open source implementation of the client CWMP (TR-069) protocol
 endef
 
-define Package/ispapp/config
+define Package/ispappd/config
 	source "$(SOURCE)/Config.in"
 endef
 
@@ -70,37 +70,37 @@ endif
 CONFIGURE_ARGS += \
 	--enable-jsonc=1
 
-define Package/ispapp/conffiles
-/etc/config/ispapp
-/usr/share/ispapp/defaults
+define Package/ispappd/conffiles
+/etc/config/ispappd
+/usr/share/ispappd/defaults
 endef
 
-define Package/ispapp/install
+define Package/ispappd/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bin/ispappd $(1)/usr/sbin
 	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_CONF) $(PKG_BUILD_DIR)/ext/openwrt/config/ispapp $(1)/etc/config
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/ext/openwrt/config/ispappd $(1)/etc/config
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ext/openwrt/init.d/ispappd $(1)/etc/init.d
 ifeq ($(ISPAPPCWMP_BACKUP_DATA_FILE),y)
-	$(INSTALL_DIR) $(1)/etc/ispapp
+	$(INSTALL_DIR) $(1)/etc/ispappd
 endif
 ifeq ($(CONFIG_ISPAPPCWMP_SCRIPTS_FULL),y)
-	$(INSTALL_DIR) $(1)/usr/share/ispapp/functions/
-	$(CP) $(PKG_BUILD_DIR)/ext/openwrt/scripts/defaults $(1)/usr/share/ispapp
-	$(CP) $(PKG_BUILD_DIR)/ext/openwrt/scripts/functions/common/* $(1)/usr/share/ispapp/functions/
+	$(INSTALL_DIR) $(1)/usr/share/ispappd/functions/
+	$(CP) $(PKG_BUILD_DIR)/ext/openwrt/scripts/defaults $(1)/usr/share/ispappd
+	$(CP) $(PKG_BUILD_DIR)/ext/openwrt/scripts/functions/common/* $(1)/usr/share/ispappd/functions/
 ifeq ($(CONFIG_ISPAPPCWMP_DATA_MODEL_TR181),y)
-	$(CP) $(PKG_BUILD_DIR)/ext/openwrt/scripts/functions/tr181/* $(1)/usr/share/ispapp/functions/
+	$(CP) $(PKG_BUILD_DIR)/ext/openwrt/scripts/functions/tr181/* $(1)/usr/share/ispappd/functions/
 else
-	$(CP) $(PKG_BUILD_DIR)/ext/openwrt/scripts/functions/tr098/* $(1)/usr/share/ispapp/functions/
+	$(CP) $(PKG_BUILD_DIR)/ext/openwrt/scripts/functions/tr098/* $(1)/usr/share/ispappd/functions/
 endif
 	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ext/openwrt/scripts/ispapp.sh $(1)/usr/sbin/ispapp
-	chmod +x $(1)/usr/share/ispapp/functions/*
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ext/openwrt/scripts/ispappd.sh $(1)/usr/sbin/ispappd
+	chmod +x $(1)/usr/share/ispappd/functions/*
 else
-	$(INSTALL_DIR) $(1)/usr/share/ispapp/functions/
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ext/openwrt/scripts/functions/common/ipping_launch $(1)/usr/share/ispapp/functions/ipping_launch
+	$(INSTALL_DIR) $(1)/usr/share/ispappd/functions/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ext/openwrt/scripts/functions/common/ipping_launch $(1)/usr/share/ispappd/functions/ipping_launch
 endif
 endef
 
-$(eval $(call BuildPackage,ispapp))
+$(eval $(call BuildPackage,ispappd))

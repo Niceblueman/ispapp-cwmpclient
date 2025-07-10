@@ -1,6 +1,6 @@
-bin_PROGRAMS = easycwmpd
+bin_PROGRAMS = ispappd
 
-easycwmpd_SOURCES =		\
+ispappd_SOURCES =		\
     ../src/backup.c		\
     ../src/backup.h		\
     ../src/backup_stubs.h	\
@@ -39,7 +39,7 @@ easycwmpd_SOURCES =		\
     ../src/xml.h		\
     ../src/xml_compat.h
 
-easycwmpd_CFLAGS =		\
+ispappd_CFLAGS =		\
 	$(AM_CFLAGS)		\
 	$(LIBUCI_CFLAGS)	\
 	$(LIBUBOX_CFLAGS)	\
@@ -47,7 +47,7 @@ easycwmpd_CFLAGS =		\
 	$(LIBROXML_CFLAGS)	\
 	$(LIBCURL_CFLAGS)
 
-easycwmpd_LDFLAGS =		\
+ispappd_LDFLAGS =		\
 	$(AM_LDFLAGS)		\
 	$(LIBUCI_LDFLAGS)	\
 	$(LIBUBOX_LDFLAGS)	\
@@ -55,7 +55,7 @@ easycwmpd_LDFLAGS =		\
 	$(LIBROXML_LDFLAGS)	\
 	$(LIBCURL_LDFLAGS)
 
-easycwmpd_LDADD =		\
+ispappd_LDADD =		\
 	$(AM_LIBS)			\
 	$(LIBUCI_LIBS)		\
 	$(LIBUBOX_LIBS)		\
