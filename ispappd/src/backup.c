@@ -1,4 +1,3 @@
-
 #define _GNU_SOURCE
 #include <unistd.h>
 #include <sys/stat.h>
@@ -47,6 +46,10 @@ void str_replace_newline_byspace(char *str) {
 
 #else
 // Real implementations when XML library is available
+
+// Use roxml node_t for all XML node pointers
+
+typedef node_t xml_node_t;
 
 void str_replace_newline_byspace(char *str)
 {
@@ -512,219 +515,176 @@ xml_node_t *backup_add_download(char *key, int delay, char *file_size, char *dow
 
 xml_node_t *backup_add_upload(char *key, int delay, char *upload_url, char *file_type, char *username, char *password)
 {
-	xml_node_t *data, *b, *n;
-	char time_execute[16];
+    xml_node_t *data, *b, *n;
+    char time_execute[16];
 
-	if (snprintf(time_execute,sizeof(time_execute),"%u",delay + (unsigned int)time(NULL)) < 0) return NULL;
+    if (snprintf(time_execute,sizeof(time_execute),"%u",delay + (unsigned int)time(NULL)) < 0) return NULL;
 
-	data = roxml_get_chld(backup_tree, "cwmp", 0);
-	if (!data) return NULL;
-	b = roxml_add_node(data, 0, ROXML_ELM_NODE, "upload", NULL);
-	if (!b) return NULL;
+    data = roxml_get_chld(backup_tree, "cwmp", 0);
+    if (!data) return NULL;
+    b = roxml_add_node(data, 0, ROXML_ELM_NODE, "upload", NULL);
+    if (!b) return NULL;
 
-	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "command_key", NULL);
-	if (!n) return NULL;
-	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, key);
-	if (!n) return NULL;
+    n = roxml_add_node(b, 0, ROXML_ELM_NODE, "command_key", NULL);
+    if (!n) return NULL;
+    n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, key);
+    if (!n) return NULL;
 
-	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "file_type", NULL);
-	if (!n) return NULL;
-	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, file_type);
-	if (!n) return NULL;
+    n = roxml_add_node(b, 0, ROXML_ELM_NODE, "file_type", NULL);
+    if (!n) return NULL;
+    n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, file_type);
+    if (!n) return NULL;
 
-	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "url", NULL);
-	if (!n) return NULL;
-	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, upload_url);
-	if (!n) return NULL;
+    n = roxml_add_node(b, 0, ROXML_ELM_NODE, "url", NULL);
+    if (!n) return NULL;
+    n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, upload_url);
+    if (!n) return NULL;
 
-	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "username", NULL);
-	if (!n) return NULL;
-	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, username);
-	if (!n) return NULL;
+    n = roxml_add_node(b, 0, ROXML_ELM_NODE, "username", NULL);
+    if (!n) return NULL;
+    n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, username);
+    if (!n) return NULL;
 
-	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "password", NULL);
-	if (!n) return NULL;
-	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, password);
-	if (!n) return NULL;
+    n = roxml_add_node(b, 0, ROXML_ELM_NODE, "password", NULL);
+    if (!n) return NULL;
+    n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, password);
+    if (!n) return NULL;
 
-	n = roxml_add_node(b, 0, ROXML_ELM_NODE, "time_execute", NULL);
-	if (!n) return NULL;
-	n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, time_execute);
-	if (!n) return NULL;
+    n = roxml_add_node(b, 0, ROXML_ELM_NODE, "time_execute", NULL);
+    if (!n) return NULL;
+    n = roxml_add_node(n, 0, ROXML_TXT_NODE, NULL, time_execute);
+    if (!n) return NULL;
 
-	backup_save_file();
-	return b;
+    backup_save_file();
+    return b;
 }
 
 int backup_load_download(void)
 {
-	int delay = 0;
-	unsigned int t;
-	xml_node_t *data, *b, *c;
-	char *download_url = NULL, *file_size = NULL,
-		*command_key = NULL, *file_type = NULL,
-		*username = NULL, *password = NULL, *val = NULL;
+    int delay = 0;
+    unsigned int t;
+    xml_node_t *data, *b, *c;
+    char *download_url = NULL, *file_size = NULL,
+        *command_key = NULL, *file_type = NULL,
+        *username = NULL, *password = NULL;
 
-	data = mxmlFindElement(backup_tree, backup_tree, "cwmp", NULL, NULL, MXML_DESCEND);
-	if (!data) return -1;
-	b = data;
+    data = roxml_get_chld(backup_tree, "cwmp", 0);
+    if (!data) return -1;
+    int count = roxml_get_chld_nb(data);
+    for (int i = 0; i < count; i++) {
+        b = roxml_get_chld(data, NULL, i);
+        if (!b) continue;
+        char *node_name = roxml_get_name(b, NULL, 0);
+        if (strcmp(node_name, "download") != 0) continue;
 
-	while (b = mxmlFindElement(b, data, "download", NULL, NULL, MXML_DESCEND)) {
-		c = mxmlFindElement(b, b, "command_key",NULL, NULL, MXML_DESCEND);
-		if (!c) return -1;
-		if (c->child && c->child->type == MXML_OPAQUE && c->child->value.opaque) {
-			c = c->child;
-			val = xml_get_value_with_whitespace(&c, c->parent);
-			command_key = val;
-		}
-		else
-			command_key = strdup("");
+        c = roxml_get_chld(b, "command_key", 0);
+        if (c && roxml_get_txt(c, 0))
+            command_key = roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL);
+        else
+            command_key = "";
 
-		c = mxmlFindElement(b, b, "url",NULL, NULL, MXML_DESCEND);
-		if (!c) goto error;
-		if(c->child)
-			download_url = c->child->value.opaque;
-		else
-			download_url = "";
+        c = roxml_get_chld(b, "url", 0);
+        if (c && roxml_get_txt(c, 0))
+            download_url = roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL);
+        else
+            download_url = "";
 
-		c = mxmlFindElement(b, b, "username",NULL, NULL, MXML_DESCEND);
-		if (!c) goto error;
-		if (c->child && c->child->type == MXML_OPAQUE && c->child->value.opaque) {
-			c = c->child;
-			val = xml_get_value_with_whitespace(&c, c->parent);
-			username = val;
-		}
-		else
-			username = strdup("");
+        c = roxml_get_chld(b, "username", 0);
+        if (c && roxml_get_txt(c, 0))
+            username = roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL);
+        else
+            username = "";
 
-		c = mxmlFindElement(b, b, "password",NULL, NULL, MXML_DESCEND);
-		if (!c) goto error;
-		if (c->child && c->child->type == MXML_OPAQUE && c->child->value.opaque) {
-			c = c->child;
-			val = xml_get_value_with_whitespace(&c, c->parent);
-			password = val;
-		}
-		else
-			password = strdup("");
+        c = roxml_get_chld(b, "password", 0);
+        if (c && roxml_get_txt(c, 0))
+            password = roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL);
+        else
+            password = "";
 
-		c = mxmlFindElement(b, b, "file_size",NULL, NULL, MXML_DESCEND);
-		if (!c) goto error;
-		if(c->child)
-			file_size = c->child->value.opaque;
-		else
-			file_size = "";
+        c = roxml_get_chld(b, "file_size", 0);
+        if (c && roxml_get_txt(c, 0))
+            file_size = roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL);
+        else
+            file_size = "";
 
-		c = mxmlFindElement(b, b, "time_execute",NULL, NULL, MXML_DESCEND);
-		if (!c) goto error;
-		if(c->child) {
-			sscanf(c->child->value.opaque, "%u", &t);
-			delay = t - time(NULL);
-		}
+        c = roxml_get_chld(b, "time_execute", 0);
+        if (c && roxml_get_txt(c, 0)) {
+            sscanf(roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL), "%u", &t);
+            delay = t - time(NULL);
+        } else {
+            delay = 0;
+        }
 
-		c = mxmlFindElement(b, b, "file_type",NULL, NULL, MXML_DESCEND);
-		if (!c) goto error;
-		if (c->child && c->child->type == MXML_OPAQUE && c->child->value.opaque) {
-			c = c->child;
-			file_type = xml_get_value_with_whitespace(&c, c->parent);
-		}
-		else
-			file_type = strdup("");
+        c = roxml_get_chld(b, "file_type", 0);
+        if (c && roxml_get_txt(c, 0))
+            file_type = roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL);
+        else
+            file_type = "";
 
-		cwmp_add_download(command_key, delay, file_size, download_url, file_type, username, password, b);
-		FREE(command_key);
-		FREE(username);
-		FREE(password);
-		FREE(file_type);
-	}
-	return 0;
-error:
-	FREE(command_key);
-	FREE(username);
-	FREE(password);
-	FREE(file_type);
-	return -1;
+        cwmp_add_download(command_key, delay, file_size, download_url, file_type, username, password, b);
+    }
+    return 0;
 }
 
 int backup_load_upload(void)
 {
-	int delay = 0;
-	unsigned int t;
-	xml_node_t *data, *b, *c;
-	char *upload_url = NULL,
-		*command_key = NULL, *file_type = NULL,
-		*username = NULL, *password = NULL, *val = NULL;
+    int delay = 0;
+    unsigned int t;
+    xml_node_t *data, *b, *c;
+    char *upload_url = NULL,
+        *command_key = NULL, *file_type = NULL,
+        *username = NULL, *password = NULL;
 
-	data = mxmlFindElement(backup_tree, backup_tree, "cwmp", NULL, NULL, MXML_DESCEND);
-	if (!data) return -1;
-	b = data;
+    data = roxml_get_chld(backup_tree, "cwmp", 0);
+    if (!data) return -1;
+    int count = roxml_get_chld_nb(data);
+    for (int i = 0; i < count; i++) {
+        b = roxml_get_chld(data, NULL, i);
+        if (!b) continue;
+        char *node_name = roxml_get_name(b, NULL, 0);
+        if (strcmp(node_name, "upload") != 0) continue;
 
-	while (b = mxmlFindElement(b, data, "upload", NULL, NULL, MXML_DESCEND)) {
-		c = mxmlFindElement(b, b, "command_key",NULL, NULL, MXML_DESCEND);
-		if (!c) return -1;
-		if (c->child && c->child->type == MXML_OPAQUE && c->child->value.opaque) {
-			c = c->child;
-			val = xml_get_value_with_whitespace(&c, c->parent);
-			command_key = val;
-		}
-		else
-			command_key = strdup("");
+        c = roxml_get_chld(b, "command_key", 0);
+        if (c && roxml_get_txt(c, 0))
+            command_key = roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL);
+        else
+            command_key = "";
 
-		c = mxmlFindElement(b, b, "url",NULL, NULL, MXML_DESCEND);
-		if (!c) goto error;
-		if(c->child)
-			upload_url = c->child->value.opaque;
-		else
-			upload_url = "";
+        c = roxml_get_chld(b, "url", 0);
+        if (c && roxml_get_txt(c, 0))
+            upload_url = roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL);
+        else
+            upload_url = "";
 
-		c = mxmlFindElement(b, b, "username",NULL, NULL, MXML_DESCEND);
-		if (!c) goto error;
-		if (c->child && c->child->type == MXML_OPAQUE && c->child->value.opaque) {
-			c = c->child;
-			val = xml_get_value_with_whitespace(&c, c->parent);
-			username = val;
-		}
-		else
-			username = strdup("");
+        c = roxml_get_chld(b, "username", 0);
+        if (c && roxml_get_txt(c, 0))
+            username = roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL);
+        else
+            username = "";
 
-		c = mxmlFindElement(b, b, "password",NULL, NULL, MXML_DESCEND);
-		if (!c) goto error;
-		if (c->child && c->child->type == MXML_OPAQUE && c->child->value.opaque) {
-			c = c->child;
-			val = xml_get_value_with_whitespace(&c, c->parent);
-			password = val;
-		}
-		else
-			password = strdup("");
+        c = roxml_get_chld(b, "password", 0);
+        if (c && roxml_get_txt(c, 0))
+            password = roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL);
+        else
+            password = "";
 
-		c = mxmlFindElement(b, b, "time_execute",NULL, NULL, MXML_DESCEND);
-		if (!c) goto error;
-		if(c->child) {
-			sscanf(c->child->value.opaque, "%u", &t);
-			delay = t - time(NULL);
-		}
+        c = roxml_get_chld(b, "time_execute", 0);
+        if (c && roxml_get_txt(c, 0)) {
+            sscanf(roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL), "%u", &t);
+            delay = t - time(NULL);
+        } else {
+            delay = 0;
+        }
 
-		c = mxmlFindElement(b, b, "file_type",NULL, NULL, MXML_DESCEND);
-		if (!c) goto error;
-		if (c->child && c->child->type == MXML_OPAQUE && c->child->value.opaque) {
-			c = c->child;
-			file_type = xml_get_value_with_whitespace(&c, c->parent);
-		}
-		else
-			file_type = strdup("");
+        c = roxml_get_chld(b, "file_type", 0);
+        if (c && roxml_get_txt(c, 0))
+            file_type = roxml_get_content(roxml_get_txt(c, 0), NULL, 0, NULL);
+        else
+            file_type = "";
 
-		cwmp_add_upload(command_key, delay, upload_url, file_type, username, password, b);
-		FREE(command_key);
-		FREE(username);
-		FREE(password);
-		FREE(file_type);
-	}
-	return 0;
-error:
-	FREE(command_key);
-	FREE(username);
-	FREE(password);
-	FREE(file_type);
-	return -1;
+        cwmp_add_upload(command_key, delay, upload_url, file_type, username, password, b);
+    }
+    return 0;
 }
 
 int backup_remove_download(xml_node_t *node)
