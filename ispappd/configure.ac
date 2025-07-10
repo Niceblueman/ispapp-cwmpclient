@@ -131,20 +131,20 @@ AC_SUBST([LIBUBUS_LIBS])
 # Check for required libraries using pkg-config
 PKG_CHECK_MODULES([LIBCURL], [libcurl >= 7.20.0])
 
-# Check for microxml/roxml library
-PKG_CHECK_MODULES([MICROXML], [microxml],
-    [have_microxml=yes],
-    [have_microxml=no])
+# Check for libroxml/roxml library
+PKG_CHECK_MODULES([LIBROXML], [libroxml],
+    [have_libroxml=yes],
+    [have_libroxml=no])
 
-AS_IF([test "x$have_microxml" = "xno"], [
-    AC_MSG_WARN([microxml not found via pkg-config, trying manual detection])
+AS_IF([test "x$have_libroxml" = "xno"], [
+    AC_MSG_WARN([libroxml not found via pkg-config, trying manual detection])
     # Fallback to manual library detection
     AC_CHECK_LIB([roxml], [roxml_load_doc],
-        [MICROXML_LIBS="-lroxml"],
-        [AC_MSG_ERROR([microxml/roxml library not found])])
+        [LIBROXML_LIBS="-lroxml"],
+        [AC_MSG_ERROR([libroxml/roxml library not found])])
     AC_CHECK_HEADER([roxml.h],
-        [MICROXML_CFLAGS=""],
-        [AC_MSG_ERROR([microxml/roxml headers not found])])
+        [LIBROXML_CFLAGS=""],
+        [AC_MSG_ERROR([libroxml/roxml headers not found])])
 ])
 
 # Checks for header files
@@ -187,7 +187,7 @@ echo "  Backup data in config: $backupdatainconfig"
 echo ""
 echo "Libraries:"
 echo "  libcurl:              $LIBCURL_LIBS"
-echo "  microxml:             $MICROXML_LIBS"
+echo "  libroxml:             $LIBROXML_LIBS"
 echo "  UCI:                  $LIBUCI_LIBS"
 echo "  libubox:              $LIBUBOX_LIBS"
 echo "  libubus:              $LIBUBUS_LIBS"
