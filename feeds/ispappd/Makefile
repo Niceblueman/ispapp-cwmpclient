@@ -6,7 +6,7 @@ PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
 PKG_HASH:=f342a3ed8aebc1f3c77ac44f456788077599562ae8fae1377d9400cc162965b7
 
-PKG_FIXUP:=autoreconf
+#PKG_FIXUP:=autoreconf
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_ISPAPPCWMP_DEBUG \
@@ -98,6 +98,22 @@ else
 	$(INSTALL_DIR) $(1)/usr/share/ispappd/functions/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ext/openwrt/scripts/functions/common/ipping_launch $(1)/usr/share/ispappd/functions/ipping_launch
 endif
+endef
+
+define Build/Configure
+	(cd $(PKG_BUILD_DIR); \
+	autoreconf -vif; \
+	./configure \
+		--target=$(GNU_TARGET_NAME) \
+		--host=$(GNU_TARGET_NAME) \
+		--build=$(GNU_HOST_NAME) \
+		--prefix=/usr \
+		--exec-prefix=/usr \
+		--sysconfdir=/etc \
+		--localstatedir=/var \
+		$(CONFIGURE_ARGS) \
+		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" )
 endef
 
 $(eval $(call BuildPackage,ispappd))

@@ -183,7 +183,7 @@ jobs:
           FEEDNAME: ispappd
           FEED_DIR: ${{ github.workspace }}/feeds/
           ARCH: ${{ matrix.arch }}
-          PACKAGES: ispappd easycwmp
+          PACKAGES: ispappd
           V: s
         
       - name: Store packages
@@ -193,14 +193,12 @@ jobs:
           replacesArtifacts: true
           artifacts: |
             bin/packages/**/ispappd/*.apk
-            bin/packages/**/easycwmp/*.apk
           tag: ${{ matrix.arch }}
       - name: Create directory for R2 upload
         run: mkdir -p r2-upload/packages/${{ matrix.arch }}
       - name: Move packages to R2 upload directory
         run: |
           cp bin/packages/${{ matrix.arch }}/ispappd/*.apk r2-upload/packages/${{ matrix.arch }}/
-          cp bin/packages/${{ matrix.arch }}/easycwmp/*.apk r2-upload/packages/${{ matrix.arch }}/
       - name: Upload to Cloudflare R2
         uses: ryand56/r2-upload-action@latest
         with:
