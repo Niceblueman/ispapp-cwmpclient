@@ -1,7 +1,7 @@
 #ifndef _ISPAPPCWMP_BACKUP_H__
 #define _ISPAPPCWMP_BACKUP_H__
 
-#include <libxml2/libxml/tree.h>
+#include <libxml/tree.h>
 #define BACKUP_DIR "/etc/easycwmp"
 #define BACKUP_FILE BACKUP_DIR"/.backup.xml"
 

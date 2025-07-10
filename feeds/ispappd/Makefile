@@ -39,7 +39,8 @@ endef
 endif
 
 TARGET_CFLAGS += \
-	-D_GNU_SOURCE
+	-D_GNU_SOURCE \
+	-I$(STAGING_DIR)/usr/include/libxml2
 
 TARGET_LDFLAGS += \
 	-Wl,-rpath-link=$(STAGING_DIR)/usr/lib
@@ -101,6 +102,10 @@ endif
 endef
 
 define Build/Configure
+	# Create necessary symlinks for libxml2 include paths
+	mkdir -p $(PKG_BUILD_DIR)/include
+	ln -sf $(STAGING_DIR)/usr/include/libxml2/libxml $(PKG_BUILD_DIR)/include/libxml
+	
 	(cd $(PKG_BUILD_DIR); \
 	autoreconf -vif; \
 	./configure \
@@ -112,7 +117,7 @@ define Build/Configure
 		--sysconfdir=/etc \
 		--localstatedir=/var \
 		$(CONFIGURE_ARGS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
+		CFLAGS="$(TARGET_CFLAGS) -I$(PKG_BUILD_DIR)/include" \
 		LDFLAGS="$(TARGET_LDFLAGS)" \
 		LIBXML2_CFLAGS="-I$(STAGING_DIR)/usr/include/libxml2" \
 		LIBXML2_LIBS="-lxml2" )

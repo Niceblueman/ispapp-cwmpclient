@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include <libubox/uloop.h>
-#include <libxml2/libxml/tree.h>
+#include <libxml/tree.h>
 
 #include "xml.h"
 #include "backup.h"

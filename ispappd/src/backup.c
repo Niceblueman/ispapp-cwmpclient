@@ -1,8 +1,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <uci.h>
-#include <libxml2/libxml/parser.h>
-#include <libxml2/libxml/tree.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 #include "backup.h"
 #include "config.h"
 #include "xml.h"

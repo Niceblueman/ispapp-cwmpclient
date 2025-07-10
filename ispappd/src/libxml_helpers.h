@@ -1,8 +1,8 @@
 #ifndef _LIBXML_HELPERS_H
 #define _LIBXML_HELPERS_H
 
-#include <libxml2/libxml/tree.h>
-#include <libxml2/libxml/parser.h>
+#include <libxml/tree.h>
+#include <libxml/parser.h>
 
 // Helper functions to migrate from microxml to libxml2
 xmlNodePtr xmlFindElementByName(xmlNodePtr node, const char *name);

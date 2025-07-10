@@ -1,7 +1,7 @@
 #ifndef _ISPAPPCWMP_XML_H__
 #define _ISPAPPCWMP_XML_H__
 
-#include <libxml2/libxml/tree.h>
+#include <libxml/tree.h>
 #include <libubox/uloop.h>
 
 #define SECDTOMSEC 1000
