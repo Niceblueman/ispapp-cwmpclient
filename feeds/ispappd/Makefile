@@ -1,7 +1,3 @@
-# Copyright (C) 2012-2016 PIVA Software <www.pivasoftware.com>
-# 	Author: MOHAMED Kallel <mohamed.kallel@pivasoftware.com>
-# 	Author: ANIS ELLOUZE <anis.ellouze@pivasoftware.com>
-
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ispappd

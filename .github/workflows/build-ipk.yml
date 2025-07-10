@@ -180,11 +180,11 @@ jobs:
         env:
           NO_REFRESH_CHECK: true
           IGNORE_ERRORS: true
-          FEEDNAME: ispapp
+          FEEDNAME: ispappd
           FEED_DIR: ${{ github.workspace }}/feeds/
           ARCH: ${{ matrix.arch }}
           PACKAGES: ispappd
-          V: snapshot
+          V: s
         
       - name: Store packages
         uses: ncipollo/release-action@v1
