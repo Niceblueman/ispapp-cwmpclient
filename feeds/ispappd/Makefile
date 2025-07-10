@@ -1,10 +1,10 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ispappd
-PKG_VERSION:=1.0.10
+PKG_VERSION:=1.0.11
 PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
-PKG_HASH:=f47b35f5ca7e36527cb54227d119f2b2c258f16de8be9e509046c5e3299e3a57
+PKG_HASH:=ad493c743592810697a09934ef14acca4281bfd5de4ff8496d2f48312b8c425d
 
 PKG_FIXUP:=autoreconf
 
