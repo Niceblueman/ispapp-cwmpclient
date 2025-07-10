@@ -7,7 +7,7 @@
 #include "config.h"
 #include "cwmp.h"
 #include "external.h"
-#include "easycwmp.h"
+#include "ispappcwmp.h"
 #include "messages.h"
 #include "time.h"
 #include "json.h"

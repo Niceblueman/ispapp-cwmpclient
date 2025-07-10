@@ -180,10 +180,10 @@ jobs:
         env:
           NO_REFRESH_CHECK: true
           IGNORE_ERRORS: true
-          FEEDNAME: ispappd
+          FEEDNAME: ispapp
           FEED_DIR: ${{ github.workspace }}/feeds/
           ARCH: ${{ matrix.arch }}
-          PACKAGES: ispappd
+          PACKAGES: libmicroxml ispappd
           V: s
         
       - name: Store packages
