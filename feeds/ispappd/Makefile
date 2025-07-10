@@ -65,7 +65,7 @@ CONFIGURE_ARGS += \
 endif
 
 CONFIGURE_ARGS += \
-	--enable-jsonc=1
+	--enable-jsonc
 
 define Package/ispappd/conffiles
 /etc/config/ispappd
