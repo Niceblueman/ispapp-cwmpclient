@@ -4,7 +4,8 @@ on:
   push:
     tags:
       - 'v*.*.*'
-
+permissions:
+  contents: write
 jobs:
   release-source-tarball:
     runs-on: ubuntu-latest
@@ -12,7 +13,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create source tarball (ispappd only)
+      - name: Create source tarball (ispappd folder)
         run: |
           VERSION=$(echo ${{ github.ref }} | sed 's|refs/tags/||')
           tar --exclude-vcs -czf ispappd-$VERSION.tar.gz ispappd
+
+      - name: Generate SHA256 hash for tarball
+        run: |
+          VERSION=$(echo ${{ github.ref }} | sed 's|refs/tags/||')
+          sha256sum ispappd-$VERSION.tar.gz > ispappd-$VERSION.tar.gz.sha256
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: |
+            ispappd-${{ github.ref_name }}.tar.gz
+            ispappd-${{ github.ref_name }}.tar.gz.sha256
