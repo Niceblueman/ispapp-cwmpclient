@@ -7,7 +7,7 @@ docker rm -f openwrt-sdk-build 2>/dev/null || true
 docker run -it -d \
     --name openwrt-sdk-build \
     --privileged \
-    -v /Volumes/OpenWrt/ispapp-cwmpclient/ispappd:/builder/package/ispappd \
+    -v /Volumes/OpenWrt/ispapp-cwmpclient/feeds/ispappd:/builder/package/ispappd \
     openwrt/sdk:bcm27xx-bcm2710-23.05.4 \
     /bin/bash
 
