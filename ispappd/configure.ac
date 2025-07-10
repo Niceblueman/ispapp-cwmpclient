@@ -133,7 +133,8 @@ PKG_CHECK_MODULES([LIBCURL], [libcurl >= 7.20.0])
 
 # Check for libroxml/roxml library
 PKG_CHECK_MODULES([LIBROXML], [libroxml],
-    [have_libroxml=yes],
+    [have_libroxml=yes
+     AC_DEFINE([HAVE_LIBROXML], [1], [Define to 1 if libroxml is available])],
     [have_libroxml=no])
 
 AS_IF([test "x$have_libroxml" = "xno"], [
