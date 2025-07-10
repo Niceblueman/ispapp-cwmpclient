@@ -1,4 +1,0 @@
-1. ISPAPPD
-    - This is main daemon for ISPAPPD.
-    - It is responsible for managing the lifecycle of the application.
-    - daemon support most cwmp operations and standard operations.
