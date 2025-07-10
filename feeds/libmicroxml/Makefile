@@ -16,7 +16,7 @@ PKG_SOURCE_URL:=https://github.com/pivasoftware/microxml.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_VERSION:=caa8d3e6887f5c70e54df555dd78e4e45cfa74cc
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-
+PKG_HASH:=4255c67885062c0e745a3648239bb04bb23608c4aff7fcbd1172a4629269aabb
 PKG_FIXUP:=autoreconf
 
 include $(INCLUDE_DIR)/package.mk
@@ -27,6 +27,7 @@ define Package/libmicroxml
   TITLE:=XML library
   MAINTAINER:=Luka Perkov <luka@openwrt.org>
 endef
+
 
 define Package/libmicroxml/description
  A micro sized XML library
