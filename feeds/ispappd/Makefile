@@ -20,7 +20,7 @@ define Package/ispappd
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=CWMP client (using libcurl)
-  DEPENDS:=+libubus +libuci +libubox +libmicroxml +libjson-c +libcurl +curl
+  DEPENDS:=+libubus +libuci +libubox +libxml2 +libjson-c +libcurl +curl
 endef
 
 define Package/ispappd/description

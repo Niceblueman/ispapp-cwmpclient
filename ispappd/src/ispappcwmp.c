@@ -363,6 +363,7 @@ int main (int argc, char **argv)
 
 	http_client_exit();
 	xml_exit();
+	backup_cleanup();
 	config_exit();
 	cwmp_free_deviceid();
 	command_cleanup();

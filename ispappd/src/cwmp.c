@@ -240,12 +240,14 @@ static void cwmp_handle_end_session(void)
 		log_message(NAME, L_NOTICE, "end session: factory reset\n");
 		external_action_simple_execute("factory_reset", NULL, NULL);
 		external_action_handle(NULL);
+		backup_cleanup();
 		exit(EXIT_SUCCESS);
 	}
 	if (cwmp->end_session & ENDS_REBOOT) {
 		log_message(NAME, L_NOTICE, "end session: reboot\n");
 		external_action_simple_execute("reboot", NULL, NULL);
 		external_action_handle(NULL);
+		backup_cleanup();
 		exit(EXIT_SUCCESS);
 	}
 	if (cwmp->end_session & ENDS_RELOAD_CONFIG) {

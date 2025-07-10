@@ -1,7 +1,7 @@
 #ifndef _ISPAPPCWMP_XML_H__
 #define _ISPAPPCWMP_XML_H__
 
-#include <microxml.h>
+#include <libxml2/libxml/tree.h>
 #include <libubox/uloop.h>
 
 #define SECDTOMSEC 1000
@@ -50,8 +50,8 @@ struct cwmp_namespaces
 
 struct rpc_method {
 	const char *name;
-	int (*handler)(mxml_node_t *body_in, mxml_node_t *tree_in,
-			mxml_node_t *tree_out);
+	int (*handler)(xmlNodePtr body_in, xmlNodePtr tree_in,
+			xmlNodePtr tree_out);
 };
 
 extern struct fault_code fault_array[__FAULT_MAX];
@@ -65,63 +65,63 @@ int xml_parse_get_rpc_methods_response_message(char *msg_in);
 int xml_handle_message(char *msg_in, char **msg_out);
 int xml_get_index_fault(char *fault_code);
 
-static int xml_handle_get_rpc_methods(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_get_rpc_methods(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_set_parameter_values(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_set_parameter_values(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_get_parameter_values(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_get_parameter_values(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_get_parameter_names(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_get_parameter_names(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_set_parameter_attributes(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_set_parameter_attributes(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_download(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_download(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_upload(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_upload(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_factory_reset(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_factory_reset(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_reboot(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_reboot(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_get_parameter_attributes(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_get_parameter_attributes(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_schedule_inform(mxml_node_t *node,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_schedule_inform(xmlNodePtr node,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_AddObject(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_AddObject(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
-static int xml_handle_DeleteObject(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out);
+static int xml_handle_DeleteObject(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out);
 
 static void xml_do_inform(struct uloop_timeout *timeout);
-const char *xml_format_cb(mxml_node_t *node, int pos);
-char *xml_get_value_with_whitespace(mxml_node_t **b, mxml_node_t *body_in);
-mxml_node_t *xml_create_generic_fault_message(mxml_node_t *body, int code);
-int xml_add_cwmpid(mxml_node_t *tree);
+const char *xml_format_cb(xmlNodePtr node, int pos);
+char *xml_get_value_with_whitespace(xmlNodePtr *b, xmlNodePtr body_in);
+xmlNodePtr xml_create_generic_fault_message(xmlNodePtr body, int code);
+int xml_add_cwmpid(xmlNodePtr tree);
 int xml_parse_transfer_complete_response_message(char *msg_in);
-int xml_create_set_parameter_value_fault_message(mxml_node_t *body, int code);
+int xml_create_set_parameter_value_fault_message(xmlNodePtr body, int code);
 #endif

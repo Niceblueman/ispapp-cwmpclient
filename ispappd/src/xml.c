@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include <libubox/uloop.h>
-#include <microxml.h>
+#include <libxml2/libxml/tree.h>
 
 #include "xml.h"
 #include "backup.h"
@@ -66,76 +66,92 @@ const struct rpc_method rpc_methods[] = {
 	{ "ScheduleInform", xml_handle_schedule_inform },
 };
 
-mxml_node_t *				/* O - Element node or NULL */
-mxmlFindElementOpaque(mxml_node_t *node,	/* I - Current node */
-						mxml_node_t *top,	/* I - Top node */
+xmlNodePtr				/* O - Element node or NULL */
+xmlFindNodeWithContent(xmlNodePtr node,	/* I - Current node */
+						xmlNodePtr top,	/* I - Top node */
 						const char *text,	/* I - Element text, if NULL return NULL */
-						int descend)		/* I - Descend into tree - MXML_DESCEND, MXML_NO_DESCEND, or MXML_DESCEND_FIRST */
+						int descend)		/* I - Descend into tree */
 {
 	if (!node || !top || !text)
 		return (NULL);
 
-	node = mxmlWalkNext(node, top, descend);
-
-	while (node != NULL)
-	{
-		if (node->type == MXML_OPAQUE &&
-			node->value.opaque &&
-			(!text || !strcmp(node->value.opaque, text)))
+	// Navigate through the tree
+	xmlNodePtr current = node;
+	
+	while (current != NULL) {
+		// Check if current node has the text content we're looking for
+		if (current->type == XML_TEXT_NODE && 
+			current->content &&
+			(!text || !strcmp((char*)current->content, text)))
 		{
-			return (node);
+			return (current);
 		}
 
-		if (descend == MXML_DESCEND)
-			node = mxmlWalkNext(node, top, MXML_DESCEND);
-		else
-			node = node->next;
+		// Process child nodes if descend is requested
+		if (descend && current->children != NULL) {
+			xmlNodePtr result = xmlFindNodeWithContent(current->children, top, text, descend);
+			if (result != NULL)
+				return result;
+		}
+
+		// Move to next sibling
+		current = current->next;
 	}
 	return (NULL);
 }
 
-const char *xml_format_cb(mxml_node_t *node, int pos)
+const char *xml_format_cb(xmlNodePtr node, int pos)
 {
-	mxml_node_t *b = node;
+	xmlNodePtr b = node;
 	static char space_format[20];
 	int i=0;
 
+	// In libxml2, we don't have the same whitespace positions as in microxml
+	// We'll define our own constants for similar positions
+	#define XML_WS_BEFORE_CLOSE 1
+	#define XML_WS_BEFORE_OPEN 2
+	#define XML_WS_AFTER_OPEN 3
+	#define XML_WS_AFTER_CLOSE 4
+
 	switch (pos) {
-		case  MXML_WS_BEFORE_CLOSE:
-			if (node->child && node->child->type != MXML_ELEMENT)
+		case XML_WS_BEFORE_CLOSE:
+			if (node->children && node->children->type != XML_ELEMENT_NODE)
 				return ("");
 			
 			while (b->parent != NULL) {
 				space_format[i] = ' ';
-				b=b->parent;
+				b = b->parent;
 				i++;
 			}
 			space_format[i] = '\0';
 			return (space_format);
 				
-		case  MXML_WS_BEFORE_OPEN:
+		case XML_WS_BEFORE_OPEN:
 			while (b->parent != NULL) {
 				space_format[i] = ' ';
-				b=b->parent;
+				b = b->parent;
 				i++;
 			}
 			space_format[i] = '\0';
 			return (space_format);
-		case  MXML_WS_AFTER_OPEN:
-			if (node->child && node->child->type!=MXML_ELEMENT)
+		case XML_WS_AFTER_OPEN:
+			if (node->children && node->children->type != XML_ELEMENT_NODE)
 				return ("");
 			else
 				return ("\n");
-		case  MXML_WS_AFTER_CLOSE:
+		case XML_WS_AFTER_CLOSE:
 			return ("\n");
 		default:
 			return ("");
 	}
 }
 
-char *xml_get_value_with_whitespace(mxml_node_t **b, mxml_node_t *body_in)
+char *xml_get_value_with_whitespace(xmlNodePtr *b, xmlNodePtr body_in)
 {
-	char * value = strdup((*b)->value.opaque);
+	char *value = NULL;
+	// In libxml2, node content is directly available as node->content
+	if (*b && (*b)->content)
+		value = strdup((char *)((*b)->content));
 	return value;
 }
 
@@ -172,265 +188,479 @@ void xml_log_parameter_fault()
 	}
 }
 
-int xml_check_duplicated_parameter(mxml_node_t *tree)
+int xml_check_duplicated_parameter(xmlNodePtr tree)
 {
-	mxml_node_t *b, *n = tree;
-	while (n) {
-		if (n && n->type == MXML_OPAQUE &&
-			n->value.opaque &&
-			n->parent->type == MXML_ELEMENT &&
-			!strcmp(n->parent->value.element.name, "Name")) {
-			b = n;
-			while (b = mxmlWalkNext(b, tree, MXML_DESCEND)) {
-				if (b && b->type == MXML_OPAQUE &&
-					b->value.opaque &&
-					b->parent->type == MXML_ELEMENT &&
-					!strcmp(b->parent->value.element.name, "Name")) {
-					if (strcmp(b->value.opaque, n->value.opaque) == 0) {
-						log_message(NAME, L_NOTICE, "Fault in the param: %s , Fault code: 9003 <parameter duplicated>\n", b->value.opaque);
+	xmlNodePtr currentNode, compareNode;
+	
+	// Helper function to traverse the XML tree
+	xmlNodePtr xmlWalkNext(xmlNodePtr node, xmlNodePtr top, int descend) {
+		if (node == NULL)
+			return NULL;
+			
+		if (node->children != NULL && descend)
+			return node->children;
+			
+		if (node->next != NULL)
+			return node->next;
+			
+		for (xmlNodePtr parent = node->parent; parent != NULL; parent = parent->parent) {
+			if (parent == top)
+				return NULL;
+			if (parent->next != NULL)
+				return parent->next;
+		}
+		
+		return NULL;
+	}
+	
+	// Start traversal
+	currentNode = tree;
+	while (currentNode) {
+		// Check if current node is a text node under a "Name" element
+		if (currentNode && currentNode->type == XML_TEXT_NODE && 
+			currentNode->content &&
+			currentNode->parent &&
+			currentNode->parent->type == XML_ELEMENT_NODE &&
+			!xmlStrcmp(currentNode->parent->name, (const xmlChar*)"Name")) {
+			
+			// Compare with other Name nodes
+			compareNode = currentNode;
+			while ((compareNode = xmlWalkNext(compareNode, tree, 1))) {
+				if (compareNode && compareNode->type == XML_TEXT_NODE &&
+					compareNode->content &&
+					compareNode->parent && 
+					compareNode->parent->type == XML_ELEMENT_NODE &&
+					!xmlStrcmp(compareNode->parent->name, (const xmlChar*)"Name")) {
+						
+					if (!xmlStrcmp(compareNode->content, currentNode->content)) {
+						log_message(NAME, L_NOTICE, "Fault in the param: %s, Fault code: 9003 <parameter duplicated>\n", compareNode->content);
 						return 1;
 					}
 				}
 			}
 		}
-		n = mxmlWalkNext(n, tree, MXML_DESCEND);
+		currentNode = xmlWalkNext(currentNode, tree, 1);
 	}
 	return 0;
 }
 
-int xml_mxml_get_attrname_array(mxml_node_t *node,
-								const char  *value,
-								char *name_arr[],
-								int size)
+// Helper function to find elements by name
+xmlNodePtr xmlFindElementByName(xmlNodePtr node, const char *name)
 {
-	int	i, j = 0;
-	mxml_attr_t	*attr;
-
-	if (!node || node->type != MXML_ELEMENT || !value)
-		return (-1);
-
-	for (i = node->value.element.num_attrs, attr = node->value.element.attrs;
-		i > 0;
-		i --, attr ++)
-	{
-		if (!strcmp(attr->value, value) && *(attr->name + 5) == ':')
-		{
-			name_arr[j++] = strdup((attr->name + 6));
-		}
-		if (j >= size) break;
-	}
-
-	return (j ? 0 : -1);
+    if (!node || !name)
+        return NULL;
+        
+    // Check if the current node is what we're looking for
+    if (node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)name))
+        return node;
+        
+    // Check children
+    xmlNodePtr child = node->children;
+    while (child) {
+        xmlNodePtr result = xmlFindElementByName(child, name);
+        if (result)
+            return result;
+        child = child->next;
+    }
+    
+    return NULL;
 }
 
-mxml_node_t *xml_mxml_find_node_by_env_type(mxml_node_t *tree_in, char *bname) {
-	mxml_node_t *b;
-	char *c;
-	int i;
-
-	for (i = 0; i < ARRAY_SIZE(ns.soap_env) && ns.soap_env[i]; i++) {
-		if (asprintf(&c, "%s:%s", ns.soap_env[i], bname) == -1)
-			return NULL;
-
-		b = mxmlFindElement(tree_in, tree_in, c, NULL, NULL, MXML_DESCEND);
-		FREE(c);
-		if (b) return b;
-	}
-	return NULL;
+// Find element by name with attribute
+xmlNodePtr xmlFindElementWithAttr(xmlNodePtr node, const char *name, const char *attr_name, const char *attr_value)
+{
+    if (!node || !name || !attr_name || !attr_value)
+        return NULL;
+        
+    // Check current node
+    if (node->type == XML_ELEMENT_NODE && 
+        !xmlStrcmp(node->name, (const xmlChar*)name)) {
+        
+        xmlChar *attr = xmlGetProp(node, (const xmlChar*)attr_name);
+        if (attr && !xmlStrcmp(attr, (const xmlChar*)attr_value)) {
+            xmlFree(attr);
+            return node;
+        }
+        if (attr) xmlFree(attr);
+    }
+    
+    // Check children
+    xmlNodePtr child = node->children;
+    while (child) {
+        xmlNodePtr result = xmlFindElementWithAttr(child, name, attr_name, attr_value);
+        if (result)
+            return result;
+        child = child->next;
+    }
+    
+    return NULL;
 }
 
-static int xml_recreate_namespace(mxml_node_t *tree)
+int xml_get_attrname_array(xmlNodePtr node,
+                             const char *value,
+                             char *name_arr[],
+                             int size)
 {
-	mxml_node_t *b = tree;
-	const char *cwmp_urn;
-	char *c;
-	int i;
+    int j = 0;
+    xmlAttrPtr attr;
 
-	xml_free_ns();
+    if (!node || node->type != XML_ELEMENT_NODE || !value)
+        return (-1);
 
-	do {
-		if (ns.cwmp == NULL) {
-			for (i = 0; cwmp_urls[i] != NULL; i++) {
-				cwmp_urn = cwmp_urls[i];
-				c = (char *) mxmlElementGetAttrName(b, cwmp_urn);
-				if (c && *(c + 5) == ':') {
-					ns.cwmp = strdup((c + 6));
-					break;
-				}
-			}
-		}
+    for (attr = node->properties; attr != NULL; attr = attr->next)
+    {
+        xmlChar *attr_value = xmlGetProp(node, attr->name);
+        if (attr_value) {
+            if (!xmlStrcmp(attr_value, (const xmlChar*)value) && 
+                xmlStrlen(attr->name) > 5 && 
+                *(attr->name + 5) == ':')
+            {
+                name_arr[j++] = xmlStrdup(attr->name + 6);
+            }
+            xmlFree(attr_value);
+            if (j >= size) break;
+        }
+    }
 
-		if (ns.soap_env[0] == NULL) {
-			xml_mxml_get_attrname_array(b, soap_env_url, ns.soap_env, ARRAY_SIZE(ns.soap_env));
-		}
-
-		if (ns.soap_enc  == NULL) {
-			c = (char *) mxmlElementGetAttrName(b, soap_enc_url);
-			if (c && (*(c + 5) == ':')) {
-				ns.soap_enc = strdup((c + 6));
-			}
-		}
-
-		if (ns.xsd == NULL) {
-			c = (char *) mxmlElementGetAttrName(b, xsd_url);
-			if (c && (*(c + 5) == ':')) {
-				ns.xsd = strdup((c + 6));
-			}
-		}
-
-		if (ns.xsi == NULL) {
-			c = (char *) mxmlElementGetAttrName(b, xsi_url);
-			if (c && (*(c + 5) == ':')) {
-				ns.xsi = strdup((c + 6));
-			}
-		}
-	} while (b = mxmlWalkNext(b, tree, MXML_DESCEND));
-
-	if ((ns.soap_env[0] != NULL ) && (ns.cwmp != NULL))
-		return 0;
-
-	return -1;
+    return (j ? 0 : -1);
 }
 
-static void xml_get_hold_request(mxml_node_t *tree)
+xmlNodePtr xml_find_node_by_env_type(xmlNodePtr tree_in, char *bname) {
+    xmlNodePtr b;
+    char *c;
+    int i;
+
+    for (i = 0; i < ARRAY_SIZE(ns.soap_env) && ns.soap_env[i]; i++) {
+        if (asprintf(&c, "%s:%s", ns.soap_env[i], bname) == -1)
+            return NULL;
+
+        // Recursive search in the tree for this element
+        b = NULL;
+        for (xmlNodePtr curr = tree_in; curr != NULL; curr = xmlWalkNext(curr, tree_in, 1)) {
+            if (curr->type == XML_ELEMENT_NODE && !xmlStrcmp(curr->name, (const xmlChar*)c)) {
+                FREE(c);
+                return curr;
+            }
+        }
+        FREE(c);
+    }
+    return NULL;
+}
+
+// Helper function for walking the XML tree - similar to mxmlWalkNext
+xmlNodePtr xmlWalkNext(xmlNodePtr node, xmlNodePtr top, int descend)
 {
-	mxml_node_t *b;
-	char *c;
+    if (!node)
+        return NULL;
+        
+    if (descend && node->children)
+        return node->children;
+        
+    if (node->next)
+        return node->next;
+        
+    for (xmlNodePtr parent = node->parent; parent != NULL; parent = parent->parent) {
+        if (parent == top)
+            return NULL;
+        if (parent->next)
+            return parent->next;
+    }
+    
+    return NULL;
+}
 
-	cwmp->hold_requests = false;
+// Helper function to find attribute by value and get the attribute name
+char* xmlGetAttrNameByValue(xmlNodePtr node, const char* value)
+{
+    xmlAttrPtr attr;
+    for (attr = node->properties; attr; attr = attr->next) {
+        xmlChar* attrVal = xmlGetProp(node, attr->name);
+        if (attrVal && !xmlStrcmp(attrVal, (const xmlChar*)value)) {
+            char* result = NULL;
+            if (xmlStrlen(attr->name) > 5 && (*(attr->name + 5) == ':')) {
+                result = strdup((const char*)(attr->name + 6));
+            }
+            xmlFree(attrVal);
+            return result;
+        }
+        if (attrVal) xmlFree(attrVal);
+    }
+    return NULL;
+}
 
-	if (asprintf(&c, "%s:%s", ns.cwmp, "NoMoreRequests") == -1)
-		return;
-	b = mxmlFindElement(tree, tree, c, NULL, NULL, MXML_DESCEND);
-	free(c);
-	if (b) {
-		b = mxmlWalkNext(b, tree, MXML_DESCEND_FIRST);
+static int xml_recreate_namespace(xmlNodePtr tree)
+{
+    xmlNodePtr b = tree;
+    const char *cwmp_urn;
+    char *c;
+    int i;
 
-		if(b->value.opaque)
-			cwmp->hold_requests = (atoi(b->value.opaque)) ? true : false;
-	}
+    xml_free_ns();
 
-	if (asprintf(&c, "%s:%s", ns.cwmp, "HoldRequests") == -1)
-		return;
-	b = mxmlFindElement(tree, tree, c, NULL, NULL, MXML_DESCEND);
-	free(c);
-	if (b) {
-		b = mxmlWalkNext(b, tree, MXML_DESCEND_FIRST);
+    do {
+        if (ns.cwmp == NULL) {
+            for (i = 0; cwmp_urls[i] != NULL; i++) {
+                cwmp_urn = cwmp_urls[i];
+                c = xmlGetAttrNameByValue(b, cwmp_urn);
+                if (c) {
+                    ns.cwmp = c; // c is already strdup'd in xmlGetAttrNameByValue
+                    break;
+                }
+            }
+        }
 
-		if(b->value.opaque)
-			cwmp->hold_requests = (atoi(b->value.opaque)) ? true : false;
-	}
+        if (ns.soap_env[0] == NULL) {
+            xml_get_attrname_array(b, soap_env_url, ns.soap_env, ARRAY_SIZE(ns.soap_env));
+        }
+
+        if (ns.soap_enc == NULL) {
+            c = xmlGetAttrNameByValue(b, soap_enc_url);
+            if (c) {
+                ns.soap_enc = c; // c is already strdup'd in xmlGetAttrNameByValue
+            }
+        }
+
+        if (ns.xsd == NULL) {
+            c = xmlGetAttrNameByValue(b, xsd_url);
+            if (c) {
+                ns.xsd = c; // c is already strdup'd in xmlGetAttrNameByValue
+            }
+        }
+
+        if (ns.xsi == NULL) {
+            c = xmlGetAttrNameByValue(b, xsi_url);
+            if (c) {
+                ns.xsi = c; // c is already strdup'd in xmlGetAttrNameByValue
+            }
+        }
+    } while ((b = xmlWalkNext(b, tree, 1)) != NULL);
+
+    if ((ns.soap_env[0] != NULL) && (ns.cwmp != NULL))
+        return 0;
+
+    return -1;
+}
+
+static void xml_get_hold_request(xmlNodePtr tree)
+{
+    xmlNodePtr b;
+    char *c;
+
+    cwmp->hold_requests = false;
+
+    if (asprintf(&c, "%s:%s", ns.cwmp, "NoMoreRequests") == -1)
+        return;
+    
+    // Find the element
+    b = NULL;
+    for (xmlNodePtr curr = tree; curr != NULL; curr = xmlWalkNext(curr, tree, 1)) {
+        if (curr->type == XML_ELEMENT_NODE && !xmlStrcmp(curr->name, (const xmlChar*)c)) {
+            b = curr;
+            break;
+        }
+    }
+    free(c);
+    
+    if (b) {
+        // Get the text content
+        xmlNodePtr text_node = b->children;
+        if (text_node && text_node->type == XML_TEXT_NODE && text_node->content) {
+            cwmp->hold_requests = (atoi((const char*)text_node->content)) ? true : false;
+        }
+    }
+
+    if (asprintf(&c, "%s:%s", ns.cwmp, "HoldRequests") == -1)
+        return;
+    
+    // Find the element
+    b = NULL;
+    for (xmlNodePtr curr = tree; curr != NULL; curr = xmlWalkNext(curr, tree, 1)) {
+        if (curr->type == XML_ELEMENT_NODE && !xmlStrcmp(curr->name, (const xmlChar*)c)) {
+            b = curr;
+            break;
+        }
+    }
+    free(c);
+    
+    if (b) {
+        // Get the text content
+        xmlNodePtr text_node = b->children;
+        if (text_node && text_node->type == XML_TEXT_NODE && text_node->content) {
+            cwmp->hold_requests = (atoi((const char*)text_node->content)) ? true : false;
+        }
+    }
 }
 
 int xml_handle_message(char *msg_in, char **msg_out)
 {
-	mxml_node_t *tree_in = NULL, *tree_out = NULL, *b, *body_out;
-	const struct rpc_method *method;
-	int i, code = FAULT_9002;
-	char *c;
+    xmlDocPtr doc_in = NULL, doc_out = NULL;
+    xmlNodePtr tree_in = NULL, tree_out = NULL, b, body_out;
+    const struct rpc_method *method;
+    int i, code = FAULT_9002;
+    char *c;
 
-	tree_out = mxmlLoadString(NULL, CWMP_RESPONSE_MESSAGE, MXML_OPAQUE_CALLBACK);
-	if (!tree_out) goto error;
+    // Parse the response template
+    doc_out = xmlParseMemory(CWMP_RESPONSE_MESSAGE, strlen(CWMP_RESPONSE_MESSAGE));
+    if (!doc_out) goto error;
+    tree_out = xmlDocGetRootElement(doc_out);
+    if (!tree_out) goto error;
 
-	tree_in = mxmlLoadString(NULL, msg_in, MXML_OPAQUE_CALLBACK);
-	if (!tree_in) goto error;
+    // Parse the incoming message
+    doc_in = xmlParseMemory(msg_in, strlen(msg_in));
+    if (!doc_in) goto error;
+    tree_in = xmlDocGetRootElement(doc_in);
+    if (!tree_in) goto error;
 
-	if(xml_recreate_namespace(tree_in)) {
-		code = FAULT_9003;
-		goto fault_out;
-	}
-	/* handle cwmp:ID */
-	if (asprintf(&c, "%s:%s", ns.cwmp, "ID") == -1)
-		goto error;
+    if (xml_recreate_namespace(tree_in)) {
+        code = FAULT_9003;
+        goto fault_out;
+    }
+    
+    /* handle cwmp:ID */
+    if (asprintf(&c, "%s:%s", ns.cwmp, "ID") == -1)
+        goto error;
 
-	b = mxmlFindElement(tree_in, tree_in, c, NULL, NULL, MXML_DESCEND);
-	FREE(c);
-	/* ACS did not send ID parameter, we are continuing without it */
-	if (!b) goto find_method;
+    // Find ID element
+    b = NULL;
+    for (xmlNodePtr curr = tree_in; curr != NULL; curr = xmlWalkNext(curr, tree_in, 1)) {
+        if (curr->type == XML_ELEMENT_NODE && !xmlStrcmp(curr->name, (const xmlChar*)c)) {
+            b = curr;
+            break;
+        }
+    }
+    FREE(c);
+    
+    /* ACS did not send ID parameter, we are continuing without it */
+    if (!b) goto find_method;
 
-	b = mxmlWalkNext(b, tree_in, MXML_DESCEND_FIRST);
-	if (!b || !b->value.opaque) goto find_method;
-	c = strdup(b->value.opaque);
+    // Get the text content
+    xmlNodePtr text_node = b->children;
+    if (!text_node || text_node->type != XML_TEXT_NODE || !text_node->content) goto find_method;
+    c = strdup((char*)text_node->content);
 
-	b = mxmlFindElement(tree_out, tree_out, "cwmp:ID", NULL, NULL, MXML_DESCEND);
-	if (!b) {
-		FREE(c);
-		goto error;
-	}
+    // Find ID element in output document
+    b = NULL;
+    for (xmlNodePtr curr = tree_out; curr != NULL; curr = xmlWalkNext(curr, tree_out, 1)) {
+        if (curr->type == XML_ELEMENT_NODE && !xmlStrcmp(curr->name, (const xmlChar*)"cwmp:ID")) {
+            b = curr;
+            break;
+        }
+    }
+    if (!b) {
+        FREE(c);
+        goto error;
+    }
 
-	b = mxmlNewOpaque(b, c);
-	FREE(c);
-	if (!b) goto error;
+    // Set ID in output document
+    xmlNodePtr new_text = xmlNewText((const xmlChar*)c);
+    if (!new_text) {
+        FREE(c);
+        goto error;
+    }
+    xmlAddChild(b, new_text);
+    FREE(c);
 
 find_method:
-	b = xml_mxml_find_node_by_env_type(tree_in, "Body");
-	if (!b) {
-		code = FAULT_9003;
-		goto fault_out;
-	}
-	while (1) {
-		b = mxmlWalkNext(b, tree_in, MXML_DESCEND_FIRST);
-		if (!b) {
-			code = FAULT_9003;
-			goto fault_out;
-		}
-		if (b->type == MXML_ELEMENT) break;
-	}
+    b = xml_find_node_by_env_type(tree_in, "Body");
+    if (!b) {
+        code = FAULT_9003;
+        goto fault_out;
+    }
+    
+    // Find the first element node child of Body
+    xmlNodePtr child = b->children;
+    while (child) {
+        if (child->type == XML_ELEMENT_NODE) {
+            b = child;
+            break;
+        }
+        child = child->next;
+    }
+    
+    if (!child) {
+        code = FAULT_9003;
+        goto fault_out;
+    }
 
-	c = b->value.element.name;
-	if (strchr(c, ':')) {
-		char *tmp = strchr(c, ':');
-		size_t ns_len = tmp - c;
+    // Get node name
+    c = (char*)b->name;
+    if (strchr(c, ':')) {
+        char *tmp = strchr(c, ':');
+        size_t ns_len = tmp - c;
 
-		if (strlen(ns.cwmp) != ns_len) {
-			code = FAULT_9003;
-			goto fault_out;
-		}
+        if (strlen(ns.cwmp) != ns_len) {
+            code = FAULT_9003;
+            goto fault_out;
+        }
 
-		if (strncmp(ns.cwmp, c, ns_len)) {
-			code = FAULT_9003;
-			goto fault_out;
-		}
+        if (strncmp(ns.cwmp, c, ns_len)) {
+            code = FAULT_9003;
+            goto fault_out;
+        }
 
-		c = tmp + 1;
-	} else {
-		code = FAULT_9003;
-		goto fault_out;
-	}
-	method = NULL;
-	log_message(NAME, L_NOTICE, "received %s method from the ACS\n", c);
-	for (i = 0; i < ARRAY_SIZE(rpc_methods); i++) {
-		if (!strcmp(c, rpc_methods[i].name)) {
-			method = &rpc_methods[i];
-			break;
-		}
-	}
-	if (method) {
-		if (method->handler(b, tree_in, tree_out)) goto error;
-	}
-	else {
-		code = FAULT_9000;
-		goto fault_out;
-	}
-	*msg_out = mxmlSaveAllocString(tree_out, xml_format_cb);
+        c = tmp + 1;
+    } else {
+        code = FAULT_9003;
+        goto fault_out;
+    }
+    
+    method = NULL;
+    log_message(NAME, L_NOTICE, "received %s method from the ACS\n", c);
+    for (i = 0; i < ARRAY_SIZE(rpc_methods); i++) {
+        if (!strcmp(c, rpc_methods[i].name)) {
+            method = &rpc_methods[i];
+            break;
+        }
+    }
+    
+    if (method) {
+        if (method->handler(b, tree_in, tree_out)) goto error;
+    }
+    else {
+        code = FAULT_9000;
+        goto fault_out;
+    }
+    
+    // Serialize the output document
+    xmlBufferPtr buf = xmlBufferCreate();
+    if (!buf) goto error;
+    
+    xmlNodeDumpOutput(xmlOutputBufferCreateBuffer(buf, NULL), doc_out, tree_out, 0, 1, NULL);
+    *msg_out = strdup((char*)xmlBufferContent(buf));
+    xmlBufferFree(buf);
 
-	mxmlDelete(tree_in);
-	mxmlDelete(tree_out);
-	return 0;
+    xmlFreeDoc(doc_in);
+    xmlFreeDoc(doc_out);
+    return 0;
 
 fault_out:
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body", NULL, NULL, MXML_DESCEND);
-	if (!body_out) goto error;
-	xml_create_generic_fault_message(body_out, code);
-	*msg_out = mxmlSaveAllocString(tree_out, xml_format_cb);
-	mxmlDelete(tree_in);
-	mxmlDelete(tree_out);
-	return 0;
+    body_out = NULL;
+    for (xmlNodePtr curr = tree_out; curr != NULL; curr = xmlWalkNext(curr, tree_out, 1)) {
+        if (curr->type == XML_ELEMENT_NODE && !xmlStrcmp(curr->name, (const xmlChar*)"soap_env:Body")) {
+            body_out = curr;
+            break;
+        }
+    }
+    if (!body_out) goto error;
+    
+    xml_create_generic_fault_message(body_out, code);
+    
+    // Serialize the output document
+    xmlBufferPtr buf = xmlBufferCreate();
+    if (!buf) goto error;
+    
+    xmlNodeDumpOutput(xmlOutputBufferCreateBuffer(buf, NULL), doc_out, tree_out, 0, 1, NULL);
+    *msg_out = strdup((char*)xmlBufferContent(buf));
+    xmlBufferFree(buf);
+
+    xmlFreeDoc(doc_in);
+    xmlFreeDoc(doc_out);
+    return 0;
 
 error:
-	mxmlDelete(tree_in);
-	mxmlDelete(tree_out);
-	return -1;
+    if (doc_in) xmlFreeDoc(doc_in);
+    if (doc_out) xmlFreeDoc(doc_out);
+    return -1;
 }
 
 int xml_get_index_fault(char *fault_code)
@@ -463,346 +693,463 @@ int xml_check_fault_in_list_parameter(void)
 
 /* Inform */
 
-static int xml_prepare_events_inform(mxml_node_t *tree)
+static int xml_prepare_events_inform(xmlNodePtr tree)
 {
-	mxml_node_t *node, *b1, *b2;
-	char *c;
-	int n = 0;
-	struct list_head *p;
-	struct event *event;
+    xmlNodePtr node, b1 = NULL, b2;
+    char *c;
+    int n = 0;
+    struct list_head *p;
+    struct event *event;
 
-	b1 = mxmlFindElement(tree, tree, "Event", NULL, NULL, MXML_DESCEND);
-	if (!b1) return -1;
+    // Find Event element in the tree
+    for (xmlNodePtr curr = tree; curr != NULL; curr = xmlWalkNext(curr, tree, 1)) {
+        if (curr->type == XML_ELEMENT_NODE && !xmlStrcmp(curr->name, (const xmlChar*)"Event")) {
+            b1 = curr;
+            break;
+        }
+    }
+    if (!b1) return -1;
 
-	list_for_each(p, &cwmp->events) {
-		event = list_entry (p, struct event, list);
-		node = mxmlNewElement (b1, "EventStruct");
-		if (!node) goto error;
+    list_for_each(p, &cwmp->events) {
+        event = list_entry(p, struct event, list);
+        
+        // Create EventStruct element
+        node = xmlNewChild(b1, NULL, (const xmlChar*)"EventStruct", NULL);
+        if (!node) goto error;
 
-		b2 = mxmlNewElement (node, "EventCode");
-		if (!b2) goto error;
+        // Create EventCode element
+        b2 = xmlNewChild(node, NULL, (const xmlChar*)"EventCode", NULL);
+        if (!b2) goto error;
+        
+        // Add the event code text
+        xmlNodePtr text = xmlNewText((const xmlChar*)event_code_array[event->code].code);
+        if (!text) goto error;
+        xmlAddChild(b2, text);
 
-		b2 = mxmlNewOpaque(b2, event_code_array[event->code].code);
-		if (!b2) goto error;
+        // Create CommandKey element
+        b2 = xmlNewChild(node, NULL, (const xmlChar*)"CommandKey", NULL);
+        if (!b2) goto error;
 
-		b2 = mxmlNewElement (node, "CommandKey");
-		if (!b2) goto error;
+        // Add CommandKey text if it exists
+        if (event->key) {
+            text = xmlNewText((const xmlChar*)event->key);
+            if (!text) goto error;
+            xmlAddChild(b2, text);
+        }
 
-		if (event->key) {
-			b2 = mxmlNewOpaque(b2, event->key);
-			if (!b2) goto error;
-		}
+        n++;
+    }
 
-		mxmlAdd(b1, MXML_ADD_AFTER, MXML_ADD_TO_PARENT, node);
-		n++;
-	}
+    if (n) {
+        if (asprintf(&c, "cwmp:EventStruct[%u]", n) == -1)
+            return -1;
 
-	if (n) {
-		if (asprintf(&c, "cwmp:EventStruct[%u]", n) == -1)
-			return -1;
+        xmlSetProp(b1, (const xmlChar*)"soap_enc:arrayType", (const xmlChar*)c);
+        FREE(c);
+    }
 
-		mxmlElementSetAttr(b1, "soap_enc:arrayType", c);
-		FREE(c);
-	}
-
-	return 0;
+    return 0;
 
 error:
-	return -1;
+    return -1;
 }
 
-static int xml_prepare_notifications_inform(mxml_node_t *parameter_list, int *counter)
+static int xml_prepare_notifications_inform(xmlNodePtr parameter_list, int *counter)
 {
-	/* notifications */
-	mxml_node_t *b, *n;
+    /* notifications */
+    xmlNodePtr b, n;
+    xmlNodePtr text;
 
-	struct list_head *p;
-	struct notification *notification;
+    struct list_head *p;
+    struct notification *notification;
 
-	list_for_each(p, &cwmp->notifications) {
-		notification = list_entry(p, struct notification, list);
+    list_for_each(p, &cwmp->notifications) {
+        notification = list_entry(p, struct notification, list);
 
-		b = mxmlFindElementOpaque(parameter_list, parameter_list, notification->parameter, MXML_DESCEND);
-		if (b) continue;
-		
-		n = mxmlNewElement(parameter_list, "ParameterValueStruct");
-		if (!n) goto error;
+        // Check if parameter already exists in list
+        b = xmlFindNodeWithContent(parameter_list, parameter_list, notification->parameter, 1);
+        if (b) continue;
+        
+        // Create new ParameterValueStruct
+        n = xmlNewChild(parameter_list, NULL, (const xmlChar*)"ParameterValueStruct", NULL);
+        if (!n) goto error;
 
-		b = mxmlNewElement(n, "Name");
-		if (!b) goto error;
+        // Create Name element
+        b = xmlNewChild(n, NULL, (const xmlChar*)"Name", NULL);
+        if (!b) goto error;
 
-		b = mxmlNewOpaque(b, notification->parameter);
-		if (!b) goto error;
+        // Add parameter name as text
+        text = xmlNewText((const xmlChar*)notification->parameter);
+        if (!text) goto error;
+        xmlAddChild(b, text);
 
-		b = b->parent->parent;
-		b = mxmlNewElement(n, "Value");
-		if (!b) goto error;
+        // Create Value element
+        b = xmlNewChild(n, NULL, (const xmlChar*)"Value", NULL);
+        if (!b) goto error;
 
-		mxmlElementSetAttr(b, "xsi:type", notification->type);
+        // Set xsi:type attribute
+        xmlSetProp(b, (const xmlChar*)"xsi:type", (const xmlChar*)notification->type);
 
-		b = mxmlNewOpaque(b, notification->value);
-		if (!b) goto error;
+        // Add parameter value as text
+        text = xmlNewText((const xmlChar*)notification->value);
+        if (!text) goto error;
+        xmlAddChild(b, text);
 
-		(*counter)++;
-	}
+        (*counter)++;
+    }
 
-	return 0;
+    return 0;
 
 error:
-	return -1;
+    return -1;
 }
 
 int xml_prepare_inform_message(char **msg_out)
 {
-	mxml_node_t *tree, *b, *n, *parameter_list;
-	struct external_parameter *external_parameter;
-	char *c;
-	int counter = 0;
+    xmlDocPtr doc = NULL;
+    xmlNodePtr tree, b, n, parameter_list;
+    struct external_parameter *external_parameter;
+    xmlNodePtr text_node;
+    char *c;
+    int counter = 0;
 
-	tree = mxmlLoadString(NULL, CWMP_INFORM_MESSAGE, MXML_OPAQUE_CALLBACK);
-	if (!tree) goto error;
+    // Parse the template
+    doc = xmlParseMemory(CWMP_INFORM_MESSAGE, strlen(CWMP_INFORM_MESSAGE));
+    if (!doc) goto error;
+    tree = xmlDocGetRootElement(doc);
+    if (!tree) goto error;
 
-	if(xml_add_cwmpid(tree)) goto error;
+    if (xml_add_cwmpid(tree)) goto error;
 
-	b = mxmlFindElement(tree, tree, "RetryCount", NULL, NULL, MXML_DESCEND);
-	if (!b) goto error;
+    // Find RetryCount element
+    b = xmlFindElementByName(tree, "RetryCount");
+    if (!b) goto error;
 
-	b = mxmlNewInteger(b, cwmp->retry_count);
-	if (!b) goto error;
+    // Set RetryCount value
+    char retry_count_str[16];
+    snprintf(retry_count_str, sizeof(retry_count_str), "%d", cwmp->retry_count);
+    text_node = xmlNewText((const xmlChar*)retry_count_str);
+    if (!text_node) goto error;
+    xmlAddChild(b, text_node);
 
-	b = mxmlFindElement(tree, tree, "Manufacturer", NULL, NULL, MXML_DESCEND);
-	if (!b) goto error;
+    // Find Manufacturer element
+    b = xmlFindElementByName(tree, "Manufacturer");
+    if (!b) goto error;
 
-	b = mxmlNewOpaque(b, cwmp->deviceid.manufacturer);
-	if (!b) goto error;
+    // Set Manufacturer value
+    text_node = xmlNewText((const xmlChar*)cwmp->deviceid.manufacturer);
+    if (!text_node) goto error;
+    xmlAddChild(b, text_node);
 
-	b = mxmlFindElement(tree, tree, "OUI", NULL, NULL, MXML_DESCEND);
-	if (!b) goto error;
+    // Find OUI element
+    b = xmlFindElementByName(tree, "OUI");
+    if (!b) goto error;
 
-	b = mxmlNewOpaque(b, cwmp->deviceid.oui);
-	if (!b) goto error;
+    // Set OUI value
+    text_node = xmlNewText((const xmlChar*)cwmp->deviceid.oui);
+    if (!text_node) goto error;
+    xmlAddChild(b, text_node);
 
-	b = mxmlFindElement(tree, tree, "ProductClass", NULL, NULL, MXML_DESCEND);
-	if (!b) goto error;
+    // Find ProductClass element
+    b = xmlFindElementByName(tree, "ProductClass");
+    if (!b) goto error;
 
-	b = mxmlNewOpaque(b, cwmp->deviceid.product_class);
-	if (!b) goto error;
+    // Set ProductClass value
+    text_node = xmlNewText((const xmlChar*)cwmp->deviceid.product_class);
+    if (!text_node) goto error;
+    xmlAddChild(b, text_node);
 
-	b = mxmlFindElement(tree, tree, "SerialNumber", NULL, NULL, MXML_DESCEND);
-	if (!b) goto error;
+    // Find SerialNumber element
+    b = xmlFindElementByName(tree, "SerialNumber");
+    if (!b) goto error;
 
-	b = mxmlNewOpaque(b, cwmp->deviceid.serial_number);
-	if (!b) goto error;
+    // Set SerialNumber value
+    text_node = xmlNewText((const xmlChar*)cwmp->deviceid.serial_number);
+    if (!text_node) goto error;
+    xmlAddChild(b, text_node);
    
-	if (xml_prepare_events_inform(tree))
-		goto error;
+    if (xml_prepare_events_inform(tree))
+        goto error;
 
-	b = mxmlFindElement(tree, tree, "CurrentTime", NULL, NULL, MXML_DESCEND);
-	if (!b) goto error;
+    // Find CurrentTime element
+    b = xmlFindElementByName(tree, "CurrentTime");
+    if (!b) goto error;
 
-	b = mxmlNewOpaque(b, mix_get_time());
-	if (!b) goto error;
+    // Set CurrentTime value
+    text_node = xmlNewText((const xmlChar*)mix_get_time());
+    if (!text_node) goto error;
+    xmlAddChild(b, text_node);
 
-	external_action_simple_execute("inform", "parameter", NULL);
-	if (external_action_handle(json_handle_get_parameter_value))
-		goto error;
+    external_action_simple_execute("inform", "parameter", NULL);
+    if (external_action_handle(json_handle_get_parameter_value))
+        goto error;
 
-	parameter_list = mxmlFindElement(tree, tree, "ParameterList", NULL, NULL, MXML_DESCEND);
-	if (!parameter_list) goto error;
+    // Find ParameterList element
+    parameter_list = xmlFindElementByName(tree, "ParameterList");
+    if (!parameter_list) goto error;
 
-	while (external_list_parameter.next != &external_list_parameter) {
+    while (external_list_parameter.next != &external_list_parameter) {
+        external_parameter = list_entry(external_list_parameter.next, struct external_parameter, list);
 
-		external_parameter = list_entry(external_list_parameter.next, struct external_parameter, list);
+        // Create ParameterValueStruct element
+        n = xmlNewChild(parameter_list, NULL, (const xmlChar*)"ParameterValueStruct", NULL);
+        if (!n) goto error;
 
-		n = mxmlNewElement(parameter_list, "ParameterValueStruct");
-		if (!n) goto error;
+        // Create Name element
+        b = xmlNewChild(n, NULL, (const xmlChar*)"Name", NULL);
+        if (!b) goto error;
 
-		b = mxmlNewElement(n, "Name");
-		if (!b) goto error;
+        // Set Name value
+        text_node = xmlNewText((const xmlChar*)external_parameter->name);
+        if (!text_node) goto error;
+        xmlAddChild(b, text_node);
 
-		b = mxmlNewOpaque(b, external_parameter->name);
-		if (!b) goto error;
+        // Create Value element
+        b = xmlNewChild(n, NULL, (const xmlChar*)"Value", NULL);
+        if (!b) goto error;
 
-		b = mxmlNewElement(n, "Value");
-		if (!b) goto error;
+        // Set xsi:type attribute
+        xmlSetProp(b, (const xmlChar*)"xsi:type", (const xmlChar*)external_parameter->type);
+        
+        // Set Value content
+        text_node = xmlNewText((const xmlChar*)(external_parameter->data ? external_parameter->data : ""));
+        if (!text_node) goto error;
+        xmlAddChild(b, text_node);
 
-		mxmlElementSetAttr(b, "xsi:type", external_parameter->type);
-		b = mxmlNewOpaque(b, external_parameter->data ? external_parameter->data : "");
-		if (!b) goto error;
+        counter++;
 
-		counter++;
+        external_parameter_delete(external_parameter);
+    }
 
-		external_parameter_delete(external_parameter);
-	}
+    if (xml_prepare_notifications_inform(parameter_list, &counter))
+        goto error;
 
-	if (xml_prepare_notifications_inform(parameter_list, &counter))
-		goto error;
+    if (asprintf(&c, "cwmp:ParameterValueStruct[%d]", counter) == -1)
+        goto error;
 
-	if (asprintf(&c, "cwmp:ParameterValueStruct[%d]", counter) == -1)
-		goto error;
+    xmlSetProp(parameter_list, (const xmlChar*)"soap_enc:arrayType", (const xmlChar*)c);
+    FREE(c);
 
-	mxmlElementSetAttr(parameter_list, "soap_enc:arrayType", c);
-	FREE(c);
+    // Serialize XML to string
+    xmlBufferPtr buf = xmlBufferCreate();
+    if (!buf) goto error;
+    
+    xmlNodeDumpOutput(xmlOutputBufferCreateBuffer(buf, NULL), doc, tree, 0, 1, NULL);
+    *msg_out = strdup((char*)xmlBufferContent(buf));
+    xmlBufferFree(buf);
 
-	*msg_out = mxmlSaveAllocString(tree, xml_format_cb);
-
-	mxmlDelete(tree);
-	return 0;
+    xmlFreeDoc(doc);
+    return 0;
 
 error:
-	external_free_list_parameter();
-	mxmlDelete(tree);
-	return -1;
+    external_free_list_parameter();
+    if (doc) xmlFreeDoc(doc);
+    return -1;
 }
 
 int xml_parse_inform_response_message(char *msg_in)
 {
-	mxml_node_t *tree, *b;
-	char *c;
-	int fault = 0;
+    xmlDocPtr doc = NULL;
+    xmlNodePtr tree, b;
+    int fault = 0;
 
-	tree = mxmlLoadString(NULL, msg_in, MXML_OPAQUE_CALLBACK);
-	if (!tree) goto error;
-	if(xml_recreate_namespace(tree)) goto error;
+    // Parse the XML
+    doc = xmlParseMemory(msg_in, strlen(msg_in));
+    if (!doc) goto error;
+    tree = xmlDocGetRootElement(doc);
+    if (!tree) goto error;
+    
+    // Process namespace info
+    if(xml_recreate_namespace(tree)) goto error;
 
-	b = xml_mxml_find_node_by_env_type(tree, "Fault");
-	if (b) {
-		b = mxmlFindElementOpaque(b, b, "8005", MXML_DESCEND);
-		if (b) {
-			fault = FAULT_ACS_8005;
-			goto out;
-		}
-		goto error;
-	}
+    // Find Fault element
+    b = xml_find_node_by_env_type(tree, "Fault");
+    if (b) {
+        // Look for fault code 8005
+        xmlNodePtr fault_node = NULL;
+        for (xmlNodePtr curr = b; curr != NULL; curr = xmlWalkNext(curr, tree, 1)) {
+            if (curr->type == XML_TEXT_NODE && 
+                curr->content &&
+                !strcmp((char*)curr->content, "8005")) {
+                fault = FAULT_ACS_8005;
+                goto out;
+            }
+        }
+        goto error;
+    }
 
-	xml_get_hold_request(tree);
-	b = mxmlFindElement(tree, tree, "MaxEnvelopes", NULL, NULL, MXML_DESCEND);
-	if (!b) goto error;
+    // Process hold request info
+    xml_get_hold_request(tree);
+    
+    // Find MaxEnvelopes element
+    b = xmlFindElementByName(tree, "MaxEnvelopes");
+    if (!b) goto error;
 
-	b = mxmlWalkNext(b, tree, MXML_DESCEND_FIRST);
-	if (!b || !b->value.opaque)
-		goto error;
-
+    // Get text content
+    xmlNodePtr text_node = b->children;
+    if (!text_node || text_node->type != XML_TEXT_NODE || !text_node->content)
+        goto error;
 
 out:
-	mxmlDelete(tree);
-	return fault;
+    xmlFreeDoc(doc);
+    return fault;
 
 error:
-	mxmlDelete(tree);
-	return -1;
+    if (doc) xmlFreeDoc(doc);
+    return -1;
 }
 
 /* ACS GetRPCMethods */
 int xml_prepare_get_rpc_methods_message(char **msg_out)
 {
-	mxml_node_t *tree;
+    xmlDocPtr doc = NULL;
+    xmlNodePtr tree;
 
-	tree = mxmlLoadString(NULL, CWMP_GET_RPC_METHOD_MESSAGE, MXML_OPAQUE_CALLBACK);
-	if (!tree) return -1;
+    // Parse the template
+    doc = xmlParseMemory(CWMP_GET_RPC_METHOD_MESSAGE, strlen(CWMP_GET_RPC_METHOD_MESSAGE));
+    if (!doc) return -1;
+    tree = xmlDocGetRootElement(doc);
+    if (!tree) {
+        xmlFreeDoc(doc);
+        return -1;
+    }
 
-	if(xml_add_cwmpid(tree)) return -1;
+    if(xml_add_cwmpid(tree)) {
+        xmlFreeDoc(doc);
+        return -1;
+    }
 
-	*msg_out = mxmlSaveAllocString(tree, xml_format_cb);
+    // Serialize XML to string
+    xmlBufferPtr buf = xmlBufferCreate();
+    if (!buf) {
+        xmlFreeDoc(doc);
+        return -1;
+    }
+    
+    xmlNodeDumpOutput(xmlOutputBufferCreateBuffer(buf, NULL), doc, tree, 0, 1, NULL);
+    *msg_out = strdup((char*)xmlBufferContent(buf));
+    xmlBufferFree(buf);
 
-	mxmlDelete(tree);
-	return 0;
+    xmlFreeDoc(doc);
+    return 0;
 }
 
 int xml_parse_get_rpc_methods_response_message(char *msg_in)
 {
-	mxml_node_t *tree, *b;
-	char *c;
-	int fault = 0;
+    xmlDocPtr doc = NULL;
+    xmlNodePtr tree, b;
+    int fault = 0;
 
-	tree = mxmlLoadString(NULL, msg_in, MXML_OPAQUE_CALLBACK);
-	if (!tree) goto error;
-	if(xml_recreate_namespace(tree)) goto error;
+    // Parse XML
+    doc = xmlParseMemory(msg_in, strlen(msg_in));
+    if (!doc) goto error;
+    tree = xmlDocGetRootElement(doc);
+    if (!tree) goto error;
+    
+    if(xml_recreate_namespace(tree)) goto error;
 
-	b = xml_mxml_find_node_by_env_type(tree, "Fault");
-	if (b) {
-		b = mxmlFindElementOpaque(b, b, "8005", MXML_DESCEND);
-		if (b) {
-			fault = FAULT_ACS_8005;
-			goto out;
-		}
-		goto out;
-	}
+    // Find Fault element
+    b = xml_find_node_by_env_type(tree, "Fault");
+    if (b) {
+        // Check for fault code 8005
+        xmlNodePtr fault_node = NULL;
+        for (xmlNodePtr curr = b; curr != NULL; curr = xmlWalkNext(curr, tree, 1)) {
+            if (curr->type == XML_TEXT_NODE && 
+                curr->content &&
+                !strcmp((char*)curr->content, "8005")) {
+                fault = FAULT_ACS_8005;
+                goto out;
+            }
+        }
+        goto out;
+    }
 
-	xml_get_hold_request(tree);
+    xml_get_hold_request(tree);
 
 out:
-	mxmlDelete(tree);
-	return fault;
+    xmlFreeDoc(doc);
+    return fault;
 
 error:
-	mxmlDelete(tree);
-	return -1;
+    if (doc) xmlFreeDoc(doc);
+    return -1;
 }
 
 /* ACS TransferComplete */
 
 int xml_parse_transfer_complete_response_message(char *msg_in)
 {
-	mxml_node_t *tree, *b;
-	char *c;
-	int fault = 0;
+    xmlDocPtr doc = NULL;
+    xmlNodePtr tree, b;
+    int fault = 0;
 
-	tree = mxmlLoadString(NULL, msg_in, MXML_OPAQUE_CALLBACK);
-	if (!tree) goto error;
-	if(xml_recreate_namespace(tree)) goto error;
+    // Parse XML
+    doc = xmlParseMemory(msg_in, strlen(msg_in));
+    if (!doc) goto error;
+    tree = xmlDocGetRootElement(doc);
+    if (!tree) goto error;
+    
+    if(xml_recreate_namespace(tree)) goto error;
 
-	b = xml_mxml_find_node_by_env_type(tree, "Fault");
-	if (b) {
-		b = mxmlFindElementOpaque(b, b, "8005", MXML_DESCEND);
-		if (b) {
-			fault = FAULT_ACS_8005;
-			goto out;
-		}
-		goto out;
-	}
+    // Find Fault element
+    b = xml_find_node_by_env_type(tree, "Fault");
+    if (b) {
+        // Check for fault code 8005
+        xmlNodePtr fault_node = NULL;
+        for (xmlNodePtr curr = b; curr != NULL; curr = xmlWalkNext(curr, tree, 1)) {
+            if (curr->type == XML_TEXT_NODE && 
+                curr->content &&
+                !strcmp((char*)curr->content, "8005")) {
+                fault = FAULT_ACS_8005;
+                goto out;
+            }
+        }
+        goto out;
+    }
 
-	xml_get_hold_request(tree);
+    xml_get_hold_request(tree);
 
 out:
-	mxmlDelete(tree);
-	return fault;
+    xmlFreeDoc(doc);
+    return fault;
 
 error:
-	mxmlDelete(tree);
-	return -1;
+    if (doc) xmlFreeDoc(doc);
+    return -1;
 }
 
 /* CPE GetRPCMethods */
 
-static int xml_handle_get_rpc_methods(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+static int xml_handle_get_rpc_methods(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out)
 {
-		mxml_node_t *b1, *b2, *method_list;
+		xmlNodePtr b1, b2, method_list;
 		int i = 0;
 
-		b1 = mxmlFindElement(tree_out, tree_out, "soap_env:Body", NULL, NULL, MXML_DESCEND);
+		// Find the SOAP body element
+		// xmlFindElementHelper is a custom helper function that would need to be implemented
+		b1 = xmlFindElementByName(tree_out, "soap_env:Body");
 		if (!b1) return -1;
 
-		b1 = mxmlNewElement(b1, "cwmp:GetRPCMethodsResponse");
+		// Create new element nodes
+		b1 = xmlNewChild(b1, NULL, BAD_CAST "cwmp:GetRPCMethodsResponse", NULL);
 		if (!b1) return -1;
 
-		method_list = mxmlNewElement(b1, "MethodList");
+		method_list = xmlNewChild(b1, NULL, BAD_CAST "MethodList", NULL);
 		if (!method_list) return -1;
 
 		for (i = 0; i < ARRAY_SIZE(rpc_methods); i++) {
-			b2 = mxmlNewElement(method_list, "string");
-			if (!b2) return -1;
-
-			b2 = mxmlNewOpaque(b2, rpc_methods[i].name);
+			b2 = xmlNewChild(method_list, NULL, BAD_CAST "string", BAD_CAST rpc_methods[i].name);
 			if (!b2) return -1;
 		}
+        
+		// Set attribute on the method_list element
 		char *attr_value;
 		if (asprintf(&attr_value, "xsd:string[%d]", ARRAY_SIZE(rpc_methods)) == -1)
 			return -1;
 
-		mxmlElementSetAttr(method_list, "soap_enc:arrayType", attr_value);
+		xmlNewProp(method_list, BAD_CAST "soap_enc:arrayType", BAD_CAST attr_value);
 		free(attr_value);
 
 		log_message(NAME, L_NOTICE, "send GetRPCMethodsResponse to the ACS\n");
@@ -811,252 +1158,294 @@ static int xml_handle_get_rpc_methods(mxml_node_t *body_in,
 
 /* SetParameterValues */
 
-int xml_handle_set_parameter_values(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+int xml_handle_set_parameter_values(xmlNodePtr body_in,
+                            xmlNodePtr tree_in,
+                            xmlNodePtr tree_out)
 {
-	mxml_node_t *b = body_in, *body_out;
-	struct external_parameter *external_parameter;
-	struct list_head *ilist;
-	char *parameter_name = NULL, *parameter_value = NULL, *status = NULL, *param_key = NULL;
-	int code = FAULT_9002;
+    xmlNodePtr b, body_out;
+    struct external_parameter *external_parameter;
+    struct list_head *ilist;
+    char *parameter_name = NULL, *parameter_value = NULL, *status = NULL, *param_key = NULL;
+    int code = FAULT_9002;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body", NULL, NULL, MXML_DESCEND);
-	if (!body_out) goto error;
+    // Find the body element in the output tree
+    body_out = xmlFindElementByName(tree_out, "soap_env:Body");
+    if (!body_out) goto error;
 
-	if (xml_check_duplicated_parameter(body_in)) {
-		code = FAULT_9003;
-		goto fault_out;
-	}
-	while (b) {
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "Name")) {
-			parameter_name = b->value.opaque;
-		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "Name") &&
-			!b->child) {
-			parameter_name = "";
-		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "Value")) {
-			free(parameter_value);
-			parameter_value = xml_get_value_with_whitespace(&b, body_in);
-		}
+    // Check for duplicated parameters
+    if (xml_check_duplicated_parameter(body_in)) {
+        code = FAULT_9003;
+        goto fault_out;
+    }
 
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "Value") &&
-			!b->child) {
-			free(parameter_value);
-			parameter_value = strdup("");
-		}
+    // Traverse the XML tree to find parameter names, values, and the parameter key
+    for (b = body_in; b != NULL; b = xmlWalkNext(b, tree_in, 1)) {
+        // Find parameter name
+        if (b && b->type == XML_TEXT_NODE && 
+            b->content &&
+            b->parent && b->parent->type == XML_ELEMENT_NODE && 
+            !xmlStrcmp(b->parent->name, (const xmlChar*)"Name")) {
+            parameter_name = (char*)b->content;
+        }
+        
+        // Handle empty Name element
+        if (b && b->type == XML_ELEMENT_NODE && 
+            !xmlStrcmp(b->name, (const xmlChar*)"Name") && 
+            !b->children) {
+            parameter_name = "";
+        }
+        
+        // Find parameter value
+        if (b && b->type == XML_TEXT_NODE && 
+            b->content &&
+            b->parent && b->parent->type == XML_ELEMENT_NODE && 
+            !xmlStrcmp(b->parent->name, (const xmlChar*)"Value")) {
+            free(parameter_value);
+            parameter_value = xml_get_value_with_whitespace(&b, body_in);
+        }
+        
+        // Handle empty Value element
+        if (b && b->type == XML_ELEMENT_NODE && 
+            !xmlStrcmp(b->name, (const xmlChar*)"Value") && 
+            !b->children) {
+            free(parameter_value);
+            parameter_value = strdup("");
+        }
+        
+        // Find parameter key
+        if (b && b->type == XML_TEXT_NODE && 
+            b->content &&
+            b->parent && b->parent->type == XML_ELEMENT_NODE && 
+            !xmlStrcmp(b->parent->name, (const xmlChar*)"ParameterKey")) {
+            free(param_key);
+            param_key = xml_get_value_with_whitespace(&b, body_in);
+        }
+        
+        // Handle empty ParameterKey element
+        if (b && b->type == XML_ELEMENT_NODE && 
+            !xmlStrcmp(b->name, (const xmlChar*)"ParameterKey") && 
+            !b->children) {
+            free(param_key);
+            param_key = strdup("");
+        }
 
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "ParameterKey")) {
-			free(param_key);
-			param_key = xml_get_value_with_whitespace(&b, body_in);
-		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "ParameterKey") &&
-			!b->child) {
-			free(param_key);
-			param_key = strdup("");
-		}
+        // Process parameter if both name and value are available
+        if (parameter_name && parameter_value) {
+            external_action_parameter_execute("set", "value", parameter_name, parameter_value);
+            parameter_name = NULL;
+            FREE(parameter_value);
+        }
+    }
 
-		if (parameter_name && parameter_value) {
-			external_action_parameter_execute("set", "value", parameter_name, parameter_value);
-			parameter_name = NULL;
-			FREE(parameter_value);
-		}
-		b = mxmlWalkNext(b, body_in, MXML_DESCEND);
-	}
+    // Apply the settings with the parameter key
+    external_action_simple_execute("apply", "value", param_key);
+    free(param_key);
+    
+    // Handle any errors from the external action
+    if (external_action_handle(json_handle_set_parameter))
+        goto fault_out;
 
-	external_action_simple_execute("apply", "value", param_key);
-	free(param_key);
-	
-	if (external_action_handle(json_handle_set_parameter))
-		goto fault_out;
+    // Check for faults in the parameter list
+    if (xml_check_fault_in_list_parameter()) {
+        code = FAULT_9003;
+        goto fault_out;
+    }
+    
+    // Fetch the response status
+    external_fetch_set_param_resp_status(&status);
+    if(!status)
+        goto fault_out;
 
-	if (xml_check_fault_in_list_parameter()) {
-		code = FAULT_9003;
-		goto fault_out;
-	}
-	external_fetch_set_param_resp_status(&status);
-	if(!status)
-		goto fault_out;
+    // Create the response element
+    b = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:SetParameterValuesResponse", NULL);
+    if (!b) goto error;
 
-	b = mxmlNewElement(body_out, "cwmp:SetParameterValuesResponse");
-	if (!b) goto error;
+    // Create the Status element
+    xmlNodePtr status_node = xmlNewChild(b, NULL, (const xmlChar*)"Status", NULL);
+    if (!status_node) goto error;
 
-	b = mxmlNewElement(b, "Status");
-	if (!b) goto error;
+    // Set the Status value
+    xmlNodePtr text_node = xmlNewText((const xmlChar*)status);
+    if (!text_node) goto error;
+    xmlAddChild(status_node, text_node);
 
-	b = mxmlNewOpaque(b, status);
-	if (!b) goto error;
+    free(status);
+    free(parameter_value);
+    external_free_list_parameter();
 
-	free(status);
-	free(parameter_value);
-	external_free_list_parameter();
-
-	log_message(NAME, L_NOTICE, "send SetParameterValuesResponse to the ACS\n");
-	return 0;
+    log_message(NAME, L_NOTICE, "send SetParameterValuesResponse to the ACS\n");
+    return 0;
 
 fault_out:
-	xml_log_parameter_fault();
-	free(parameter_value);
-	xml_create_set_parameter_value_fault_message(body_out, code);
-	free(status);
-	external_free_list_parameter();
-	return 0;
+    xml_log_parameter_fault();
+    free(parameter_value);
+    xml_create_set_parameter_value_fault_message(body_out, code);
+    free(status);
+    external_free_list_parameter();
+    return 0;
+
 error:
-	free(parameter_value);
-	free(status);
-	external_free_list_parameter();
-	return-1;
+    free(parameter_value);
+    free(status);
+    external_free_list_parameter();
+    return -1;
 }
 
 /* GetParameterValues */
 
-int xml_handle_get_parameter_values(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+int xml_handle_get_parameter_values(xmlNodePtr body_in,
+                             xmlNodePtr tree_in,
+                             xmlNodePtr tree_out)
 {
-	mxml_node_t *n, *parameter_list, *b = body_in, *body_out, *t;
-	struct external_parameter *external_parameter;
-	char *parameter_name = NULL;
-	int counter = 0, fc, code = FAULT_9002;
-	struct list_head *ilist;
+    xmlNodePtr n, parameter_list, b, body_out, t;
+    struct external_parameter *external_parameter;
+    char *parameter_name = NULL;
+    int counter = 0, fc, code = FAULT_9002;
+    struct list_head *ilist;
+    xmlNodePtr text_node;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body",
-				NULL, NULL, MXML_DESCEND);
-	if (!body_out) return -1;
+    // Find body element in output tree
+    body_out = xmlFindElementByName(tree_out, "soap_env:Body");
+    if (!body_out) return -1;
 
-	while (b) {
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "string")) {
-			parameter_name = b->value.opaque;
-		}
+    // Traverse the XML tree to find parameter names
+    for (b = body_in; b != NULL; b = xmlWalkNext(b, tree_in, 1)) {
+        // Find parameter name in "string" element
+        if (b && b->type == XML_TEXT_NODE && 
+            b->content &&
+            b->parent && b->parent->type == XML_ELEMENT_NODE && 
+            !xmlStrcmp(b->parent->name, (const xmlChar*)"string")) {
+            parameter_name = (char*)b->content;
+        }
 
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "string") &&
-			!b->child) {
-			parameter_name = "";
-		}
+        // Handle empty "string" element
+        if (b && b->type == XML_ELEMENT_NODE && 
+            !xmlStrcmp(b->name, (const xmlChar*)"string") && 
+            !b->children) {
+            parameter_name = "";
+        }
 
-		if (parameter_name) {
-			external_action_parameter_execute("get", "value", parameter_name, NULL);
-			if (external_action_handle(json_handle_get_parameter_value))
-				goto fault_out;
-			fc = xml_check_fault_in_list_parameter();
-			if (fc) {
-				code = fc;
-				goto fault_out;
-			}
-		}
+        // Process parameter if name is available
+        if (parameter_name) {
+            external_action_parameter_execute("get", "value", parameter_name, NULL);
+            if (external_action_handle(json_handle_get_parameter_value))
+                goto fault_out;
+            fc = xml_check_fault_in_list_parameter();
+            if (fc) {
+                code = fc;
+                goto fault_out;
+            }
+        }
+        parameter_name = NULL;
+    }
 
-		b = mxmlWalkNext(b, body_in, MXML_DESCEND);
-		parameter_name = NULL;
-	}
+    // Create response elements
+    n = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:GetParameterValuesResponse", NULL);
+    if (!n) goto out;
+    
+    parameter_list = xmlNewChild(n, NULL, (const xmlChar*)"ParameterList", NULL);
+    if (!parameter_list) goto out;
 
-	n = mxmlNewElement(body_out, "cwmp:GetParameterValuesResponse");
-	if (!n) goto out;
-	parameter_list = mxmlNewElement(n, "ParameterList");
-	if (!parameter_list) goto out;
+    // Process all parameters in the list
+    while (external_list_parameter.next != &external_list_parameter) {
+        external_parameter = list_entry(external_list_parameter.next, struct external_parameter, list);
 
-	while (external_list_parameter.next != &external_list_parameter) {
+        // Create ParameterValueStruct element
+        n = xmlNewChild(parameter_list, NULL, (const xmlChar*)"ParameterValueStruct", NULL);
+        if (!n) goto out;
 
-		external_parameter = list_entry(external_list_parameter.next, struct external_parameter, list);
+        // Create Name element
+        t = xmlNewChild(n, NULL, (const xmlChar*)"Name", NULL);
+        if (!t) goto out;
 
-		n = mxmlNewElement(parameter_list, "ParameterValueStruct");
-		if (!n) goto out;
+        // Set Name value
+        text_node = xmlNewText((const xmlChar*)external_parameter->name);
+        if (!text_node) goto out;
+        xmlAddChild(t, text_node);
 
-		t = mxmlNewElement(n, "Name");
-		if (!t) goto out;
+        // Create Value element
+        t = xmlNewChild(n, NULL, (const xmlChar*)"Value", NULL);
+        if (!t) goto out;
 
-		t = mxmlNewOpaque(t, external_parameter->name);
-		if (!t) goto out;
+        // Set Value type attribute
+        xmlSetProp(t, (const xmlChar*)"xsi:type", (const xmlChar*)external_parameter->type);
+        
+        // Set Value content
+        text_node = xmlNewText((const xmlChar*)(external_parameter->data ? external_parameter->data : ""));
+        if (!text_node) goto out;
+        xmlAddChild(t, text_node);
 
-		t = mxmlNewElement(n, "Value");
-		if (!t) goto out;
+        counter++;
+        external_parameter_delete(external_parameter);
+    }
+    
+    // Set array type attribute
+    char *c;
+    if (asprintf(&c, "cwmp:ParameterValueStruct[%d]", counter) == -1)
+        goto out;
 
-		mxmlElementSetAttr(t, "xsi:type", external_parameter->type);
-		t = mxmlNewOpaque(t, external_parameter->data ? external_parameter->data : "");
-		if (!t) goto out;
+    xmlSetProp(parameter_list, (const xmlChar*)"soap_enc:arrayType", (const xmlChar*)c);
+    FREE(c);
 
-		counter++;
-		external_parameter_delete(external_parameter);
-	}
-	char *c;
-	if (asprintf(&c, "cwmp:ParameterValueStruct[%d]", counter) == -1)
-		goto out;
-
-	mxmlElementSetAttr(parameter_list, "soap_enc:arrayType", c);
-	FREE(c);
-
-	log_message(NAME, L_NOTICE, "send GetParameterValuesResponse to the ACS\n");
-	return 0;
+    log_message(NAME, L_NOTICE, "send GetParameterValuesResponse to the ACS\n");
+    return 0;
+    
 fault_out:
-	xml_log_parameter_fault();
-	xml_create_generic_fault_message(body_out, code);
-	external_free_list_parameter();
-	return 0;
+    xml_log_parameter_fault();
+    xml_create_generic_fault_message(body_out, code);
+    external_free_list_parameter();
+    return 0;
+    
 out:
-	external_free_list_parameter();
-	return -1;
+    external_free_list_parameter();
+    return -1;
 }
 
 /* GetParameterNames */
 
-int xml_handle_get_parameter_names(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+int xml_handle_get_parameter_names(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out)
 {
-	mxml_node_t *n, *parameter_list, *b = body_in, *body_out, *t;
+	xmlNodePtr n, parameter_list, b = body_in, body_out, t;
 	struct external_parameter *external_parameter;
 	char *parameter_name = NULL;
 	char *next_level = NULL;
 	int counter = 0, fc, code = FAULT_9002;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body",
-					NULL, NULL, MXML_DESCEND);
+	body_out = xmlFindElementByName(tree_out, "soap_env:Body");
 	if (!body_out) return -1;
+	
 	while (b) {
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "ParameterPath")) {
-			parameter_name = b->value.opaque;
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "ParameterPath")) {
+			parameter_name = (char*)b->content;
 		}
 
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "ParameterPath") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "ParameterPath") &&
+			!b->children) {
 			parameter_name = "";
 		}
 
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "NextLevel")) {
-			next_level = b->value.opaque;
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "NextLevel")) {
+			next_level = (char*)b->content;
 		}
 
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "NextLevel") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "NextLevel") &&
+			!b->children) {
 			next_level = "";
 		}
 
-		b = mxmlWalkNext(b, body_in, MXML_DESCEND);
+		b = xmlWalkNext(b);
 	}
+	
 	if (parameter_name && next_level) {
 		external_action_parameter_execute("get", "name", parameter_name, next_level);
 		if (external_action_handle(json_handle_get_parameter_name))
@@ -1068,29 +1457,31 @@ int xml_handle_get_parameter_names(mxml_node_t *body_in,
 		}
 	}
 
-	n = mxmlNewElement(body_out, "cwmp:GetParameterNamesResponse");
+	n = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:GetParameterNamesResponse", NULL);
 	if (!n) goto out;
 
-	parameter_list = mxmlNewElement(n, "ParameterList");
+	parameter_list = xmlNewChild(n, NULL, (const xmlChar*)"ParameterList", NULL);
 	if (!parameter_list) goto out;
 
 	while (external_list_parameter.next != &external_list_parameter) {
 		external_parameter = list_entry(external_list_parameter.next, struct external_parameter, list);
 
-		n = mxmlNewElement(parameter_list, "ParameterInfoStruct");
+		n = xmlNewChild(parameter_list, NULL, (const xmlChar*)"ParameterInfoStruct", NULL);
 		if (!n) goto out;
 
-		t = mxmlNewElement(n, "Name");
+		t = xmlNewChild(n, NULL, (const xmlChar*)"Name", NULL);
 		if (!t) goto out;
 
-		t = mxmlNewOpaque(t, external_parameter->name);
+		xmlNodePtr text_node = xmlNewText((const xmlChar*)external_parameter->name);
+		if (!text_node) goto out;
+		xmlAddChild(t, text_node);
+
+		t = xmlNewChild(n, NULL, (const xmlChar*)"Writable", NULL);
 		if (!t) goto out;
 
-		t = mxmlNewElement(n, "Writable");
-		if (!t) goto out;
-
-		t = mxmlNewOpaque(t, external_parameter->data);
-		if (!t) goto out;
+		text_node = xmlNewText((const xmlChar*)external_parameter->data);
+		if (!text_node) goto out;
+		xmlAddChild(t, text_node);
 
 		counter++;
 
@@ -1101,7 +1492,7 @@ int xml_handle_get_parameter_names(mxml_node_t *body_in,
 	if (asprintf(&c, "cwmp:ParameterInfoStruct[%d]", counter) == -1)
 		goto out;
 
-	mxmlElementSetAttr(parameter_list, "soap_enc:arrayType", c);
+	xmlSetProp(parameter_list, (const xmlChar*)"soap_enc:arrayType", (const xmlChar*)c);
 	FREE(c);
 
 	log_message(NAME, L_NOTICE, "send GetParameterNamesResponse to the ACS\n");
@@ -1119,31 +1510,30 @@ out:
 
 /* GetParameterAttributes */
 
-static int xml_handle_get_parameter_attributes(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+static int xml_handle_get_parameter_attributes(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out)
 {
-	mxml_node_t *n, *parameter_list, *b = body_in, *body_out, *t;
+	xmlNodePtr n, parameter_list, b = body_in, body_out, t;
 	struct external_parameter *external_parameter;
 	char *parameter_name = NULL;
 	int counter = 0, fc, code = FAULT_9002;
 	struct list_head *ilist;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body",
-				NULL, NULL, MXML_DESCEND);
+	body_out = xmlFindElementByName(tree_out, "soap_env:Body");
 	if (!body_out) return -1;
 
 	while (b) {
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "string")) {
-			parameter_name = b->value.opaque;
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "string")) {
+			parameter_name = (char*)b->content;
 		}
 
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "string") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "string") &&
+			!b->children) {
 			parameter_name = "";
 		}
 		if (parameter_name) {
@@ -1156,35 +1546,38 @@ static int xml_handle_get_parameter_attributes(mxml_node_t *body_in,
 				goto fault_out;
 			}
 		}
-		b = mxmlWalkNext(b, body_in, MXML_DESCEND);
+		b = xmlWalkNext(b);
 		parameter_name = NULL;
 	}
 
-	n = mxmlNewElement(body_out, "cwmp:GetParameterAttributesResponse");
+	n = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:GetParameterAttributesResponse", NULL);
 	if (!n) goto out;
 
-	parameter_list = mxmlNewElement(n, "ParameterList");
+	parameter_list = xmlNewChild(n, NULL, (const xmlChar*)"ParameterList", NULL);
 	if (!parameter_list) goto out;
 
 	while (external_list_parameter.next != &external_list_parameter) {
 
 		external_parameter = list_entry(external_list_parameter.next, struct external_parameter, list);
 
-		n = mxmlNewElement(parameter_list, "ParameterAttributeStruct");
+		n = xmlNewChild(parameter_list, NULL, (const xmlChar*)"ParameterAttributeStruct", NULL);
 			if (!n) goto out;
 
-		t = mxmlNewElement(n, "Name");
+		t = xmlNewChild(n, NULL, (const xmlChar*)"Name", NULL);
 		if (!t) goto out;
 
-		t = mxmlNewOpaque(t, external_parameter->name);
-		if (!t) goto out;
+		xmlNodePtr text_node = xmlNewText((const xmlChar*)external_parameter->name);
+		if (!text_node) goto out;
+		xmlAddChild(t, text_node);
 
-		t = mxmlNewElement(n, "Notification");
+		t = xmlNewChild(n, NULL, (const xmlChar*)"Notification", NULL);
 		if (!t) goto out;
-		t = mxmlNewOpaque(t, external_parameter->data ? external_parameter->data : "");
-		if (!t) goto out;
+		
+		text_node = xmlNewText((const xmlChar*)(external_parameter->data ? external_parameter->data : ""));
+		if (!text_node) goto out;
+		xmlAddChild(t, text_node);
 
-		t = mxmlNewElement(n, "AccessList");
+		t = xmlNewChild(n, NULL, (const xmlChar*)"AccessList", NULL);
 		if (!t) goto out;
 
 		counter++;
@@ -1195,7 +1588,7 @@ static int xml_handle_get_parameter_attributes(mxml_node_t *body_in,
 	if (asprintf(&c, "cwmp:ParameterAttributeStruct[%d]", counter) == -1)
 		goto out;
 
-	mxmlElementSetAttr(parameter_list, "soap_enc:arrayType", c);
+	xmlSetProp(parameter_list, (const xmlChar*)"soap_enc:arrayType", (const xmlChar*)c);
 	FREE(c);
 
 	log_message(NAME, L_NOTICE, "send GetParameterAttributesResponse to the ACS\n");
@@ -1212,63 +1605,63 @@ out:
 
 /* SetParameterAttributes */
 
-static int xml_handle_set_parameter_attributes(mxml_node_t *body_in,
-						mxml_node_t *tree_in,
-						mxml_node_t *tree_out) {
+static int xml_handle_set_parameter_attributes(xmlNodePtr body_in,
+						xmlNodePtr tree_in,
+						xmlNodePtr tree_out) {
 
-	mxml_node_t *b = body_in, *body_out;
+	xmlNodePtr b = body_in, body_out;
 	char *c, *parameter_name = NULL, *parameter_notification = NULL, *success = NULL;
 	uint8_t attr_notification_update = 0;
 	struct external_parameter *external_parameter;
 	struct list_head *ilist;
 	int fc, code = FAULT_9002 ;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body", NULL, NULL, MXML_DESCEND);
+	body_out = xmlFindElementByName(tree_out, "soap_env:Body");
 	if (!body_out) goto error;
 
 	while (b != NULL) {
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "SetParameterAttributesStruct")) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "SetParameterAttributesStruct")) {
 			attr_notification_update = 0;
 			parameter_name = NULL;
 			parameter_notification = NULL;
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "Name")) {
-			parameter_name = b->value.opaque;
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "Name")) {
+			parameter_name = (char*)b->content;
 		}
 
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "Name") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "Name") &&
+			!b->children) {
 			parameter_name = "";
 		}
 
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "NotificationChange")) {
-			if (strcasecmp(b->value.opaque, "true") == 0) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "NotificationChange")) {
+			if (strcasecmp((const char*)b->content, "true") == 0) {
 				attr_notification_update = 1;
-			} else if (strcasecmp(b->value.opaque, "false") == 0) {
+			} else if (strcasecmp((const char*)b->content, "false") == 0) {
 				attr_notification_update = 0;
 			} else {
-				attr_notification_update = (uint8_t) atoi(b->value.opaque);
+				attr_notification_update = (uint8_t) atoi((const char*)b->content);
 			}
 		}
 
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "Notification")) {
-			parameter_notification = b->value.opaque;
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "Notification")) {
+			parameter_notification = (char*)b->content;
 		}
 
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "Notification") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "Notification") &&
+			!b->children) {
 			parameter_notification = "";
 		}
 
@@ -1278,7 +1671,7 @@ static int xml_handle_set_parameter_attributes(mxml_node_t *body_in,
 			parameter_name = NULL;
 			parameter_notification = NULL;
 		}
-		b = mxmlWalkNext(b, body_in, MXML_DESCEND);
+		b = xmlWalkNext(b);
 	}
 
 	external_action_simple_execute("apply", "notification", NULL);
@@ -1296,7 +1689,7 @@ static int xml_handle_set_parameter_attributes(mxml_node_t *body_in,
 	if(!success)
 		goto fault_out;
 
-	b = mxmlNewElement(body_out, "cwmp:SetParameterAttributesResponse");
+	b = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:SetParameterAttributesResponse", NULL);
 	if (!b) goto error;
 
 	free(success);
@@ -1319,90 +1712,90 @@ error:
 
 /* Download */
 
-static int xml_handle_download(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+static int xml_handle_download(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out)
 {
-	mxml_node_t *n, *t, *b = body_in, *body_out;
+	xmlNodePtr n, t, b = body_in, body_out;
 	char *download_url = NULL, *file_size = NULL,
 		*command_key = NULL, *file_type = NULL, *username = NULL,
 		*password = NULL, r;
 	int delay = -1, code = FAULT_9002;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body", NULL, NULL, MXML_DESCEND);
+	body_out = xmlFindElementByName(tree_out, "soap_env:Body");
 	if (!body_out) return -1;
 
 	while (b != NULL) {
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "CommandKey")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "CommandKey")) {
 			FREE(command_key);
 			command_key = xml_get_value_with_whitespace(&b, body_in);
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "CommandKey") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "CommandKey") &&
+			!b->children) {
 			FREE(command_key);
 			command_key = strdup("");
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "FileType")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "FileType")) {
 			FREE(file_type);
 			file_type = xml_get_value_with_whitespace(&b, body_in);
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "URL")) {
-			download_url = b->value.opaque;
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "URL")) {
+			download_url = (char*)b->content;
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "Username")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "Username")) {
 			FREE(username);
 			username = xml_get_value_with_whitespace(&b, body_in);
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "Username") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "Username") &&
+			!b->children) {
 			FREE(username);
 			username = strdup("");
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "Password")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "Password")) {
 			FREE(password);
 			password = xml_get_value_with_whitespace(&b, body_in);
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "Password") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "Password") &&
+			!b->children) {
 			FREE(password);
 			password = strdup("");
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "FileSize")) {
-			file_size = b->value.opaque;
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "FileSize")) {
+			file_size = (char*)b->content;
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "FileSize") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "FileSize") &&
+			!b->children) {
 			file_size = "0";
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "DelaySeconds")) {
-			delay = atoi(b->value.opaque);
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "DelaySeconds")) {
+			delay = atoi((const char*)b->content);
 		}
-		b = mxmlWalkNext(b, body_in, MXML_DESCEND);
+		b = xmlWalkNext(b);
 	}
 	if (!download_url || !file_size || !command_key || !file_type || !username || !password || delay < 0) {
 		code = FAULT_9003;
@@ -1424,27 +1817,32 @@ static int xml_handle_download(mxml_node_t *body_in,
 	FREE(username);
 	FREE(password);
 
-	t = mxmlNewElement(body_out, "cwmp:DownloadResponse");
+	t = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:DownloadResponse", NULL);
 	if (!t) return -1;
 
-	b = mxmlNewElement(t, "Status");
+	b = xmlNewChild(t, NULL, (const xmlChar*)"Status", NULL);
 	if (!b) return -1;
 
-	b = mxmlNewElement(t, "StartTime");
+	b = xmlNewChild(t, NULL, (const xmlChar*)"StartTime", NULL);
 	if (!b) return -1;
 
-	b = mxmlNewOpaque(b, UNKNOWN_TIME);
+	xmlNodePtr text_node = xmlNewText((const xmlChar*)UNKNOWN_TIME);
+	if (!text_node) return -1;
+	xmlAddChild(b, text_node);
+
+	b = xmlFindElementByName(t, "Status");
 	if (!b) return -1;
 
-	b = mxmlFindElement(t, tree_out, "Status", NULL, NULL, MXML_DESCEND);
+	text_node = xmlNewText((const xmlChar*)"1");
+	if (!text_node) return -1;
+	xmlAddChild(b, text_node);
+
+	b = xmlNewChild(t, NULL, (const xmlChar*)"CompleteTime", NULL);
 	if (!b) return -1;
 
-	b = mxmlNewOpaque(b, "1");
-
-	b = mxmlNewElement(t, "CompleteTime");
-	if (!b) return -1;
-
-	b = mxmlNewOpaque(b, UNKNOWN_TIME);
+	text_node = xmlNewText((const xmlChar*)UNKNOWN_TIME);
+	if (!text_node) return -1;
+	xmlAddChild(b, text_node);
 	if (!b) return -1;
 
 	log_message(NAME, L_NOTICE, "send DownloadResponse to the ACS\n");
@@ -1462,82 +1860,82 @@ fault_out:
 
 /* upload */
 
-static int xml_handle_upload(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+static int xml_handle_upload(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out)
 {
-	mxml_node_t *n, *t, *b = body_in, *body_out;
+	xmlNodePtr n, t, b = body_in, body_out;
 	char *upload_url = NULL,
 		*command_key = NULL, *file_type = NULL, *username = NULL,
 		*password = NULL, r;
 	int delay = -1, code = FAULT_9002;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body", NULL, NULL, MXML_DESCEND);
+	body_out = xmlFindElementByName(tree_out, "soap_env:Body");
 	if (!body_out) {
 		printf("!body_out) \n" );
 		return -1;
 	}
 
 	while (b != NULL) {
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "CommandKey")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "CommandKey")) {
 			FREE(command_key);
 			command_key = xml_get_value_with_whitespace(&b, body_in);
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "CommandKey") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "CommandKey") &&
+			!b->children) {
 			FREE(command_key);
 			command_key = strdup("");
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "FileType")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "FileType")) {
 			FREE(file_type);
 			file_type = xml_get_value_with_whitespace(&b, body_in);
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "URL")) {
-			upload_url = b->value.opaque;
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "URL")) {
+			upload_url = (char*)b->content;
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "Username")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "Username")) {
 			FREE(username);
 			username = xml_get_value_with_whitespace(&b, body_in);
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "Username") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "Username") &&
+			!b->children) {
 			FREE(username);
 			username = strdup("");
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "Password")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "Password")) {
 			FREE(password);
 			password = xml_get_value_with_whitespace(&b, body_in);
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "Password") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "Password") &&
+			!b->children) {
 			FREE(password);
 			password = strdup("");
 		}
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "DelaySeconds")) {
-			delay = atoi(b->value.opaque);
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "DelaySeconds")) {
+			delay = atoi((const char*)b->content);
 		}
-		b = mxmlWalkNext(b, body_in, MXML_DESCEND);
+		b = xmlWalkNext(b);
 	}
 	if (!upload_url || !command_key || !file_type || !username || !password || delay < 0) {
 		code = FAULT_9003;
@@ -1559,27 +1957,32 @@ static int xml_handle_upload(mxml_node_t *body_in,
 	FREE(username);
 	FREE(password);
 
-	t = mxmlNewElement(body_out, "cwmp:UploadResponse");
+	t = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:UploadResponse", NULL);
 	if (!t) return -1;
 
-	b = mxmlNewElement(t, "Status");
+	b = xmlNewChild(t, NULL, (const xmlChar*)"Status", NULL);
 	if (!b) return -1;
 
-	b = mxmlNewElement(t, "StartTime");
+	b = xmlNewChild(t, NULL, (const xmlChar*)"StartTime", NULL);
 	if (!b) return -1;
 
-	b = mxmlNewOpaque(b, UNKNOWN_TIME);
+	xmlNodePtr text_node = xmlNewText((const xmlChar*)UNKNOWN_TIME);
+	if (!text_node) return -1;
+	xmlAddChild(b, text_node);
+
+	b = xmlFindElementByName(t, "Status");
 	if (!b) return -1;
 
-	b = mxmlFindElement(t, tree_out, "Status", NULL, NULL, MXML_DESCEND);
+	text_node = xmlNewText((const xmlChar*)"1");
+	if (!text_node) return -1;
+	xmlAddChild(b, text_node);
+
+	b = xmlNewChild(t, NULL, (const xmlChar*)"CompleteTime", NULL);
 	if (!b) return -1;
 
-	b = mxmlNewOpaque(b, "1");
-
-	b = mxmlNewElement(t, "CompleteTime");
-	if (!b) return -1;
-
-	b = mxmlNewOpaque(b, UNKNOWN_TIME);
+	text_node = xmlNewText((const xmlChar*)UNKNOWN_TIME);
+	if (!text_node) return -1;
+	xmlAddChild(b, text_node);
 	if (!b) return -1;
 
 	return 0;
@@ -1596,16 +1999,16 @@ fault_out:
 
 /* FactoryReset */
 
-static int xml_handle_factory_reset(mxml_node_t *node,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+static int xml_handle_factory_reset(xmlNodePtr node,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out)
 {
-	mxml_node_t *body_out, *b;
+	xmlNodePtr body_out, b;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body", NULL, NULL, MXML_DESCEND);
+	body_out = xmlFindElementByName(tree_out, "soap_env:Body");
 	if (!body_out) return -1;
 
-	b = mxmlNewElement(body_out, "cwmp:FactoryResetResponse");
+	b = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:FactoryResetResponse", NULL);
 	if (!b) return -1;
 
 	cwmp_add_handler_end_session(ENDS_FACTORY_RESET);
@@ -1616,32 +2019,32 @@ static int xml_handle_factory_reset(mxml_node_t *node,
 
  /* Reboot */
 
-static int xml_handle_reboot(mxml_node_t *node,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+static int xml_handle_reboot(xmlNodePtr node,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out)
 {
-	mxml_node_t *b = node, *body_out;
+	xmlNodePtr b = node, body_out;
 	char *command_key = NULL;
 	int code = FAULT_9002;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body", NULL, NULL, MXML_DESCEND);
+	body_out = xmlFindElementByName(tree_out, "soap_env:Body");
 	if (!body_out) return -1;
 
 	while (b) {
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "CommandKey")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "CommandKey")) {
 			FREE(command_key);
 			command_key = xml_get_value_with_whitespace(&b, node);
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "CommandKey") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "CommandKey") &&
+			!b->children) {
 			FREE(command_key);
 			command_key = strdup("");
 		}
-		b = mxmlWalkNext(b, node, MXML_DESCEND);
+		b = xmlWalkNext(b);
 	}
 
 	if (!command_key) {
@@ -1649,7 +2052,7 @@ static int xml_handle_reboot(mxml_node_t *node,
 		goto fault_out;
 	}
 
-	b = mxmlNewElement(body_out, "cwmp:RebootResponse");
+	b = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:RebootResponse", NULL);
 	if (!b) {
 		FREE(command_key);
 		return -1;
@@ -1671,50 +2074,50 @@ fault_out:
 
 /* ScheduleInform */
 
-static int xml_handle_schedule_inform(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+static int xml_handle_schedule_inform(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out)
 {
-	mxml_node_t *b = body_in, *body_out;
+	xmlNodePtr b = body_in, body_out;
 	char *command_key = NULL;
 	char *delay_seconds = NULL;
 	int  delay = 0, code = FAULT_9002;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body", NULL, NULL, MXML_DESCEND);
+	body_out = xmlFindElementByName(tree_out, "soap_env:Body");
 	if (!body_out) return -1;
 
 	while (b) {
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "CommandKey")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "CommandKey")) {
 			FREE(command_key);
 			command_key = xml_get_value_with_whitespace(&b, body_in);
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "CommandKey") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "CommandKey") &&
+			!b->children) {
 			FREE(command_key);
 			command_key = strdup("");
 		}
 
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "DelaySeconds")) {
-			delay_seconds = b->value.opaque;
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "DelaySeconds")) {
+			delay_seconds = (char*)b->content;
 		}
-		b = mxmlWalkNext(b, body_in, MXML_DESCEND);
+		b = xmlWalkNext(b);
 	}
 	if (delay_seconds) delay = atoi(delay_seconds);
 
 	if (command_key && (delay > 0)) {
 		cwmp_add_scheduled_inform(command_key, delay);
-		b = mxmlNewElement(body_out, "cwmp:ScheduleInformResponse");
+		b = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:ScheduleInformResponse", NULL);
 		if (!b) goto error;
 	}
 	else {
-		code = FAULT_9003;
+		code = FAULT_9003
 		goto fault_out;
 	}
 	FREE(command_key);
@@ -1733,45 +2136,45 @@ error:
 
 /* AddObject */
 
-static int xml_handle_AddObject(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+static int xml_handle_AddObject(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out)
 {
-	mxml_node_t *b = body_in, *t, *body_out;
+	xmlNodePtr b = body_in, t, body_out;
 	char *object_name = NULL, *param_key = NULL;
 	char *status = NULL, *fault = NULL, *instance = NULL;
 	int code = FAULT_9002;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body", NULL, NULL, MXML_DESCEND);
+	body_out = xmlFindElementByName(tree_out, "soap_env:Body");
 	if (!body_out) return -1;
 
 	while (b) {
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "ObjectName")) {
-			object_name = b->value.opaque;
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "ObjectName")) {
+			object_name = (char*)b->content;
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "ObjectName") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "ObjectName") &&
+			!b->children) {
 			object_name = "";
 		}
 
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "ParameterKey")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "ParameterKey")) {
 			free(param_key);
 			param_key = xml_get_value_with_whitespace(&b, body_in);
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "ParameterKey") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "ParameterKey") &&
+			!b->children) {
 			free(param_key);
 			param_key = strdup("");
 		}
-		b = mxmlWalkNext(b, body_in, MXML_DESCEND);
+		b = xmlWalkNext(b);
 	}
 
 	if (!param_key) {
@@ -1801,18 +2204,20 @@ static int xml_handle_AddObject(mxml_node_t *body_in,
 	external_action_simple_execute("apply", "object", param_key);
 	FREE(param_key);
 
-	t = mxmlNewElement(body_out, "cwmp:AddObjectResponse");
+	t = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:AddObjectResponse", NULL);
 	if (!t) goto error;
 
-	b = mxmlNewElement(t, "InstanceNumber");
+	b = xmlNewChild(t, NULL, (const xmlChar*)"InstanceNumber", NULL);
 	if (!b) goto error;
-	b = mxmlNewOpaque(b, instance);
-	if (!b) goto error;
+	xmlNodePtr text_node = xmlNewText((const xmlChar*)instance);
+	if (!text_node) goto error;
+	xmlAddChild(b, text_node);
 
-	b = mxmlNewElement(t, "Status");
+	b = xmlNewChild(t, NULL, (const xmlChar*)"Status", NULL);
 	if (!b) goto error;
-	b = mxmlNewOpaque(b, status);
-	if (!b) goto error;
+	text_node = xmlNewText((const xmlChar*)status);
+	if (!text_node) goto error;
+	xmlAddChild(b, text_node);
 
 	free(instance);
 	free(status);
@@ -1840,45 +2245,45 @@ error:
 
 /* DeleteObject */
 
-static int xml_handle_DeleteObject(mxml_node_t *body_in,
-					mxml_node_t *tree_in,
-					mxml_node_t *tree_out)
+static int xml_handle_DeleteObject(xmlNodePtr body_in,
+					xmlNodePtr tree_in,
+					xmlNodePtr tree_out)
 {
-	mxml_node_t *b = body_in, *t, *body_out;
+	xmlNodePtr b = body_in, t, body_out;
 	char *object_name = NULL, *param_key = NULL;
 	char *status = NULL, *fault = NULL;
 	int code = FAULT_9002;
 
-	body_out = mxmlFindElement(tree_out, tree_out, "soap_env:Body", NULL, NULL, MXML_DESCEND);
+	body_out = xmlFindElementByName(tree_out, "soap_env:Body");
 	if (!body_out) return -1;
 
 	while (b) {
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "ObjectName")) {
-			object_name = b->value.opaque;
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "ObjectName")) {
+			object_name = (char*)b->content;
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "ObjectName") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "ObjectName") &&
+			!b->children) {
 			object_name = "";
 		}
 
-		if (b && b->type == MXML_OPAQUE &&
-			b->value.opaque &&
-			b->parent->type == MXML_ELEMENT &&
-			!strcmp(b->parent->value.element.name, "ParameterKey")) {
+		if (b && b->type == XML_TEXT_NODE &&
+			b->content &&
+			b->parent->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->parent->name, "ParameterKey")) {
 			free(param_key);
 			param_key = xml_get_value_with_whitespace(&b, body_in);
 		}
-		if (b && b->type == MXML_ELEMENT &&
-			!strcmp(b->value.element.name, "ParameterKey") &&
-			!b->child) {
+		if (b && b->type == XML_ELEMENT_NODE &&
+			!strcmp((const char*)b->name, "ParameterKey") &&
+			!b->children) {
 			free(param_key);
 			param_key = strdup("");
 		}
-		b = mxmlWalkNext(b, body_in, MXML_DESCEND);
+		b = xmlWalkNext(b);
 	}
 
 	if (!param_key) {
@@ -1908,13 +2313,16 @@ static int xml_handle_DeleteObject(mxml_node_t *body_in,
 	external_action_simple_execute("apply", "object", param_key);
 	FREE(param_key);
 
-	t = mxmlNewElement(body_out, "cwmp:DeleteObjectResponse");
+	t = xmlNewChild(body_out, NULL, (const xmlChar*)"cwmp:DeleteObjectResponse", NULL);
 	if (!t) goto error;
 
-	b = mxmlNewElement(t, "Status");
+	b = xmlNewChild(t, NULL, (const xmlChar*)"Status", NULL);
 	if (!b) goto error;
-	b = mxmlNewOpaque(b, status);
-	if (!b) goto error;
+	
+	xmlNodePtr text_node = xmlNewText((const xmlChar*)status);
+	if (!text_node) goto error;
+	xmlAddChild(b, text_node);
+	
 	free(status);
 	free(fault);
 
@@ -1938,97 +2346,132 @@ error:
 
 /* Fault */
 
-mxml_node_t *xml_create_generic_fault_message(mxml_node_t *body, int code)
+xmlNodePtr xml_create_generic_fault_message(xmlNodePtr body, int code)
 {
-	mxml_node_t *b, *t, *u;
+    xmlNodePtr b, t;
 
-	b = mxmlNewElement(body, "soap_env:Fault");
-	if (!b) return NULL;
+    // Create Fault element
+    b = xmlNewChild(body, NULL, (const xmlChar*)"soap_env:Fault", NULL);
+    if (!b) return NULL;
 
-	t = mxmlNewElement(b, "faultcode");
-	if (!t) return NULL;
+    // Create faultcode element and set content
+    t = xmlNewChild(b, NULL, (const xmlChar*)"faultcode", NULL);
+    if (!t) return NULL;
+    
+    xmlNodePtr text_node = xmlNewText((const xmlChar*)fault_array[code].type);
+    if (!text_node) return NULL;
+    xmlAddChild(t, text_node);
 
-	u = mxmlNewOpaque(t, fault_array[code].type);
-	if (!u) return NULL;
+    // Create faultstring element and set content
+    t = xmlNewChild(b, NULL, (const xmlChar*)"faultstring", NULL);
+    if (!t) return NULL;
+    
+    text_node = xmlNewText((const xmlChar*)"CWMP fault");
+    if (!text_node) return NULL;
+    xmlAddChild(t, text_node);
 
-	t = mxmlNewElement(b, "faultstring");
-	if (!t) return NULL;
+    // Create detail element
+    t = xmlNewChild(b, NULL, (const xmlChar*)"detail", NULL);
+    if (!t) return NULL;
 
-	u = mxmlNewOpaque(t, "CWMP fault");
-	if (!u) return NULL;
+    // Create cwmp:Fault element
+    b = xmlNewChild(t, NULL, (const xmlChar*)"cwmp:Fault", NULL);
+    if (!b) return NULL;
 
-	b = mxmlNewElement(b, "detail");
-	if (!b) return NULL;
+    // Create FaultCode element and set content
+    t = xmlNewChild(b, NULL, (const xmlChar*)"FaultCode", NULL);
+    if (!t) return NULL;
+    
+    text_node = xmlNewText((const xmlChar*)fault_array[code].code);
+    if (!text_node) return NULL;
+    xmlAddChild(t, text_node);
 
-	b = mxmlNewElement(b, "cwmp:Fault");
-	if (!b) return NULL;
+    // Create FaultString element and set content
+    t = xmlNewChild(b, NULL, (const xmlChar*)"FaultString", NULL);
+    if (!t) return NULL;
+    
+    text_node = xmlNewText((const xmlChar*)fault_array[code].string);
+    if (!text_node) return NULL;
+    xmlAddChild(t, text_node);
 
-	t = mxmlNewElement(b, "FaultCode");
-	if (!t) return NULL;
-
-	u = mxmlNewOpaque(t, fault_array[code].code);
-	if (!u) return NULL;
-
-	t = mxmlNewElement(b, "FaultString");
-	if (!t) return NULL;
-
-	u = mxmlNewOpaque(t, fault_array[code].string);
-	if (!u) return NULL;
-
-	log_message(NAME, L_NOTICE, "send Fault: %s: '%s'\n", fault_array[code].code, fault_array[code].string);
-	return b;
+    log_message(NAME, L_NOTICE, "send Fault: %s: '%s'\n", fault_array[code].code, fault_array[code].string);
+    return b;
 }
 
-int xml_create_set_parameter_value_fault_message(mxml_node_t *body, int code)
+int xml_create_set_parameter_value_fault_message(xmlNodePtr body, int code)
 {
-	struct external_parameter *external_parameter;
-	mxml_node_t *b, *n, *t;
-	int index;
+    struct external_parameter *external_parameter;
+    xmlNodePtr b, n, t;
+    int index;
+    xmlNodePtr text_node;
 
-	n = xml_create_generic_fault_message(body, code);
-	if (!n)
-		return -1;
+    n = xml_create_generic_fault_message(body, code);
+    if (!n)
+        return -1;
 
-	while (external_list_parameter.next != &external_list_parameter) {
+    while (external_list_parameter.next != &external_list_parameter) {
+        external_parameter = list_entry(external_list_parameter.next, struct external_parameter, list);
 
-		external_parameter = list_entry(external_list_parameter.next, struct external_parameter, list);
+        if (external_parameter->fault_code && external_parameter->fault_code[0]=='9') {
+            index = xml_get_index_fault(external_parameter->fault_code);
 
-		if (external_parameter->fault_code && external_parameter->fault_code[0]=='9') {
+            // Create SetParameterValuesFault element
+            b = xmlNewChild(n, NULL, (const xmlChar*)"SetParameterValuesFault", NULL);
+            if (!b) return -1;
 
-			index = xml_get_index_fault(external_parameter->fault_code);
+            // Create ParameterName element
+            t = xmlNewChild(b, NULL, (const xmlChar*)"ParameterName", NULL);
+            if (!t) return -1;
+            
+            // Set ParameterName value
+            text_node = xmlNewText((const xmlChar*)external_parameter->name);
+            if (!text_node) return -1;
+            xmlAddChild(t, text_node);
 
-			b = mxmlNewElement(n, "SetParameterValuesFault");
-			if (!b) return -1;
+            // Create FaultCode element
+            t = xmlNewChild(b, NULL, (const xmlChar*)"FaultCode", NULL);
+            if (!t) return -1;
+            
+            // Set FaultCode value
+            text_node = xmlNewText((const xmlChar*)external_parameter->fault_code);
+            if (!text_node) return -1;
+            xmlAddChild(t, text_node);
 
-			t = mxmlNewElement(b, "ParameterName");
-			if (!t) return -1;
-			t = mxmlNewOpaque(t, external_parameter->name);
-			if (!t) return -1;
-
-			t = mxmlNewElement(b, "FaultCode");
-			if (!t) return -1;
-			t = mxmlNewOpaque(t, external_parameter->fault_code);
-			if (!t) return -1;
-
-			t = mxmlNewElement(b, "FaultString");
-			if (!t) return -1;
-			t = mxmlNewOpaque(t, fault_array[index].string);
-			if (!t) return -1;
-		}
-		external_parameter_delete(external_parameter);
-	}
-	return 0;
+            // Create FaultString element
+            t = xmlNewChild(b, NULL, (const xmlChar*)"FaultString", NULL);
+            if (!t) return -1;
+            
+            // Set FaultString value
+            text_node = xmlNewText((const xmlChar*)fault_array[index].string);
+            if (!text_node) return -1;
+            xmlAddChild(t, text_node);
+        }
+        external_parameter_delete(external_parameter);
+    }
+    return 0;
 }
 
-int xml_add_cwmpid(mxml_node_t *tree)
+int xml_add_cwmpid(xmlNodePtr tree)
 {
-	mxml_node_t *b;
-	static unsigned int id = 0;
-	char buf[16];
-	b = mxmlFindElement(tree, tree, "cwmp:ID", NULL, NULL, MXML_DESCEND);
-	if (!b) return -1;
-	snprintf(buf, sizeof(buf), "%u", ++id);
-	b = mxmlNewOpaque(b, buf);
-	if (!b) return -1;
-	return 0;
+    xmlNodePtr b;
+    static unsigned int id = 0;
+    char buf[16];
+    
+    // Find the cwmp:ID element
+    b = NULL;
+    for (xmlNodePtr curr = tree; curr != NULL; curr = xmlWalkNext(curr, tree, 1)) {
+        if (curr->type == XML_ELEMENT_NODE && !xmlStrcmp(curr->name, (const xmlChar*)"cwmp:ID")) {
+            b = curr;
+            break;
+        }
+    }
+    if (!b) return -1;
+    
+    // Set the ID
+    snprintf(buf, sizeof(buf), "%u", ++id);
+    xmlNodePtr text = xmlNewText((const xmlChar*)buf);
+    if (!text) return -1;
+    xmlAddChild(b, text);
+    
+    return 0;
 }
