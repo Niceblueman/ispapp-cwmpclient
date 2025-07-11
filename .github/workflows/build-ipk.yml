@@ -42,6 +42,9 @@ jobs:
           # - ramips-mt7621-23.05-SNAPSHOT
           # - ramips-rt288x-23.05-SNAPSHOT
           # - ramips-rt305x-23.05-SNAPSHOT
+          - aarch64_generic-23.05-SNAPSHOT
+          # - aarch64_cortex-a53-23.05-SNAPSHOT
+          # - aarch64_cortex-a72-23.05-SNAPSHOT
           # - arm_cortex-a15_neon-vfpv4-23.05-SNAPSHOT
           # - x86_64-23.05-SNAPSHOT
           # - arm_cortex-a5_vfpv4-23.05-SNAPSHOT
@@ -83,9 +86,6 @@ jobs:
           # - aarch64_cortex-a53
           # - aarch64_generic
           # # possible working archs for some skynet devices 
-          # - aarch64_generic-23.05-SNAPSHOT
-          # - aarch64_cortex-a53-23.05-SNAPSHOT
-          # - aarch64_cortex-a72-23.05-SNAPSHOT
           # # end
           # - arm_cortex-a15_neon-vfpv4
           # - x86_64
@@ -193,13 +193,13 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           artifacts: |
-            bin/packages/**/ispappd/*.ipk
+            /builder/bin/packages/**/ispappd/*.ipk
           tag: ${{ matrix.arch }}
       - name: Create directory for R2 upload
         run: mkdir -p r2-upload/packages/${{ matrix.arch }}
       - name: Move packages to R2 upload directory
         run: |
-          cp bin/packages/**/ispappd/*.ipk r2-upload/packages/${{ matrix.arch }}/
+          cp /builder/bin/packages/**/ispappd/*.ipk r2-upload/packages/${{ matrix.arch }}/
       - name: Upload to Cloudflare R2
         uses: ryand56/r2-upload-action@latest
         with:
