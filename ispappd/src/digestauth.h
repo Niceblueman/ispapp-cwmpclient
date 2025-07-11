@@ -5,7 +5,7 @@
 #define DIGESTAUTH_H_
 
 #define REALM "realm@ispappcwmp"
-#define OPAQUE "328458fab28345ae87ab3210a8513b14eff452a2"
+#define OPAQUE "ispappcwmp" // opaque@ispappcwmp
 
 /**
  * MHD-internal return code for "YES".

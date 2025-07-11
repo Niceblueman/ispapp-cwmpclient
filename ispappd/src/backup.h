@@ -2,8 +2,15 @@
 #define _ISPAPPCWMP_BACKUP_H__
 
 #include <libxml/tree.h>
-#define BACKUP_DIR "/etc/easycwmp"
+#define BACKUP_DIR "/etc/ispapp"
 #define BACKUP_FILE BACKUP_DIR"/.backup.xml"
+#include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <uci.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#include <time.h>
 
 int backup_extract_transfer_complete(xmlNodePtr node, char **msg_out, int *method_id);
 int backup_remove_transfer_complete(xmlNodePtr node);

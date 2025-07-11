@@ -1,12 +1,43 @@
 
 #ifndef _ISPAPPCWMP_ISPAPPCWMP_H__
 #define _ISPAPPCWMP_ISPAPPCWMP_H__
-
+#ifndef CLOCK_MONOTONIC
+#define CLOCK_MONOTONIC		1
+#endif
 #include <stdlib.h>
+#include <stdlib.h>
+#include <string.h>
+#include <syslog.h>
+#include <getopt.h>
+#include <limits.h>
+#include <locale.h>
+#include <unistd.h>
+#include <net/if.h>
+#include <arpa/inet.h>
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
+#include <libubox/uloop.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/file.h>
+#ifdef JSONC
+ #include <json-c/json.h>
+#else
+ #include <json/json.h>
+#endif
+#include "ispappcwmp.h"
+#include "config.h"
+#include "cwmp.h"
+#include "ubus.h"
+#include "command.h"
+#include "log.h"
+#include "external.h"
+#include "backup.h"
+#include "http.h"
+#include "xml.h"
 
-#define NAME	PACKAGE_NAME
-#define ISPAPPCWMP_VERSION	PACKAGE_VERSION
-
+#define NAME "ispappcwmp"
+#define ISPAPPCWMP_VERSION "1.0.0"
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 #define ARRAY_AND_SIZE(x) (x), ARRAY_SIZE(x)
@@ -28,7 +59,7 @@
 #define DDF(format, ...) no_debug(0, format, ## __VA_ARGS__)
 #endif
 
-static inline void no_debug(int level, const char *fmt, ...)
+static inline void no_debug(int _, const char *fmt, ...)
 {
 }
 

@@ -2,30 +2,30 @@
 #include <stdlib.h>
 #include "libxml_helpers.h"
 
-// Helper function to find an element by name (replacement for mxmlFindElement)
-xmlNodePtr xmlFindElementByName(xmlNodePtr node, const char *name)
-{
-    xmlNodePtr curr;
+// // Helper function to find an element by name (replacement for mxmlFindElement)
+// xmlNodePtr xmlFindElementByName(xmlNodePtr node, const char *name)
+// {
+//     xmlNodePtr curr;
     
-    if (!node || !name)
-        return NULL;
+//     if (!node || !name)
+//         return NULL;
         
-    // Check if this is the node we're looking for
-    if (node->name && !strcmp((const char*)node->name, name))
-        return node;
+//     // Check if this is the node we're looking for
+//     if (node->name && !strcmp((const char*)node->name, name))
+//         return node;
         
-    // Check children
-    for (curr = node->children; curr; curr = curr->next) {
-        xmlNodePtr found = xmlFindElementByName(curr, name);
-        if (found)
-            return found;
-    }
+//     // Check children
+//     for (curr = node->children; curr; curr = curr->next) {
+//         xmlNodePtr found = xmlFindElementByName(curr, name);
+//         if (found)
+//             return found;
+//     }
     
-    return NULL;
-}
+//     return NULL;
+// }
 
 // Helper function for node traversal (replacement for mxmlWalkNext)
-xmlNodePtr xmlWalkNext(xmlNodePtr node)
+xmlNodePtr xmlWalkNextOne(xmlNodePtr node)
 {
     if (!node) 
         return NULL;
@@ -40,6 +40,37 @@ xmlNodePtr xmlWalkNext(xmlNodePtr node)
         
     // Try parent's siblings
     for (xmlNodePtr p = node->parent; p; p = p->parent) {
+        if (p->next)
+            return p->next;
+    }
+    
+    return NULL;
+}
+
+// Helper function for node traversal with boundary checking (replacement for mxmlWalkNext)
+xmlNodePtr xmlWalkNext(xmlNodePtr node, xmlNodePtr top, int descend)
+{
+    if (!node) 
+        return NULL;
+        
+    // If we're at the top node, only go to children if descend is true
+    if (node == top) {
+        if (descend && node->children)
+            return node->children;
+        else
+            return NULL;
+    }
+        
+    // First try children if descend is true
+    if (descend && node->children)
+        return node->children;
+        
+    // Then try siblings, but stay within the top boundary
+    if (node->next)
+        return node->next;
+        
+    // Try parent's siblings, but don't go beyond top
+    for (xmlNodePtr p = node->parent; p && p != top; p = p->parent) {
         if (p->next)
             return p->next;
     }

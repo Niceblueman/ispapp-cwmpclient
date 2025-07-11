@@ -1,0 +1,103 @@
+# Makefile for ispappd with object file destinations
+# This Makefile can be used if autotools is not available
+
+# Configuration
+CC = gcc
+CFLAGS = -Wall -Wextra -O2 -std=c99
+LDFLAGS = 
+LIBS = -luci -lubox -lubus -lxml2 -lcurl -ljson-c
+
+# Directories
+SRCDIR = src
+OBJDIR = build-output/obj
+BINDIR = build-output/bin
+DEPDIR = build-output/deps
+
+# Target binary
+TARGET = ispappd
+BINARY = $(BINDIR)/$(TARGET)
+
+# Source files
+SOURCES = $(wildcard $(SRCDIR)/*.c)
+OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+DEPENDS = $(SOURCES:$(SRCDIR)/%.c=$(DEPDIR)/%.d)
+
+# Include directories
+INCLUDES = -I$(SRCDIR) -I/usr/include/libxml2
+
+# Default target
+all: $(BINARY)
+
+# Create directories
+$(OBJDIR):
+	@mkdir -p $(OBJDIR)
+
+$(BINDIR):
+	@mkdir -p $(BINDIR)
+
+$(DEPDIR):
+	@mkdir -p $(DEPDIR)
+
+# Build the binary
+$(BINARY): $(OBJECTS) | $(BINDIR)
+	@echo "Linking $(TARGET)..."
+	@$(CC) $(OBJECTS) -o $@ $(LDFLAGS) $(LIBS)
+	@echo "Build complete: $@"
+
+# Compile source files to object files
+$(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR) $(DEPDIR)
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) $(INCLUDES) -MMD -MP -MF $(DEPDIR)/$*.d -c $< -o $@
+
+# Include dependency files
+-include $(DEPENDS)
+
+# Clean build artifacts
+clean:
+	@echo "Cleaning build artifacts..."
+	@rm -rf build-output
+
+# Install binary
+install: $(BINARY)
+	@echo "Installing $(TARGET)..."
+	@install -d /usr/bin
+	@install -m 755 $(BINARY) /usr/bin/$(TARGET)
+
+# Uninstall binary
+uninstall:
+	@echo "Uninstalling $(TARGET)..."
+	@rm -f /usr/bin/$(TARGET)
+
+# Show build information
+info:
+	@echo "Build Information:"
+	@echo "  Source directory: $(SRCDIR)"
+	@echo "  Object directory: $(OBJDIR)"
+	@echo "  Binary directory: $(BINDIR)"
+	@echo "  Target binary:    $(BINARY)"
+	@echo "  Compiler:         $(CC)"
+	@echo "  CFLAGS:           $(CFLAGS)"
+	@echo "  LDFLAGS:          $(LDFLAGS)"
+	@echo "  LIBS:             $(LIBS)"
+
+# Debug target
+debug: CFLAGS += -g -DDEBUG
+debug: $(BINARY)
+
+# Development target
+devel: CFLAGS += -g -DDEBUG -DDEVEL
+devel: $(BINARY)
+
+# Help target
+help:
+	@echo "Available targets:"
+	@echo "  all      - Build the project (default)"
+	@echo "  clean    - Clean build artifacts"
+	@echo "  install  - Install the binary"
+	@echo "  uninstall- Uninstall the binary"
+	@echo "  debug    - Build with debug symbols"
+	@echo "  devel    - Build with debug and development flags"
+	@echo "  info     - Show build information"
+	@echo "  help     - Show this help message"
+
+.PHONY: all clean install uninstall info debug devel help

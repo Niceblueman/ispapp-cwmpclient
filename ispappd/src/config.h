@@ -5,8 +5,12 @@
 
 #include <uci.h>
 #include <time.h>
-
-#include "ispappcwmp.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <libxml/tree.h>
+#include <time.h>
 
 void config_exit(void);
 void config_load(void);

@@ -1,11 +1,8 @@
-
-
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <syslog.h>
 #include <time.h>
-
+#include <sys/syslog.h>
 #include "log.h"
 #include "ispappcwmp.h"
 #include "config.h"

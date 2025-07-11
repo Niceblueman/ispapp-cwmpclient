@@ -8,13 +8,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
-#include <libubox/uloop.h>
-#ifdef JSONC
- #include <json-c/json.h>
-#else
- #include <json/json.h>
-#endif
-
 
 #include "external.h"
 #include "ispappcwmp.h"

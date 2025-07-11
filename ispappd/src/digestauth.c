@@ -7,6 +7,7 @@
 #include <time.h>
 #include <fcntl.h>
 #include <unistd.h>
+#define __USE_POSIX199309 199309L
 #include "md5.h"
 #include "digestauth.h"
 #include "ispappcwmp.h"

@@ -1,31 +1,7 @@
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <getopt.h>
-#include <limits.h>
-#include <locale.h>
-#include <unistd.h>
-#include <net/if.h>
-#include <arpa/inet.h>
-#include <linux/netlink.h>
-#include <linux/rtnetlink.h>
-#include <libubox/uloop.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/file.h>
-
-#include "json.h"
 #include "ispappcwmp.h"
-#include "config.h"
-#include "cwmp.h"
-#include "ubus.h"
-#include "command.h"
-#include "log.h"
-#include "external.h"
-#include "backup.h"
-#include "http.h"
-#include "xml.h"
-
+#include <net/if.h>
+#define IFNAMSIZ 16
+static void json_handle_check_parameter_value_change(void);
 static void ISPAPPCWMP_do_reload(struct uloop_timeout *timeout);
 static void ISPAPPCWMP_do_notify(struct uloop_timeout *timeout);
 static void netlink_new_msg(struct uloop_fd *ufd, unsigned events);

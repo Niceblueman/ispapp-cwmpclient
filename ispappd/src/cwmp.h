@@ -5,17 +5,8 @@
 
 #include <libubox/uloop.h>
 #include "xml.h"
-#ifdef HAVE_LIBROXML
-#include <roxml.h>
-typedef node_t xml_node_t;
-#elif HAVE_MXML
-#include <mxml.h>
-#elif NO_XML
-// Stub definitions when no XML library is available
-typedef void xml_node_t;
-#else
-#error "No XML library available"
-#endif
+#include <libxml/tree.h>
+typedef xmlNodePtr xml_node_t;
 
 #define MAX_DOWNLOAD 10
 #define MAX_UPLOAD 10
@@ -143,7 +134,7 @@ struct cwmp_internal {
 };
 
 extern struct cwmp_internal *cwmp;
-struct event_code event_code_array[__EVENT_MAX];
+extern struct event_code event_code_array[__EVENT_MAX];
 
 static void cwmp_periodic_inform(struct uloop_timeout *timeout);
 static void cwmp_do_inform(struct uloop_timeout *timeout);

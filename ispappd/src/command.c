@@ -1,27 +1,21 @@
+
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/wait.h>
-#include <sys/time.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <pwd.h>
 #include <grp.h>
-#include <time.h>
-
-#ifdef JSONC
- #include <json-c/json.h>
-#else
- #include <json/json.h>
-#endif
-
-#include "command.h"
+#include "json.h"
 #include "ispappcwmp.h"
 #include "log.h"
-#include "time.h"
-
+#include "dtime.h"
+#include "command.h"
+# define CLOCK_MONOTONIC		1
 // Safe command whitelist - only allow specific commands for security
 const char *safe_command_patterns[] = {
 	"ping",

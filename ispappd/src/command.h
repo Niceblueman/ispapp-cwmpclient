@@ -1,11 +1,12 @@
 #ifndef _ISPAPPCWMP_COMMAND_H__
 #define _ISPAPPCWMP_COMMAND_H__
 
-#include <time.h>
-#include <sys/time.h>
 
 // Command execution result structure
-struct command_result {
+#ifdef __USE_POSIX
+#include <sys/time.h>
+struct command_result
+{
 	char *stdout_data;
 	char *stderr_data;
 	int exit_code;
@@ -13,9 +14,27 @@ struct command_result {
 	struct timespec end_time;
 	long execution_time_ms;
 };
+#else
+#include <time.h>
+struct mtimespec
+{
+	time_t tv_sec;        /* seconds */
+	long   tv_nsec;       /* nanoseconds */
+};
 
+struct command_result
+{
+	char *stdout_data;
+	char *stderr_data;
+	int exit_code;
+	struct mtimespec start_time; // Changed to timeval for non-POSIX
+	struct mtimespec end_time;   // Changed to timeval for non-POSIX
+	long execution_time_ms;
+};
+#endif
 // Command message format structure
-struct command_message {
+struct command_message
+{
 	char *command;
 	char *args;
 	int timeout_seconds;
@@ -27,11 +46,11 @@ struct command_message {
 int command_init(void);
 void command_cleanup(void);
 
-struct command_result* command_execute_safe(struct command_message *cmd_msg);
+struct command_result *command_execute_safe(struct command_message *cmd_msg);
 void command_result_free(struct command_result *result);
 
-char* command_result_to_json(struct command_result *result);
-struct command_message* command_parse_header(const char *header_value);
+char *command_result_to_json(struct command_result *result);
+struct command_message *command_parse_header(const char *header_value);
 void command_message_free(struct command_message *cmd_msg);
 
 // Safety and validation functions

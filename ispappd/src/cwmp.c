@@ -259,7 +259,7 @@ static void cwmp_handle_end_session(void)
 
 int cwmp_inform(void)
 {
-	xml_node_t *node;
+	xmlNodePtr node;
 	int method_id;
 
 	log_message(NAME, L_NOTICE, "start session\n");

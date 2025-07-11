@@ -1,25 +1,10 @@
-
-
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#ifdef HAVE_LIBROXML
-#include <roxml.h>
-typedef node_t xml_node_t;
-#elif HAVE_MXML
-#include <mxml.h>
-#elif NO_XML
-// Stub definitions when no XML library is available
-typedef void xml_node_t;
-#else
-#error "No XML library available"
-#endif
-#include <time.h>
 #include "cwmp.h"
 #include "backup.h" 
 #include "config.h"
 #include "log.h"
+#include "ispappcwmp.h"
 
+typedef xmlNodePtr xml_node_t;
 static bool first_run = true;
 static struct uci_context *uci_ctx;
 static struct uci_package *uci_ispappcwmp;

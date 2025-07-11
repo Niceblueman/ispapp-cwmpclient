@@ -5,8 +5,9 @@
 #include <libxml/parser.h>
 
 // Helper functions to migrate from microxml to libxml2
-xmlNodePtr xmlFindElementByName(xmlNodePtr node, const char *name);
-xmlNodePtr xmlWalkNext(xmlNodePtr node);
+// xmlNodePtr xmlFindElementByName(xmlNodePtr node, const char *name);
+xmlNodePtr xmlWalkNextOne(xmlNodePtr node);
+xmlNodePtr xmlWalkNext(xmlNodePtr node, xmlNodePtr top, int descend);
 xmlDocPtr xmlLoadStringDoc(const char *buffer);
 char* xmlSaveString(xmlNodePtr node);
 xmlNodePtr xmlNewOpaque(xmlNodePtr parent, const char *content);

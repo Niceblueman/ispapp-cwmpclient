@@ -1,10 +1,6 @@
 
 
-#include <time.h>
-
-#include "time.h"
-
-#include "ispappcwmp.h"
+#include "dtime.h"
 
 static char local_time[32] = {0};
 
