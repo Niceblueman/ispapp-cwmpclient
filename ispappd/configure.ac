@@ -1,28 +1,11 @@
 # Configure script for ispappd
-AC_INIT([ispappd], [1.8.6], [support@ispapp.co])
+AC_INIT([ispappd], [1.0.14], [support@ispapp.co])
 AC_CONFIG_SRCDIR([src/ispappcwmp.c])
 AC_CONFIG_AUX_DIR([build-aux])
 
 # Initialize automake
 AM_INIT_AUTOMAKE([1.11 -Wall -Werror subdir-objects foreign])
 AM_SILENT_RULES([yes])
-
-# Configure object file destination
-AC_ARG_WITH([build-dir],
-  [AS_HELP_STRING([--with-build-dir=DIR],
-    [directory for object files (default: build-output)])],
-  [BUILD_DIR="$withval"],
-  [BUILD_DIR="build-output"])
-AC_SUBST([BUILD_DIR])
-
-# Ensure build directory exists
-AC_MSG_CHECKING([for build directory])
-if test ! -d "$BUILD_DIR"; then
-    AC_MSG_RESULT([creating $BUILD_DIR])
-    mkdir -p "$BUILD_DIR"
-else
-    AC_MSG_RESULT([using existing $BUILD_DIR])
-fi
 
 AC_ARG_ENABLE(jsonc, [AS_HELP_STRING([--enable-jsonc], [build with jsonc])], [
  AC_DEFINE(JSONC)
@@ -115,7 +98,7 @@ AC_OUTPUT
 echo ""
 echo "Configuration Summary:"
 echo "======================"
-echo "Package:                $PACKAGE_NAME"
+echo "Package:                $PACKAGE_NAME"C
 echo "Version:                $PACKAGE_VERSION"
 echo "Compiler:               $CC"
 echo "CFLAGS:                 $CFLAGS"
@@ -128,7 +111,7 @@ echo "  Backup data in config: $backupdatainconfig"
 echo ""
 echo "Libraries:"
 echo "  libcurl:              $LIBCURL_LIBS"
-echo "  libroxml:             $LIBROXML_LIBS"
+echo "  libxml2:              $LIBXML2_LIBS"
 echo "  UCI:                  $LIBUCI_LIBS"
 echo "  libubox:              $LIBUBOX_LIBS"
 echo "  libubus:              $LIBUBUS_LIBS"

@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# Clean script for ispappd
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    echo -e "${GREEN}[CLEAN]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+print_status "Cleaning build artifacts..."
+
+# Clean autotools generated files
+if [ -f "Makefile" ]; then
+    print_status "Running make clean..."
+    make clean 2>/dev/null || true
+    make distclean 2>/dev/null || true
+fi
+
+# Remove build output directory
+if [ -d "build-output" ]; then
+    print_status "Removing build-output directory..."
+    rm -rf build-output
+fi
+
+# Remove autotools generated files
+print_status "Removing autotools generated files..."
+rm -rf autom4te.cache
+rm -f aclocal.m4
+rm -f config.log
+rm -f config.status
+rm -f configure
+rm -f install-sh
+rm -f missing
+rm -f Makefile
+rm -f Makefile.in
+rm -rf build-aux
+rm -f bin/Makefile
+rm -f bin/Makefile.in
+
+# Remove compiled files
+print_status "Removing compiled files..."
+find . -name "*.o" -type f -delete 2>/dev/null || true
+find . -name "*.lo" -type f -delete 2>/dev/null || true
+find . -name "*.a" -type f -delete 2>/dev/null || true
+find . -name "*.so" -type f -delete 2>/dev/null || true
+find . -name "*.la" -type f -delete 2>/dev/null || true
+find . -name "*.deps" -type d -exec rm -rf {} + 2>/dev/null || true
+find . -name ".deps" -type d -exec rm -rf {} + 2>/dev/null || true
+find . -name ".libs" -type d -exec rm -rf {} + 2>/dev/null || true
+
+# Remove backup files
+print_status "Removing backup files..."
+find . -name "*~" -type f -delete 2>/dev/null || true
+find . -name "*.bak" -type f -delete 2>/dev/null || true
+find . -name "*.orig" -type f -delete 2>/dev/null || true
+
+# Remove core dumps
+print_status "Removing core dumps..."
+find . -name "core" -type f -delete 2>/dev/null || true
+find . -name "core.*" -type f -delete 2>/dev/null || true
+
+print_status "Clean completed successfully!"

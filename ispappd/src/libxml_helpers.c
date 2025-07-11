@@ -47,37 +47,6 @@ xmlNodePtr xmlWalkNextOne(xmlNodePtr node)
     return NULL;
 }
 
-// Helper function for node traversal with boundary checking (replacement for mxmlWalkNext)
-xmlNodePtr xmlWalkNext(xmlNodePtr node, xmlNodePtr top, int descend)
-{
-    if (!node) 
-        return NULL;
-        
-    // If we're at the top node, only go to children if descend is true
-    if (node == top) {
-        if (descend && node->children)
-            return node->children;
-        else
-            return NULL;
-    }
-        
-    // First try children if descend is true
-    if (descend && node->children)
-        return node->children;
-        
-    // Then try siblings, but stay within the top boundary
-    if (node->next)
-        return node->next;
-        
-    // Try parent's siblings, but don't go beyond top
-    for (xmlNodePtr p = node->parent; p && p != top; p = p->parent) {
-        if (p->next)
-            return p->next;
-    }
-    
-    return NULL;
-}
-
 // Helper function to load XML from string (replacement for mxmlLoadString)
 xmlDocPtr xmlLoadStringDoc(const char *buffer)
 {
@@ -122,4 +91,26 @@ xmlNodePtr xmlNewOpaque(xmlNodePtr parent, const char *content)
     
     xmlAddChild(parent, text_node);
     return text_node;
+}
+
+xmlNodePtr xmlWalkNext(xmlNodePtr node, xmlNodePtr top, int descend)
+{
+	if (node == NULL)
+		return NULL;
+
+	if (node->children != NULL && descend)
+		return node->children;
+
+	if (node->next != NULL)
+		return node->next;
+
+	for (xmlNodePtr parent = node->parent; parent != NULL; parent = parent->parent)
+	{
+		if (parent == top)
+			return NULL;
+		if (parent->next != NULL)
+			return parent->next;
+	}
+
+	return NULL;
 }

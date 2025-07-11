@@ -13,6 +13,7 @@
 #include "json.h"
 #include "log.h"
 #include "libxml_helpers.h"
+#include "dtime.h"
 
 struct fault_code fault_array[] =
 	{
@@ -1264,7 +1265,7 @@ static int xml_handle_get_rpc_methods(xmlNodePtr body_in,
 
 	// Set attribute on the method_list element
 	char *attr_value;
-	if (asprintf(&attr_value, "xsd:string[%d]", ARRAY_SIZE(rpc_methods)) == -1)
+	if (asprintf(&attr_value, "xsd:string[%zu]", ARRAY_SIZE(rpc_methods)) == -1)
 		return -1;
 
 	xmlNewProp(method_list, BAD_CAST "soap_enc:arrayType", BAD_CAST attr_value);
@@ -2021,7 +2022,7 @@ static int xml_handle_download(xmlNodePtr body_in,
 		goto fault_out;
 	}
 	n = backup_add_download(command_key, delay, file_size, download_url, file_type, username, password);
-	cwmp_add_download(command_key, delay, file_size, download_url, file_type, username, password, n);
+	cwmp_add_download(command_key, delay, file_size, download_url, file_type, username, password, &n);
 	FREE(file_type);
 	FREE(command_key);
 	FREE(username);
@@ -2183,7 +2184,7 @@ static int xml_handle_upload(xmlNodePtr body_in,
 		goto fault_out;
 	}
 	n = backup_add_upload(command_key, delay, upload_url, file_type, username, password);
-	cwmp_add_upload(command_key, delay, upload_url, file_type, username, password, n);
+	cwmp_add_upload(command_key, delay, upload_url, file_type, username, password, &n);
 	FREE(file_type);
 	FREE(command_key);
 	FREE(username);
