@@ -197,14 +197,18 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           artifacts: |
-            /builder/bin/packages/**/ispappd/*.ipk
+            bin/packages/**/ispappd/*.ipk
+            bin/packages/**/ispappd/*.apk
           tag: ${{ matrix.arch }}
       - name: Create directory for R2 upload
         run: mkdir -p r2-upload/packages/${{ matrix.arch }}
       - name: Move packages to R2 upload directory
+        continue-on-error: true
         run: |
-          cp /builder/bin/packages/**/ispappd/*.ipk r2-upload/packages/${{ matrix.arch }}/
+          cp bin/packages/**/ispappd/*.ipk r2-upload/packages/${{ matrix.arch }}/
+          cp bin/packages/**/ispappd/*.apk r2-upload/packages/${{ matrix.arch }}/
       - name: Upload to Cloudflare R2
+        continue-on-error: true
         uses: ryand56/r2-upload-action@latest
         with:
           r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
