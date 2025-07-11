@@ -205,8 +205,12 @@ jobs:
       - name: Move packages to R2 upload directory
         continue-on-error: true
         run: |
-          cp bin/packages/**/ispappd/*.ipk r2-upload/packages/${{ matrix.arch }}/
-          cp bin/packages/**/ispappd/*.apk r2-upload/packages/${{ matrix.arch }}/
+          if ls bin/packages/**/ispappd/*.ipk 1> /dev/null 2>&1; then
+            cp bin/packages/**/ispappd/*.ipk r2-upload/packages/${{ matrix.arch }}/
+          fi
+          if ls bin/packages/**/ispappd/*.apk 1> /dev/null 2>&1; then
+            cp bin/packages/**/ispappd/*.apk r2-upload/packages/${{ matrix.arch }}/
+          fi
       - name: Upload to Cloudflare R2
         continue-on-error: true
         uses: ryand56/r2-upload-action@latest
