@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'feeds/**/*'
+      - '.github/workflows/build-ipk.yml'
 
 jobs:
   changes:
@@ -192,13 +193,13 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           artifacts: |
-            bin/packages/**/ispappd/*.apk
+            bin/packages/**/ispappd/*.ipk
           tag: ${{ matrix.arch }}
       - name: Create directory for R2 upload
         run: mkdir -p r2-upload/packages/${{ matrix.arch }}
       - name: Move packages to R2 upload directory
         run: |
-          cp bin/packages/${{ matrix.arch }}/ispappd/*.apk r2-upload/packages/${{ matrix.arch }}/
+          cp bin/packages/**/ispappd/*.ipk r2-upload/packages/${{ matrix.arch }}/
       - name: Upload to Cloudflare R2
         uses: ryand56/r2-upload-action@latest
         with:
