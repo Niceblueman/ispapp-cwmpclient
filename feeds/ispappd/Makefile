@@ -1,10 +1,10 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ispappd
-PKG_VERSION:=1.0.14
+PKG_VERSION:=1.0.15
 PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
-PKG_HASH:=ef3c9a2e6cf2c18d27b00f92d942870b67e5ddcc9131749d6d68e93ce28b15bf
+PKG_HASH:=c644187ecc3c97941bb81f1e01333141291463a46b67b9fdbdf893592ec956c6
 
 PKG_FIXUP:=autoreconf
 
@@ -75,7 +75,7 @@ endef
 
 define Package/ispappd/install
 	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bin/ispappd $(1)/usr/sbin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bin/ispappcwmp $(1)/usr/sbin
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/ext/openwrt/config/ispappd $(1)/etc/config
 	$(INSTALL_DIR) $(1)/etc/init.d
