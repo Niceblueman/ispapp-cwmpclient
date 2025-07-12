@@ -4,7 +4,7 @@
 START=90
 
 USE_PROCD=1
-PROG="/usr/sbin/ispappd"
+PROG="/usr/sbin/ispappcwmp"
 
 UCI_SET="/sbin/uci -q ${UCI_CONFIG_DIR:+-c $UCI_CONFIG_DIR} set"
 UCI_GET="/sbin/uci -q ${UCI_CONFIG_DIR:+-c $UCI_CONFIG_DIR} get"

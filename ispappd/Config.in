@@ -36,6 +36,6 @@ config ISPAPPD_DEBUG
 
 config ISPAPPD_DEVEL
 	bool "Compile with development options"
-	default n
+	default y
 
 endif

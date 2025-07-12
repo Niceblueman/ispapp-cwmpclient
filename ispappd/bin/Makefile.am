@@ -1,10 +1,10 @@
-bin_PROGRAMS = ispappd
+bin_PROGRAMS = ispappcwmp
 
 # Object file destination configuration
 AUTOMAKE_OPTIONS = subdir-objects
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
-ispappd_SOURCES =		\
+ispappcwmp_SOURCES =		\
     ../src/backup.c		\
     ../src/backup.h		\
     ../src/backup_stubs.h	\
@@ -42,7 +42,7 @@ ispappd_SOURCES =		\
     ../src/xml.c		\
     ../src/xml.h 
 
-ispappd_CFLAGS =		\
+ispappcwmp_CFLAGS =		\
 	$(AM_CFLAGS)		\
 	$(LIBUCI_CFLAGS)	\
 	$(LIBUBOX_CFLAGS)	\
@@ -50,7 +50,7 @@ ispappd_CFLAGS =		\
 	$(LIBXML2_CFLAGS)	\
 	$(LIBCURL_CFLAGS)
 
-ispappd_LDFLAGS =		\
+ispappcwmp_LDFLAGS =		\
 	$(AM_LDFLAGS)		\
 	$(LIBUCI_LDFLAGS)	\
 	$(LIBUBOX_LDFLAGS)	\
@@ -58,7 +58,7 @@ ispappd_LDFLAGS =		\
 	$(LIBXML2_LDFLAGS)	\
 	$(LIBCURL_LDFLAGS)
 
-ispappd_LDADD =		\
+ispappcwmp_LDADD =		\
 	$(AM_LIBS)			\
 	$(LIBUCI_LIBS)		\
 	$(LIBUBOX_LIBS)		\

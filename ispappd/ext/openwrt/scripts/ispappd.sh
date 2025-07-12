@@ -1,9 +1,4 @@
 #!/bin/sh
-# Copyright (C) 2012-2014 PIVA Software <www.pivasoftware.com>
-# 	Author: MOHAMED Kallel <mohamed.kallel@pivasoftware.com>
-# 	Author: AHMED Zribi <ahmed.zribi@pivasoftware.com>
-# 	Author: ANIS ELLOUZE <anis.ellouze@pivasoftware.com>
-# Copyright (C) 2011-2012 Luka Perkov <freecwmp@lukaperkov.net>
 # Modified for ispappd
 
 . /lib/functions.sh

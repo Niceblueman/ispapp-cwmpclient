@@ -1,5 +1,5 @@
-# Configure script for ispappd
-AC_INIT([ispappd], [1.0.14], [support@ispapp.co])
+# Configure script for ispappcwmp
+AC_INIT([ispappcwmp], [1.0.14], [support@ispapp.co])
 AC_CONFIG_SRCDIR([src/ispappcwmp.c])
 AC_CONFIG_AUX_DIR([build-aux])
 
