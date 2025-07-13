@@ -4,7 +4,7 @@
 #define _ISPAPPCWMP_EXTERNAL_H__
 #include <libubox/list.h>
 
-static char *fc_script = "/usr/sbin/ispappcwmp";
+static char *fc_script = "/usr/sbin/ispappd";
 extern struct list_head external_list_parameter;
 
 #define EXTERNAL_PROMPT "ispappcwmp>"
