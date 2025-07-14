@@ -34,27 +34,26 @@ init_device_info() {
 	[ "$change" = "1" ] && $UCI_COMMIT ispappd
 }
 init_env() {
-	# we use fw_printenv to read the environment variables
-	# to save we use fw_setenv
-	local val oval
-	local change=0
-	val=`fw_printenv | grep 'uci set' | grep -v '^#' | cut -f 3 -d "'" | head -n1`
-	oval=`$UCI_GET ispappd.@local[0].username`
-	[ -n "$val" -a "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].username="$val"; change=1; }
+    local val oval
+    local change=0
 
-	val=`fw_printenv | grep 'uci set' | grep -v '^#' | cut -f 3 -d "'" | head -n1`
-	oval=`$UCI_GET ispappd.@local[0].url`
-	[ -n "$val" -a "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].url="$val"; change=1; }
+    val=$(fw_printenv cwmp_username | cut -d'=' -f2-)
+    oval=$($UCI_GET ispappd.@local[0].username)
+    [ -n "$val" ] && [ "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].username="$val"; change=1; }
 
-	val=`fw_printenv | grep 'uci set' | grep -v '^#' | cut -f 5 -d "'" | head -n1`
-	oval=`$UCI_GET ispappd.@local[0].password`
-	[ -n "$val" -a "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].password="$val"; change=1; }
+    val=$(fw_printenv cwmp_url | cut -d'=' -f2-)
+    oval=$($UCI_GET ispappd.@local[0].url)
+    [ -n "$val" ] && [ "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].url="$val"; change=1; }
 
-	val=`fw_printenv | grep 'uci set' | grep -v '^#' | cut -f 7 -d "'" | head -n1`
-	oval=`$UCI_GET ispappd.@local[0].provisioning_code`
-	[ -n "$val" -a "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].provisioning_code="$val"; change=1; }
+    val=$(fw_printenv cwmp_password | cut -d'=' -f2-)
+    oval=$($UCI_GET ispappd.@local[0].password)
+    [ -n "$val" ] && [ "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].password="$val"; change=1; }
 
-	[ "$change" = "1" ] && $UCI_COMMIT ispappd
+    val=$(fw_printenv cwmp_provisioning_code | cut -d'=' -f2-)
+    oval=$($UCI_GET ispappd.@local[0].provisioning_code)
+    [ -n "$val" ] && [ "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].provisioning_code="$val"; change=1; }
+
+    [ "$change" = "1" ] && $UCI_COMMIT ispappd
 }
 start_service() {
 	local enable=`uci -q get ispappd.@local[0].enable`
@@ -81,8 +80,17 @@ boot() {
 stop_service()
 {
 	# Save any pending UCI changes (credentials, device info, etc.)
-	$UCI_COMMIT ispappd
+	$UCI_COMMIT ispappd	
 }
+
+save_env() {
+	# Save the environment variables
+	fw_setenv cwmp_username "$($UCI_GET ispappd.@local[0].username)"
+	fw_setenv cwmp_url "$($UCI_GET ispappd.@local[0].url)"
+	fw_setenv cwmp_password "$($UCI_GET ispappd.@local[0].password)"
+	fw_setenv cwmp_provisioning_code "$($UCI_GET ispappd.@local[0].provisioning_code)"
+}
+
 service_triggers()
 {
 	procd_add_reload_trigger ispappd
