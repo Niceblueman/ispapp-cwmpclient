@@ -1,11 +1,11 @@
-name: BUILD PACKAGES ispappd
+name: BUILD PACKAGES goispappd
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'feeds/ispappd/*'
+      - 'feeds/goispappd/*'
 
 jobs:
   changes:
@@ -185,7 +185,7 @@ jobs:
           FEEDNAME: ispappd
           FEED_DIR: ${{ github.workspace }}/feeds/
           ARCH: ${{ matrix.arch }}
-          PACKAGES: ispappd
+          PACKAGES: goispappd
           V: s
         
       - name: Store packages
@@ -196,19 +196,19 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           artifacts: |
-            bin/packages/**/ispappd/*.ipk
-            bin/packages/**/ispappd/*.apk
+            bin/packages/**/goispappd/*.ipk
+            bin/packages/**/goispappd/*.apk
           tag: ${{ matrix.arch }}
       - name: Create directory for R2 upload
         run: mkdir -p r2-upload/packages/${{ matrix.arch }}
       - name: Move packages to R2 upload directory
         continue-on-error: true
         run: |
-          if ls bin/packages/**/ispappd/*.ipk 1> /dev/null 2>&1; then
-            cp bin/packages/**/ispappd/*.ipk r2-upload/packages/${{ matrix.arch }}/
+          if ls bin/packages/**/goispappd/*.ipk 1> /dev/null 2>&1; then
+            cp bin/packages/**/goispappd/*.ipk r2-upload/packages/${{ matrix.arch }}/
           fi
-          if ls bin/packages/**/ispappd/*.apk 1> /dev/null 2>&1; then
-            cp bin/packages/**/ispappd/*.apk r2-upload/packages/${{ matrix.arch }}/
+          if ls bin/packages/**/goispappd/*.apk 1> /dev/null 2>&1; then
+            cp bin/packages/**/goispappd/*.apk r2-upload/packages/${{ matrix.arch }}/
           fi
       - name: Upload to Cloudflare R2
         continue-on-error: true
@@ -219,6 +219,6 @@ jobs:
           r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           r2-bucket: ${{ secrets.R2_BUCKET }}
           source-dir: r2-upload/packages/
-          destination-dir: ispappd/builds/${{ github.run_number }}/${{ matrix.arch }}/
+          destination-dir: goispappd/builds/${{ github.run_number }}/${{ matrix.arch }}/
           output-file-url: true
           multipart-concurrent: true

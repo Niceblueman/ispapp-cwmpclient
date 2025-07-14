@@ -202,8 +202,7 @@ int xml_check_duplicated_parameter(xmlNodePtr tree)
 {
 	xmlNodePtr currentNode, compareNode;
 
-	// Helper function to traverse the XML tree
-
+	// Helper function to traverse the XML 
 	// Start traversal
 	currentNode = tree;
 	while (currentNode)
@@ -240,29 +239,58 @@ int xml_check_duplicated_parameter(xmlNodePtr tree)
 	return 0;
 }
 
-// Helper function to find elements by name
 xmlNodePtr xmlFindElementByName(xmlNodePtr node, const char *name)
 {
+	xmlNodePtr current_node = NULL;
+	xmlNodePtr result = NULL;
+
 	if (!node || !name)
-		return NULL;
-
-	// Check if the current node is what we're looking for
-	if (node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar *)name))
-		return node;
-
-	// Check children
-	xmlNodePtr child = node->children;
-	while (child)
 	{
-		xmlNodePtr result = xmlFindElementByName(child, name);
-		if (result)
-			return result;
-		child = child->next;
+		log_message(NAME, L_CRIT, "xmlFindElementByName: Invalid node (%p) or name (%p)\n", node, name);
+		return NULL;
 	}
 
+	for (current_node = node; current_node != NULL; current_node = current_node->next)
+	{
+		// Validate current_node pointer before accessing any fields
+		if ((void*)current_node < (void*)0x1000) {
+			log_message(NAME, L_CRIT, "xmlFindElementByName: Invalid node pointer %p\n", current_node);
+			break;
+		}
+
+		// Debug log before accessing fields 
+		log_message(NAME, L_DEBUG, "xmlFindElementByName: Processing node %p\n", current_node);
+
+		// First verify it's an element node before checking name
+		if (current_node->type != XML_ELEMENT_NODE) {
+			log_message(NAME, L_DEBUG, "xmlFindElementByName: Skipping non-element node %p\n", current_node);
+			continue;
+		}
+
+		// Now check name validity
+		if (!current_node->name) {
+			log_message(NAME, L_CRIT, "xmlFindElementByName: Invalid name for node %p (type: %d)\n", 
+					   current_node, current_node->type);
+			continue;
+		}
+
+		if (xmlStrcmp(current_node->name, (const xmlChar *)name) == 0) {
+			log_message(NAME, L_DEBUG, "xmlFindElementByName: Found element '%s' at %p\n", name, current_node);
+			return current_node;
+		}
+
+		if (current_node->children) {
+			log_message(NAME, L_DEBUG, "xmlFindElementByName: Recursing into children of node %p\n", current_node);
+			result = xmlFindElementByName(current_node->children, name);
+			if (result) {
+				return result;
+			}
+		}
+	}
+
+	log_message(NAME, L_DEBUG, "xmlFindElementByName: No element named '%s' found\n", name);
 	return NULL;
 }
-
 // Find element by name with attribute
 xmlNodePtr xmlFindElementWithAttr(xmlNodePtr node, const char *name, const char *attr_name, const char *attr_value)
 {
@@ -353,7 +381,6 @@ xmlNodePtr xml_find_node_by_env_type(xmlNodePtr tree_in, char *bname)
 	}
 	return NULL;
 }
-
 
 // Helper function to find attribute by value and get the attribute name
 char *xmlGetAttrNameByValue(xmlNodePtr node, const char *value)
