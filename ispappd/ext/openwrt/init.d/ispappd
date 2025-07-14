@@ -31,6 +31,11 @@ init_device_info() {
 	
 	#The same thing here for OUI and SerialNumber
 
+	# Set periodic_time to current UTC time in ISO 8601 format
+	current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+	$UCI_SET ispappd.@acs[0].periodic_time="$current_time"
+	change=1
+
 	[ "$change" = "1" ] && $UCI_COMMIT ispappd
 }
 init_env() {
@@ -62,9 +67,9 @@ start_service() {
 		init_env
 		procd_open_instance
 		procd_set_param command "$PROG" -f
-		if [ "$1" = "--getrpcmethod" ];then
+		if [ "$1" = "--getrpcmethod" ]; then
 			procd_append_param command --getrpcmethod
-		else if [ "$1" = "--boot" ];then
+		elif [ "$1" = "--boot" ]; then
 			procd_append_param command --boot
 		else
 			procd_append_param command
