@@ -197,7 +197,7 @@ static int config_init_acs(void)
 						strncpy(buf, timestr, sizeof(buf)-1);
 						buf[sizeof(buf)-1] = 0;
 						buf[len-1] = 0; // Remove 'Z'
-						if (strptime(buf, "%FT%T", &tm)) {
+						if (strptime(buf, "%Y-%m-%dT%H:%M:%S", &tm)) {
 #if defined(_GNU_SOURCE) || defined(__USE_BSD)
 							t = timegm(&tm); // Use UTC
 #else
@@ -207,7 +207,7 @@ static int config_init_acs(void)
 							parse_ok = 1;
 						}
 					} else {
-						if (strptime(timestr, "%FT%T", &tm)) {
+						if (strptime(timestr, "%Y-%m-%dT%H:%M:%S", &tm)) {
 							t = mktime(&tm); // Use local time
 							parse_ok = 1;
 						}
