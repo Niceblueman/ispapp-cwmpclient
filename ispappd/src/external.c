@@ -154,6 +154,12 @@ static void external_write_pipe(const char *msg)
 	if(asprintf(&value, "%s\n", msg) == -1) return;
 	if (write(pfds_in[1], value, strlen(value)) == -1) {
 		log_message(NAME, L_CRIT, "error occured when trying to write to the pipe\n");
+		if (errno == EPIPE) {
+			log_message(NAME, L_CRIT, "broken pipe, external process probably exited\n");
+		}
+		else {
+			log_message(NAME, L_CRIT, "write error: %s\n", strerror(errno));
+		}
 	}
 	free(value);
 }
