@@ -41,7 +41,7 @@ static int config_init_local(void)
 			uci_foreach_element(&s->options, e1) {
 				if (!strcmp((uci_to_option(e1))->e.name, "interface")) {
 					config->local->interface = strdup(uci_to_option(e1)->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@local[0].interface=%s\n", config->local->interface);
+					log_message(NAME, L_DEBUG, "ispappd.@local[0].interface=%s\n", config->local->interface);
 					continue;
 				}
 
@@ -51,25 +51,25 @@ static int config_init_local(void)
 						return -1;
 					}
 					config->local->port = strdup(uci_to_option(e1)->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@local[0].port=%s\n", config->local->port);
+					log_message(NAME, L_DEBUG, "ispappd.@local[0].port=%s\n", config->local->port);
 					continue;
 				}
 
 				if (!strcmp((uci_to_option(e1))->e.name, "username")) {
 					config->local->username = strdup(uci_to_option(e1)->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@local[0].username=%s\n", config->local->username);
+					log_message(NAME, L_DEBUG, "ispappd.@local[0].username=%s\n", config->local->username);
 					continue;
 				}
 
 				if (!strcmp((uci_to_option(e1))->e.name, "password")) {
 					config->local->password = strdup(uci_to_option(e1)->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@local[0].password=%s\n", config->local->password);
+					log_message(NAME, L_DEBUG, "ispappd.@local[0].password=%s\n", config->local->password);
 					continue;
 				}
 
 				if (!strcmp((uci_to_option(e1))->e.name, "ubus_socket")) {
 					config->local->ubus_socket = strdup(uci_to_option(e1)->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@local[0].ubus_socket=%s\n", config->local->ubus_socket);
+					log_message(NAME, L_DEBUG, "ispappd.@local[0].ubus_socket=%s\n", config->local->ubus_socket);
 					continue;
 				}
 				
@@ -82,7 +82,7 @@ static int config_init_local(void)
 							config->local->logging_level = log_level;						
 						free(c);
 					}
-					log_message(NAME, L_DEBUG, "ispappcwmp.@local[0].logging_level=%d\n", config->local->logging_level);
+					log_message(NAME, L_DEBUG, "ispappd.@local[0].logging_level=%d\n", config->local->logging_level);
 					continue;
 				}
 				
@@ -92,7 +92,7 @@ static int config_init_local(void)
 					else
 						config->local->cr_auth_type = AUTH_DIGEST;				 
 
-					log_message(NAME, L_DEBUG, "ispappcwmp.@local[0].authentication=%s\n",
+					log_message(NAME, L_DEBUG, "ispappd.@local[0].authentication=%s\n",
 						(config->local->cr_auth_type == AUTH_BASIC) ? "Basic" : "Digest");
 					continue;
 				}
@@ -158,55 +158,74 @@ static int config_init_acs(void)
 					}
 
 					config->acs->url = strdup(uci_to_option(e)->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@acs[0].url=%s\n", config->acs->url);
+					log_message(NAME, L_DEBUG, "ispappd.@acs[0].url=%s\n", config->acs->url);
 					continue;
 				}
 
 				if (!strcmp((uci_to_option(e))->e.name, "username")) {
 					config->acs->username = strdup(uci_to_option(e)->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@acs[0].username=%s\n", config->acs->username);
+					log_message(NAME, L_DEBUG, "ispappd.@acs[0].username=%s\n", config->acs->username);
 					continue;
 				}
 
 				if (!strcmp((uci_to_option(e))->e.name, "password")) {
 					config->acs->password = strdup(uci_to_option(e)->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@acs[0].password=%s\n", config->acs->password);
+					log_message(NAME, L_DEBUG, "ispappd.@acs[0].password=%s\n", config->acs->password);
 					continue;
 				}
 
 				if (!strcmp((uci_to_option(e))->e.name, "periodic_enable")) {
 					config->acs->periodic_enable = (atoi((uci_to_option(e))->v.string) == 1) ? true : false;
-					log_message(NAME, L_DEBUG, "ispappcwmp.@acs[0].periodic_enable=%d\n", config->acs->periodic_enable);
+					log_message(NAME, L_DEBUG, "ispappd.@acs[0].periodic_enable=%d\n", config->acs->periodic_enable);
 					continue;
 				}
 
 				if (!strcmp((uci_to_option(e))->e.name, "periodic_interval")) {
 					config->acs->periodic_interval = atoi((uci_to_option(e))->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@acs[0].periodic_interval=%d\n", config->acs->periodic_interval);
+					log_message(NAME, L_DEBUG, "ispappd.@acs[0].periodic_interval=%d\n", config->acs->periodic_interval);
 					continue;
 				}
 
 				if (!strcmp((uci_to_option(e))->e.name, "periodic_time")) {
-					strptime(uci_to_option(e)->v.string,"%FT%T", &tm);
-					config->acs->periodic_time = mktime(&tm);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@acs[0].periodic_time=%s\n", uci_to_option(e)->v.string);
+					const char *timestr = uci_to_option(e)->v.string;
+					struct tm tm = {0};
+					time_t t = -1;
+					size_t len = strlen(timestr);
+					if (len > 0 && timestr[len-1] == 'Z') {
+						char buf[32];
+						strncpy(buf, timestr, sizeof(buf)-1);
+						buf[sizeof(buf)-1] = 0;
+						buf[len-1] = 0; // Remove 'Z'
+						strptime(buf, "%FT%T", &tm);
+#if defined(_GNU_SOURCE) || defined(__USE_BSD)
+						t = timegm(&tm); // Use UTC
+#else
+						t = mktime(&tm); // Fallback: localtime
+						log_message(NAME, L_WARNING, "timegm() not available, falling back to localtime for periodic_time\n");
+#endif
+					} else {
+						strptime(timestr, "%FT%T", &tm);
+						t = mktime(&tm); // Use local time
+					}
+					config->acs->periodic_time = t;
+					log_message(NAME, L_DEBUG, "ispappd.@acs[0].periodic_time=%s (epoch=%ld)\n", timestr, (long)t);
 					continue;
 				}
 
 				if (!strcmp((uci_to_option(e))->e.name, "http100continue_disable")) {
 					config->acs->http100continue_disable = (atoi(uci_to_option(e)->v.string)) ? true : false;
-					log_message(NAME, L_DEBUG, "ispappcwmp.@acs[0].http100continue_disable=%d\n", config->acs->http100continue_disable);
+					log_message(NAME, L_DEBUG, "ispappd.@acs[0].http100continue_disable=%d\n", config->acs->http100continue_disable);
 					continue;
 				}
 
 				if (!strcmp((uci_to_option(e))->e.name, "ssl_cert")) {
 					config->acs->ssl_cert = strdup(uci_to_option(e)->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@acs[0].ssl_cert=%s\n", config->acs->ssl_cert);
+					log_message(NAME, L_DEBUG, "ispappd.@acs[0].ssl_cert=%s\n", config->acs->ssl_cert);
 					continue;
 				}
 				if (!strcmp((uci_to_option(e))->e.name, "ssl_cacert")) {
 					config->acs->ssl_cacert = strdup(uci_to_option(e)->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@acs[0].ssl_cacert=%s\n", config->acs->ssl_cacert);
+					log_message(NAME, L_DEBUG, "ispappd.@acs[0].ssl_cacert=%s\n", config->acs->ssl_cacert);
 					continue;
 				}
 
@@ -216,7 +235,7 @@ static int config_init_acs(void)
 					} else {
 						config->acs->ssl_verify = false;
 					}
-					log_message(NAME, L_DEBUG, "ispappcwmp.@acs[0].ssl_verify=%d\n", config->acs->ssl_verify);
+					log_message(NAME, L_DEBUG, "ispappd.@acs[0].ssl_verify=%d\n", config->acs->ssl_verify);
 					continue;
 				}
 			}
@@ -251,7 +270,7 @@ static int config_init_device(void)
 			uci_foreach_element(&s->options, e2) {
 				if (!strcmp((uci_to_option(e2))->e.name, "software_version")) {
 					config->device->software_version = strdup(uci_to_option(e2)->v.string);
-					log_message(NAME, L_DEBUG, "ispappcwmp.@device[0].software_version=%s\n", config->device->software_version);
+					log_message(NAME, L_DEBUG, "ispappd.@device[0].software_version=%s\n", config->device->software_version);
 					continue;
 				}
 			}
@@ -326,7 +345,7 @@ void config_exit(void)
 void config_load(void)
 {
 
-	uci_ispappcwmp = config_init_package("ispappcwmp");
+	uci_ispappcwmp = config_init_package("ispappd");
 
 	if (!uci_ispappcwmp) goto error;
 	if (config_init_device()) goto error;

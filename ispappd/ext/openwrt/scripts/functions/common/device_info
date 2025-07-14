@@ -18,13 +18,13 @@ entry_execute_method_root_DeviceInfo() {
 	case "$1" in ""|"$DMROOT."|"$DMROOT.DeviceInfo."*)
 		common_execute_method_obj "$DMROOT.DeviceInfo." "0"
 		common_execute_method_param "$DMROOT.DeviceInfo.SpecVersion" "0" "echo 1.0" "" "" "1"
-		common_execute_method_param "$DMROOT.DeviceInfo.ProvisioningCode" "1" "$UCI_GET ispappcwmp.@local[0].provisioning_code" "device_info_set_provisioningcode" "" "1"
-		common_execute_method_param "$DMROOT.DeviceInfo.Manufacturer" "0" "$UCI_GET ispappcwmp.@device[0].manufacturer" "" "" "1"
-		common_execute_method_param "$DMROOT.DeviceInfo.ManufacturerOUI" "0" "$UCI_GET ispappcwmp.@device[0].oui" "" "" "1"
-		common_execute_method_param "$DMROOT.DeviceInfo.ProductClass" "0" "$UCI_GET ispappcwmp.@device[0].product_class" "" "" "1"
-		common_execute_method_param "$DMROOT.DeviceInfo.SerialNumber" "0" "$UCI_GET ispappcwmp.@device[0].serial_number" "" "" "1"
-		common_execute_method_param "$DMROOT.DeviceInfo.HardwareVersion" "0" "$UCI_GET ispappcwmp.@device[0].hardware_version" "" "" "1"
-		common_execute_method_param "$DMROOT.DeviceInfo.SoftwareVersion" "0" "$UCI_GET ispappcwmp.@device[0].software_version" "" "" "1"
+		common_execute_method_param "$DMROOT.DeviceInfo.ProvisioningCode" "1" "$UCI_GET ispappd.@local[0].provisioning_code" "device_info_set_provisioningcode" "" "1"
+		common_execute_method_param "$DMROOT.DeviceInfo.Manufacturer" "0" "$UCI_GET ispappd.@device[0].manufacturer" "" "" "1"
+		common_execute_method_param "$DMROOT.DeviceInfo.ManufacturerOUI" "0" "$UCI_GET ispappd.@device[0].oui" "" "" "1"
+		common_execute_method_param "$DMROOT.DeviceInfo.ProductClass" "0" "$UCI_GET ispappd.@device[0].product_class" "" "" "1"
+		common_execute_method_param "$DMROOT.DeviceInfo.SerialNumber" "0" "$UCI_GET ispappd.@device[0].serial_number" "" "" "1"
+		common_execute_method_param "$DMROOT.DeviceInfo.HardwareVersion" "0" "$UCI_GET ispappd.@device[0].hardware_version" "" "" "1"
+		common_execute_method_param "$DMROOT.DeviceInfo.SoftwareVersion" "0" "$UCI_GET ispappd.@device[0].software_version" "" "" "1"
 		common_execute_method_param "$DMROOT.DeviceInfo.UpTime" "0" "device_info_get_uptime" "" "xsd:unsignedInt"
 		common_execute_method_param "$DMROOT.DeviceInfo.DeviceLog" "0" "dmesg | tail -n1"
 		common_execute_method_obj "$DMROOT.DeviceInfo.MemoryStatus." "0"
@@ -50,7 +50,7 @@ device_info_get_free_memory() {
 
 device_info_set_provisioningcode() {
 	local val="$1"
-	$UCI_SET ispappcwmp.@local[0].provisioning_code="$val"
+	$UCI_SET ispappd.@local[0].provisioning_code="$val"
 	return 0
 }
 
