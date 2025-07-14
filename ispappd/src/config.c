@@ -191,21 +191,30 @@ static int config_init_acs(void)
 					struct tm tm = {0};
 					time_t t = -1;
 					size_t len = strlen(timestr);
+					int parse_ok = 0;
 					if (len > 0 && timestr[len-1] == 'Z') {
 						char buf[32];
 						strncpy(buf, timestr, sizeof(buf)-1);
 						buf[sizeof(buf)-1] = 0;
 						buf[len-1] = 0; // Remove 'Z'
-						strptime(buf, "%FT%T", &tm);
+						if (strptime(buf, "%FT%T", &tm)) {
 #if defined(_GNU_SOURCE) || defined(__USE_BSD)
-						t = timegm(&tm); // Use UTC
+							t = timegm(&tm); // Use UTC
 #else
-						t = mktime(&tm); // Fallback: localtime
-						log_message(NAME, L_WARNING, "timegm() not available, falling back to localtime for periodic_time\n");
+							t = mktime(&tm); // Fallback: localtime
+							log_message(NAME, L_WARNING, "timegm() not available, falling back to localtime for periodic_time\n");
 #endif
+							parse_ok = 1;
+						}
 					} else {
-						strptime(timestr, "%FT%T", &tm);
-						t = mktime(&tm); // Use local time
+						if (strptime(timestr, "%FT%T", &tm)) {
+							t = mktime(&tm); // Use local time
+							parse_ok = 1;
+						}
+					}
+					if (!parse_ok || t < 0) {
+						log_message(NAME, L_WARNING, "Failed to parse periodic_time '%s', using current time\n", timestr);
+						t = time(NULL);
 					}
 					config->acs->periodic_time = t;
 					log_message(NAME, L_DEBUG, "ispappd.@acs[0].periodic_time=%s (epoch=%ld)\n", timestr, (long)t);
