@@ -1,0 +1,3 @@
+[submodule "goispappd"]
+	path = goispappd
+	url = https://github.com/kmoz000/goispappd.git
