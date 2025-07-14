@@ -11,7 +11,6 @@ PKG_LICENSE_FILES:=LICENSE
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_FLAGS:=no-mips16
-
 GO_PKG:=github.com/Niceblueman/goispappd
 
 include $(INCLUDE_DIR)/package.mk

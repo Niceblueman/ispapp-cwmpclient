@@ -1,0 +1,7 @@
+acs_url: "http://acs.example.com:7547"
+username: "admin"
+password: "password"
+serial_number: "1234567890"
+uci_config_dir: "/opt/dev/easycwmp/ext/openwrt/config/"
+easycwmp_script: "/usr/sbin/easycwmp"
+periodic_interval: 24h
