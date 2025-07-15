@@ -28,8 +28,8 @@ CGO_CFLAGS += \
 	-I$(STAGING_DIR)/usr/include/libuci
 
 define Package/goispappd/Default
-  TITLE:=The Swiss Army knife for 802.11, BLE and Ethernet networks reconnaissance and MITM attacks.
-  URL:=https://www.bettercap.org/
+  TITLE:=tr181/tr098/TR-069 CWMP client for OpenWrt.
+  URL:=https://ispapp.co
   DEPENDS:=$(GO_ARCH_DEPENDS) +libubox +libubus +libuci
 endef
 
@@ -40,10 +40,8 @@ $(call Package/goispappd/Default)
 endef
 
 define Package/goispappd/description
-	tr181/tr098/TR-069 CWMP client for OpenWrt.
-	It is a Go port of the original ispappd written in C.
-	It supports the same features and is designed to be a drop-in replacement.
-	It is used to manage and configure devices in a network using the CWMP protocol.
+    tr181/tr098/TR-069 CWMP client for OpenWrt.
+    It is a Go port of the original ispappd written in C.
 endef
 
 $(eval $(call GoBinPackage,goispappd))
