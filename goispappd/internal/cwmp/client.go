@@ -86,15 +86,30 @@ func (c *CWMPClient) SendEnvelope(envelope *soap.RequestEnvelope) error {
 func (c *CWMPClient) periodicInform(ctx context.Context) {
 	ticker := time.NewTicker(c.config.PeriodicInterval)
 	defer ticker.Stop()
-
 	for {
 		select {
 		case <-ctx.Done():
 			c.logger.Info("Stopping periodic inform")
 			return
 		case <-ticker.C:
-			if err := c.SendInform("2 PERIODIC"); err != nil {
-				c.logger.Errorf("Failed to send periodic inform: %v", err)
+			// Pause ticker while waiting for handler
+			ticker.Stop()
+			informDone := make(chan error, 1)
+			go func() {
+				informDone <- c.SendInform("2 PERIODIC")
+			}()
+			timeout := 30 * time.Second
+			select {
+			case err := <-informDone:
+				if err != nil {
+					c.logger.Errorf("Failed to send periodic inform: %v", err)
+				}
+				// Resume ticker
+				ticker = time.NewTicker(c.config.PeriodicInterval)
+			case <-time.After(timeout):
+				c.logger.Errorf("Periodic inform handler timeout, ending session and increasing interval by 5s")
+				c.config.PeriodicInterval += 5 * time.Second
+				return
 			}
 		}
 	}
@@ -102,8 +117,9 @@ func (c *CWMPClient) periodicInform(ctx context.Context) {
 
 // SendInform constructs and sends an Inform message
 func (c *CWMPClient) SendInform(eventCode string) error {
-	inform := soap.Inform{}
-	body, err := xml.MarshalIndent(inform, "", "  ")
+	envelope := soap.NewRequestEnvelope()
+	envelope.LoadInformRequest()
+	body, err := xml.MarshalIndent(envelope, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal Inform XML: %w", err)
 	}

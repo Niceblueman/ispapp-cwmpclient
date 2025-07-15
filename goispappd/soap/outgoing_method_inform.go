@@ -64,7 +64,7 @@ func (e *RequestEnvelope) LoadParameterNames(path string) {
 	}
 }
 
-func (e *RequestEnvelope) LoadInformResponse() {
+func (e *RequestEnvelope) LoadInformRequest() {
 	e.Body.Inform = &Inform{}
 	executer := exec.NewExecutor(exec.ExecConfig{})
 	e.Body.Inform.ParameterList = ParameterList{}

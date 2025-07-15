@@ -124,8 +124,7 @@ func (h *Handler) handleDeleteObject(method *soap.DeleteObject) error {
 	return nil
 }
 func (h *Handler) handleInformResponse(method *soap.InformResponse) error {
-	h.logger.Info("Handling InformResponse request")
-	// Implement logic to handle InformResponse
+
 	return nil
 }
 func (h *Handler) handleRequestXCommand(method *soap.RequestXCommand) error {
