@@ -1,15 +1,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=goispappd
-PKG_VERSION:=1.0.23
+PKG_VERSION:=1.0.24
 PKG_RELEASE:=1
 
 PKG_MAINTAINER:=Karim O. <support@ispapp.co>
 PKG_LICENSE:=CC0-1.0
 PKG_LICENSE_FILES:=LICENSE
-# PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION).tar.gz
-# PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
-# PKG_HASH:=53ff8ca80d0e7857ac034d4b54e70385cfecb44a5aafafed7da8ee5ee26c556c
+PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
+PKG_HASH:=e53e97ac70d5433d0380a810c19f3b454c2a0b7259946bdfdfcc8f87fc4b0ff8
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
