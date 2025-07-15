@@ -7,7 +7,9 @@ PKG_RELEASE:=1
 PKG_MAINTAINER:=Karim O. <support@ispapp.co>
 PKG_LICENSE:=CC0-1.0
 PKG_LICENSE_FILES:=LICENSE
-
+# PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION).tar.gz
+# PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
+# PKG_HASH:=53ff8ca80d0e7857ac034d4b54e70385cfecb44a5aafafed7da8ee5ee26c556c
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0

@@ -17,11 +17,13 @@ jobs:
         run: |
           VERSION=$(echo ${{ github.ref }} | sed 's|refs/tags/||')
           tar --exclude-vcs -czf ispappd-$VERSION.tar.gz -C ispappd . --transform "s,^,ispappd-$VERSION/,"
+          tar --exclude-vcs -czf goispappd-$VERSION.tar.gz -C goispappd . --transform "s,^,goispappd-$VERSION/,"
 
       - name: Generate SHA256 hash for tarball
         run: |
           VERSION=$(echo ${{ github.ref }} | sed 's|refs/tags/||')
           sha256sum ispappd-$VERSION.tar.gz > ispappd-$VERSION.tar.gz.sha256
+          sha256sum goispappd-$VERSION.tar.gz > goispappd-$VERSION.tar.gz.sha256
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -30,3 +32,5 @@ jobs:
           files: |
             ispappd-${{ github.ref_name }}.tar.gz
             ispappd-${{ github.ref_name }}.tar.gz.sha256
+            goispappd-${{ github.ref_name }}.tar.gz
+            goispappd-${{ github.ref_name }}.tar.gz.sha256
