@@ -29,7 +29,7 @@ CGO_CFLAGS += \
 define Package/goispappd/Default
   TITLE:=The Swiss Army knife for 802.11, BLE and Ethernet networks reconnaissance and MITM attacks.
   URL:=https://www.bettercap.org/
-  DEPENDS:=$(GO_ARCH_DEPENDS) +libpcap +libusb-1.0 +libnetfilter-queue
+  DEPENDS:=$(GO_ARCH_DEPENDS) +libubox +libubus +libuci
 endef
 
 define Package/goispappd
