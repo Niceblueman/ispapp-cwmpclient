@@ -272,7 +272,7 @@ func TestCompareEnvelopeRealData(t *testing.T) {
 				{
 					Index:                      1,
 					Enable:                     true,
-					LowerLayers:                "Device.X_MIKROTIK_Interface.Generic.1",
+					LowerLayers:                "Device.X_ISPAPP_Interface.Generic.1",
 					Status:                     "Up",
 					Type:                       "Normal",
 					IPv4AddressNumberOfEntries: 1,

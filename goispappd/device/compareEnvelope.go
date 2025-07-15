@@ -383,8 +383,8 @@ func isWritableParameter(paramPath string) bool {
 		"Device.DHCPv4.Client.*.IPRouters",
 		"Device.DHCPv4.Client.*.DNSServers",
 		"Device.DHCPv4.Client.*.DHCPServer",
-		"Device.X_MIKROTIK_Interface.Generic.*.Enable",
-		"Device.X_MIKROTIK_Interface.Generic.*.Name",
+		"Device.X_ISPAPP_Interface.Generic.*.Enable",
+		"Device.X_ISPAPP_Interface.Generic.*.Name",
 		"Device.WiFi.AccessPoint.*.SSIDReference", // This is a special case, it cannot be changed
 		"Device.Ethernet.Interface.*.X_MIKROTIK_LinkDowns",
 		"*.NeighboringWiFiDiagnostic.*",

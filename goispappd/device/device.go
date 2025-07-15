@@ -23,8 +23,8 @@ type Device struct {
 	DHCPv4                        DHCPv4Device             // DHCPv4 client and server configuration.
 	Firewall                      FirewallDevice           // Firewall configuration (standard and Mikrotik extensions).
 	WAN                           WANDevice                // WAN device configuration and status.
-	X_MIKROTIK_Interface          XMikrotikInterfaceDevice // Mikrotik generic interfaces.
-	X_MIKROTIK_Monitor            XMikrotikMonitorDevice   // Mikrotik traffic monitoring.
+	X_ISPAPP_Interface            XMikrotikInterfaceDevice // Mikrotik generic interfaces.
+	X_ISPAPP_Monitor              XMikrotikMonitorDevice   // Mikrotik traffic monitoring.
 	NeedMethods                   bool
 	NeedParams                    bool
 }
@@ -34,26 +34,26 @@ type InternetGatewayDevice = Device
 
 // DeviceInfo contains general static and dynamic information about the CPE.
 type DeviceInfo struct {
-	OutsideIPAddress                 string             // Public IP address of the CPE.
-	Manufacturer                     string             // Name of the device manufacturer.
-	ManufacturerOUI                  string             // OUI of the manufacturer.
-	ModelName                        string             // Model name of the device.
-	Description                      string             // Textual description of the device.
-	ProductClass                     string             // Product class identifier.
-	SerialNumber                     string             // Unique serial number of the device.
-	SpecVersion                      string             // Specification version identifier.
-	HardwareVersion                  string             // Hardware version identifier.
-	SoftwareVersion                  string             // Software/firmware version identifier.
-	ProvisioningCode                 string             // Optional code for provisioning.
-	UpTime                           int                // Time in seconds since the device last booted.
-	VendorConfigFileNumberOfEntries  int                // Number of entries in VendorConfigFile table
-	X_MIKROTIK_SystemIdentity        string             // Mikrotik system identity name.
-	X_MIKROTIK_ArchName              string             // Mikrotik architecture name.
-	X_MIKROTIK_BrandingPckgBuildTime string             // Branding package build time
-	X_MIKROTIK_AutosupoutTime        string             // Generated autosupout.rif timestamp
-	VendorConfigFile                 []VendorConfigFile // Vendor config file entries
-	MemoryStatus                     MemoryStatus       // Status of device's physical memory
-	ProcessStatus                    ProcessStatus      // Status of the processes on the device
+	OutsideIPAddress                string             // Public IP address of the CPE.
+	Manufacturer                    string             // Name of the device manufacturer.
+	ManufacturerOUI                 string             // OUI of the manufacturer.
+	ModelName                       string             // Model name of the device.
+	Description                     string             // Textual description of the device.
+	ProductClass                    string             // Product class identifier.
+	SerialNumber                    string             // Unique serial number of the device.
+	SpecVersion                     string             // Specification version identifier.
+	HardwareVersion                 string             // Hardware version identifier.
+	SoftwareVersion                 string             // Software/firmware version identifier.
+	ProvisioningCode                string             // Optional code for provisioning.
+	UpTime                          int                // Time in seconds since the device last booted.
+	VendorConfigFileNumberOfEntries int                // Number of entries in VendorConfigFile table
+	X_ISPAPP_SystemIdentity         string             // Mikrotik system identity name.
+	X_ISPAPP_ArchName               string             // Mikrotik architecture name.
+	X_ISPAPP_BrandingPckgBuildTime  string             // Branding package build time
+	X_ISPAPP_AutosupoutTime         string             // Generated autosupout.rif timestamp
+	VendorConfigFile                []VendorConfigFile // Vendor config file entries
+	MemoryStatus                    MemoryStatus       // Status of device's physical memory
+	ProcessStatus                   ProcessStatus      // Status of the processes on the device
 	// Geolocation fields for device location information
 	Latitude               float64 // Device geographical latitude
 	Longitude              float64 // Device geographical longitude
@@ -121,11 +121,11 @@ type InterfaceStackEntry struct {
 type CellularDevice struct {
 	InterfaceNumberOfEntries   int                   // Number of entries in the Interface table
 	AccessPointNumberOfEntries int                   // Number of entries in the AccessPoint table
-	X_MIKROTIK_Antenna         string                // Which antenna to use for modem
-	X_MIKROTIK_CurrentAntenna  string                // Currently selected antenna
+	X_ISPAPP_Antenna           string                // Which antenna to use for modem
+	X_ISPAPP_CurrentAntenna    string                // Currently selected antenna
 	Interfaces                 []CellularInterface   // List of cellular modem interfaces.
 	AccessPoints               []CellularAccessPoint // List of configured APNs.
-	X_MIKROTIK_CellDiagnostics CellDiagnostics       // Cell diagnostics information
+	X_ISPAPP_CellDiagnostics   CellDiagnostics       // Cell diagnostics information
 }
 
 // CellDiagnostics represents Mikrotik specific cell diagnostics
@@ -150,66 +150,66 @@ type CellDiagResult struct {
 
 // CellularInterface represents a single cellular modem interface.
 type CellularInterface struct {
-	Index                                   int             // TR-069 index for this interface
-	Enable                                  bool            // Administrative status (enabled/disabled).
-	Status                                  string          // Operational status (Up, Down, Dormant, etc.).
-	LowerLayers                             string          // Reference to lower layers
-	IMEI                                    string          // International Mobile Equipment Identity.
-	RSSI                                    int             // Received Signal Strength Indicator (dBm)
-	X_MIKROTIK_Model                        string          // Modem model
-	X_MIKROTIK_Revision                     string          // Modem revision
-	X_MIKROTIK_ExtRevision                  string          // Extended revision info
-	X_MIKROTIK_SupportedAccessTechnologies  []string        // Supported access technologies
-	X_MIKROTIK_AccessTechnologies           []string        // Enabled access technologies
-	X_MIKROTIK_CurrentAccessTechnology      string          // Currently used access technology
-	X_MIKROTIK_SupportedLteBands            []string        // Supported LTE bands
-	X_MIKROTIK_LteBands                     []string        // Configured LTE bands
-	X_MIKROTIK_LteCellLock                  []string        // Cell lock configuration
-	X_MIKROTIK_Supported5GBands             []string        // Supported 5G bands
-	X_MIKROTIK_5GBands                      []string        // Configured 5G bands
-	X_MIKROTIK_RSCP                         int             // Received Signal Code Power
-	X_MIKROTIK_ECNO                         int             // ECNO value
-	X_MIKROTIK_SINR                         int             // SINR value in dB
-	X_MIKROTIK_RSRP                         int             // RSRP value in dBm
-	X_MIKROTIK_MimoRSRP                     []int           // RSRP MIMO values
-	X_MIKROTIK_RSRQ                         int             // RSRQ value in dB
-	X_MIKROTIK_CQI                          int             // CQI value
-	X_MIKROTIK_RI                           int             // Rank Indicator
-	X_MIKROTIK_MCS                          int             // Modulation Coding Scheme
-	X_MIKROTIK_TBS                          int             // Transport Block Size
-	X_MIKROTIK_RBs                          int             // Number of allocated Resource Blocks
-	X_MIKROTIK_Modulation                   string          // Modulation type
-	X_MIKROTIK_5G_CQI                       int             // CQI value for 5G
-	X_MIKROTIK_5G_RI                        int             // Rank Indicator for 5G
-	X_MIKROTIK_5G_MCS                       int             // Modulation Coding Scheme for 5G
-	X_MIKROTIK_5G_TBS                       int             // Transport Block Size for 5G
-	X_MIKROTIK_5G_RBs                       int             // Number of Resource Blocks for 5G
-	X_MIKROTIK_5G_Modulation                string          // Modulation type for 5G
-	X_MIKROTIK_5G_DataPath                  string          // User Layer Data Path under NSA Network
-	X_MIKROTIK_TxPUCCH                      int             // TxPUCCH value
-	X_MIKROTIK_TxPUSCH                      int             // TxPUSCH value
-	X_MIKROTIK_TxSRS                        int             // TxSRS value
-	X_MIKROTIK_TxPRACH                      int             // TxPRACH value
-	X_MIKROTIK_5G_TxPUCCH                   int             // TxPUCCH value for 5G
-	X_MIKROTIK_5G_TxPUSCH                   int             // TxPUSCH value for 5G
-	X_MIKROTIK_5G_TxSRS                     int             // TxSRS value for 5G
-	X_MIKROTIK_5G_TxPRACH                   int             // TxPRACH value for 5G
-	X_MIKROTIK_5G_Band                      int             // Band for 5G
-	X_MIKROTIK_5G_Bandwidth                 int             // Bandwidth in MHz for 5G
-	X_MIKROTIK_5G_PhysicalCellId            int             // Physical Cell ID for 5G
-	X_MIKROTIK_5G_SINR                      int             // SINR value for 5G in dB
-	X_MIKROTIK_5G_RSRP                      int             // RSRP value for 5G in dBm
-	X_MIKROTIK_5G_RSRQ                      int             // RSRQ value for 5G in dB
-	X_MIKROTIK_CellId                       int             // Cell ID value
-	X_MIKROTIK_BandInfo                     string          // Human readable band info
-	X_MIKROTIK_LinkDowns                    int             // Number of link downs
-	X_MIKROTIK_AccessPoints                 []string        // List of AccessPoint profiles
-	X_MIKROTIK_CarrierInfoNumberOfEntries   int             // Number of entries in CarrierInfo table
-	X_MIKROTIK_CarrierInfo5GNumberOfEntries int             // Number of entries in CarrierInfo5G table
-	USIM                                    SIMCard         // Details of the inserted SIM card.
-	Stats                                   InterfaceStats  // Interface statistics
-	X_MIKROTIK_CarrierInfo                  []CarrierInfo   // Carrier information entries
-	X_MIKROTIK_CarrierInfo5G                []CarrierInfo5G // 5G carrier information entries
+	Index                                 int             // TR-069 index for this interface
+	Enable                                bool            // Administrative status (enabled/disabled).
+	Status                                string          // Operational status (Up, Down, Dormant, etc.).
+	LowerLayers                           string          // Reference to lower layers
+	IMEI                                  string          // International Mobile Equipment Identity.
+	RSSI                                  int             // Received Signal Strength Indicator (dBm)
+	X_ISPAPP_Model                        string          // Modem model
+	X_ISPAPP_Revision                     string          // Modem revision
+	X_ISPAPP_ExtRevision                  string          // Extended revision info
+	X_ISPAPP_SupportedAccessTechnologies  []string        // Supported access technologies
+	X_ISPAPP_AccessTechnologies           []string        // Enabled access technologies
+	X_ISPAPP_CurrentAccessTechnology      string          // Currently used access technology
+	X_ISPAPP_SupportedLteBands            []string        // Supported LTE bands
+	X_ISPAPP_LteBands                     []string        // Configured LTE bands
+	X_ISPAPP_LteCellLock                  []string        // Cell lock configuration
+	X_ISPAPP_Supported5GBands             []string        // Supported 5G bands
+	X_ISPAPP_5GBands                      []string        // Configured 5G bands
+	X_ISPAPP_RSCP                         int             // Received Signal Code Power
+	X_ISPAPP_ECNO                         int             // ECNO value
+	X_ISPAPP_SINR                         int             // SINR value in dB
+	X_ISPAPP_RSRP                         int             // RSRP value in dBm
+	X_ISPAPP_MimoRSRP                     []int           // RSRP MIMO values
+	X_ISPAPP_RSRQ                         int             // RSRQ value in dB
+	X_ISPAPP_CQI                          int             // CQI value
+	X_ISPAPP_RI                           int             // Rank Indicator
+	X_ISPAPP_MCS                          int             // Modulation Coding Scheme
+	X_ISPAPP_TBS                          int             // Transport Block Size
+	X_ISPAPP_RBs                          int             // Number of allocated Resource Blocks
+	X_ISPAPP_Modulation                   string          // Modulation type
+	X_ISPAPP_5G_CQI                       int             // CQI value for 5G
+	X_ISPAPP_5G_RI                        int             // Rank Indicator for 5G
+	X_ISPAPP_5G_MCS                       int             // Modulation Coding Scheme for 5G
+	X_ISPAPP_5G_TBS                       int             // Transport Block Size for 5G
+	X_ISPAPP_5G_RBs                       int             // Number of Resource Blocks for 5G
+	X_ISPAPP_5G_Modulation                string          // Modulation type for 5G
+	X_ISPAPP_5G_DataPath                  string          // User Layer Data Path under NSA Network
+	X_ISPAPP_TxPUCCH                      int             // TxPUCCH value
+	X_ISPAPP_TxPUSCH                      int             // TxPUSCH value
+	X_ISPAPP_TxSRS                        int             // TxSRS value
+	X_ISPAPP_TxPRACH                      int             // TxPRACH value
+	X_ISPAPP_5G_TxPUCCH                   int             // TxPUCCH value for 5G
+	X_ISPAPP_5G_TxPUSCH                   int             // TxPUSCH value for 5G
+	X_ISPAPP_5G_TxSRS                     int             // TxSRS value for 5G
+	X_ISPAPP_5G_TxPRACH                   int             // TxPRACH value for 5G
+	X_ISPAPP_5G_Band                      int             // Band for 5G
+	X_ISPAPP_5G_Bandwidth                 int             // Bandwidth in MHz for 5G
+	X_ISPAPP_5G_PhysicalCellId            int             // Physical Cell ID for 5G
+	X_ISPAPP_5G_SINR                      int             // SINR value for 5G in dB
+	X_ISPAPP_5G_RSRP                      int             // RSRP value for 5G in dBm
+	X_ISPAPP_5G_RSRQ                      int             // RSRQ value for 5G in dB
+	X_ISPAPP_CellId                       int             // Cell ID value
+	X_ISPAPP_BandInfo                     string          // Human readable band info
+	X_ISPAPP_LinkDowns                    int             // Number of link downs
+	X_ISPAPP_AccessPoints                 []string        // List of AccessPoint profiles
+	X_ISPAPP_CarrierInfoNumberOfEntries   int             // Number of entries in CarrierInfo table
+	X_ISPAPP_CarrierInfo5GNumberOfEntries int             // Number of entries in CarrierInfo5G table
+	USIM                                  SIMCard         // Details of the inserted SIM card.
+	Stats                                 InterfaceStats  // Interface statistics
+	X_ISPAPP_CarrierInfo                  []CarrierInfo   // Carrier information entries
+	X_ISPAPP_CarrierInfo5G                []CarrierInfo5G // 5G carrier information entries
 }
 
 // CarrierInfo represents carrier information for cellular interfaces
@@ -271,16 +271,16 @@ type EthernetLink struct {
 
 // EthernetInterface represents a physical Ethernet port and its status.
 type EthernetInterface struct {
-	Index                int            // TR-069 index for this interface
-	Enable               bool           // Administrative status.
-	Status               string         // Operational status (Up, Down, etc.).
-	LowerLayers          string         // Reference to lower layers (usually empty for physical Ethernet).
-	MACAddress           string         // Burned-in MAC address of the interface.
-	CurrentBitRate       int            // Current negotiated speed in Mbps.
-	X_MIKROTIK_LinkDowns int            // Number of link down events since boot.
-	X_MIKROTIK_Name      string         // Interface name in RouterOS.
-	X_MIKROTIK_Comment   string         // User comment for the interface.
-	Stats                InterfaceStats // Interface statistics.
+	Index              int            // TR-069 index for this interface
+	Enable             bool           // Administrative status.
+	Status             string         // Operational status (Up, Down, etc.).
+	LowerLayers        string         // Reference to lower layers (usually empty for physical Ethernet).
+	MACAddress         string         // Burned-in MAC address of the interface.
+	CurrentBitRate     int            // Current negotiated speed in Mbps.
+	X_ISPAPP_LinkDowns int            // Number of link down events since boot.
+	X_ISPAPP_Name      string         // Interface name in RouterOS.
+	X_ISPAPP_Comment   string         // User comment for the interface.
+	Stats              InterfaceStats // Interface statistics.
 }
 
 // WiFiDevice aggregates all WiFi related configurations.
@@ -316,21 +316,21 @@ type NeighboringWiFiResult struct {
 
 // WiFiRadio represents a physical WiFi radio (e.g., 2.4GHz or 5GHz radio).
 type WiFiRadio struct {
-	Index                      int                     // TR-069 index for this radio
-	Enable                     bool                    // Administrative status.
-	Status                     string                  // Operational status.
-	LowerLayers                string                  // Reference to lower layers (usually empty for physical radio).
-	SupportedFrequencyBands    string                  // Bands supported (e.g., "2.4GHz", "5GHz").
-	OperatingFrequencyBand     string                  // Currently active frequency band.
-	SupportedStandards         string                  // Standards supported (e.g., "g,n,ac,ax").
-	OperatingStandards         string                  // Currently active standards.
-	PossibleChannels           string                  // Possible radio channels for the standard (comma-separated)
-	Channel                    int                     // Current operating channel.
-	AutoChannelSupported       bool                    // Whether automatic channel selection is supported
-	AutoChannelEnable          bool                    // Whether automatic channel selection is enabled.
-	X_MIKROTIK_SkipDFSChannels string                  // DFS channel skipping configuration
-	Stats                      WiFiRadioStats          // Radio statistics
-	X_MIKROTIK_Stats           XMikrotikWiFiRadioStats // Mikrotik-specific stats
+	Index                    int                     // TR-069 index for this radio
+	Enable                   bool                    // Administrative status.
+	Status                   string                  // Operational status.
+	LowerLayers              string                  // Reference to lower layers (usually empty for physical radio).
+	SupportedFrequencyBands  string                  // Bands supported (e.g., "2.4GHz", "5GHz").
+	OperatingFrequencyBand   string                  // Currently active frequency band.
+	SupportedStandards       string                  // Standards supported (e.g., "g,n,ac,ax").
+	OperatingStandards       string                  // Currently active standards.
+	PossibleChannels         string                  // Possible radio channels for the standard (comma-separated)
+	Channel                  int                     // Current operating channel.
+	AutoChannelSupported     bool                    // Whether automatic channel selection is supported
+	AutoChannelEnable        bool                    // Whether automatic channel selection is enabled.
+	X_ISPAPP_SkipDFSChannels string                  // DFS channel skipping configuration
+	Stats                    WiFiRadioStats          // Radio statistics
+	X_ISPAPP_Stats           XMikrotikWiFiRadioStats // Mikrotik-specific stats
 }
 
 // WiFiRadioStats contains statistics for a WiFi radio
@@ -396,7 +396,7 @@ type WiFiAssociatedDevice struct {
 	AuthenticationState bool                           // Whether the client is authenticated.
 	SignalStrength      int                            // Signal strength of the client's uplink (dBm).
 	Stats               WiFiAssociatedDeviceStats      // Standard statistics
-	X_MIKROTIK_Stats    XMikrotikAssociatedDeviceStats // Mikrotik-specific statistics
+	X_ISPAPP_Stats      XMikrotikAssociatedDeviceStats // Mikrotik-specific statistics
 }
 
 // WiFiAssociatedDeviceStats contains statistics for an associated device
@@ -460,7 +460,7 @@ type PPPInterface struct {
 	Password           string         // Password for PPP authentication (handle securely).
 	EncryptionProtocol string         // Encryption protocol used (None, MPPE).
 	ConnectionTrigger  string         // Trigger for establishing connection (OnDemand, AlwaysOn).
-	X_MIKROTIK_Type    string         // Mikrotik specific type (e.g., PPPoE).
+	X_ISPAPP_Type      string         // Mikrotik specific type (e.g., PPPoE).
 	PPPoE              PPPoESettings  // PPPoE specific settings.
 	IPCP               IPCPSettings   // IPCP settings (for IPv4).
 	Stats              InterfaceStats // Interface statistics.
@@ -503,7 +503,7 @@ type IPv4AddressEntry struct {
 	Status         string // Operational status (Enabled, Disabled, Error).
 	IPAddress      string // The IPv4 address.
 	SubnetMask     string // The subnet mask.
-	AddressingType string // How the address was assigned (Static, DHCP, IPCP, X_MIKROTIK_Dynamic).
+	AddressingType string // How the address was assigned (Static, DHCP, IPCP, X_ISPAPP_Dynamic).
 }
 
 // IPDiagnostics contains parameters for running IP layer diagnostic tests.
@@ -652,7 +652,7 @@ type IPv4ForwardingEntry struct {
 	DestSubnetMask   string // Destination subnet mask.
 	GatewayIPAddress string // Next hop gateway IP address.
 	Interface        string // Egress interface path name.
-	Origin           string // How the route was learned (Static, DHCP, RIP, OSPF, X_MIKROTIK_*).
+	Origin           string // How the route was learned (Static, DHCP, RIP, OSPF, X_ISPAPP_*).
 }
 
 // HostsDevice provides information about hosts detected by the CPE.
@@ -690,7 +690,7 @@ type DNSServerEntry struct {
 	Enable    bool   // Administrative status.
 	Status    string // Operational status (Enabled, Disabled, Error).
 	DNSServer string // IP address of the DNS server.
-	Type      string // How the server was configured (Static, DHCPv4, DHCPv6, IPCP, RouterAdvertisement, X_MIKROTIK_Dynamic).
+	Type      string // How the server was configured (Static, DHCPv4, DHCPv6, IPCP, RouterAdvertisement, X_ISPAPP_Dynamic).
 }
 
 // DHCPv4Device aggregates DHCPv4 client and server configurations.
@@ -892,7 +892,7 @@ type WANIPConnection struct {
 
 // FirewallDevice aggregates firewall configurations. Includes Mikrotik extensions.
 type FirewallDevice struct {
-	X_MIKROTIK_ConnTrack XMikrotikConnTrack // Mikrotik connection tracking info.
-	X_MIKROTIK_Filter    XMikrotikFilter    // Mikrotik filter rules.
-	X_MIKROTIK_NAT       XMikrotikNAT       // Mikrotik NAT rules.
+	X_ISPAPP_ConnTrack XMikrotikConnTrack // Mikrotik connection tracking info.
+	X_ISPAPP_Filter    XMikrotikFilter    // Mikrotik filter rules.
+	X_ISPAPP_NAT       XMikrotikNAT       // Mikrotik NAT rules.
 }
