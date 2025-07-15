@@ -16,8 +16,7 @@ PKG_USE_MIPS16:=0
 PKG_BUILD_FLAGS:=no-mips16
 
 GO_PKG:=github.com/Niceblueman/goispappd
-GO_PKG_BUILD_PKG:=./cmd/goispappd
-GO_PKG_LDFLAGS_X:=
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-v$(PKG_VERSION)
 GO_PKG_TARGET_BIN_NAME:=goispappd
 
 include $(INCLUDE_DIR)/package.mk
