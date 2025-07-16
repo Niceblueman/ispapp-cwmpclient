@@ -41,42 +41,42 @@ func NewHandler(logger *logrus.Logger) *Handler {
 
 // HandleRequest processes the incoming SOAP request
 func (h *Handler) HandleResponse(resp *soap.ResponceEnvelope) error {
-	h.logger.Infof("Handling SOAP response: %s", resp.XMLName.Local)
-	switch {
-	case resp.Body.GetRPCMethods != nil:
+	METHOD := resp.GetMethodSwitch()
+	switch METHOD {
+	case "GetRPCMethods":
 		return h.handleGetRPCMethods(resp.Body.GetRPCMethods)
-	case resp.Body.GetParameterValues != nil:
+	case "GetParameterValues":
 		return h.handleGetParameterValues(resp.Body.GetParameterValues)
-	case resp.Body.SetParameterValues != nil:
+	case "SetParameterValues":
 		return h.handleSetParameterValues(resp.Body.SetParameterValues)
-	case resp.Body.Download != nil:
+	case "Download":
 		return h.handleDownload(resp.Body.Download)
-	case resp.Body.Reboot != nil:
+	case "Reboot":
 		return h.handleReboot(resp.Body.Reboot)
-	case resp.Body.FactoryReset != nil:
+	case "FactoryReset":
 		return h.handleFactoryReset(resp.Body.FactoryReset)
-	case resp.Body.AddObject != nil:
+	case "AddObject":
 		return h.handleAddObject(resp.Body.AddObject)
-	case resp.Body.DeleteObject != nil:
+	case "DeleteObject":
 		return h.handleDeleteObject(resp.Body.DeleteObject)
-	case resp.Body.InformResponse != nil:
+	case "InformResponse":
 		return h.handleInformResponse(resp.Body.InformResponse)
-	case resp.Body.RequestXCommand != nil:
+	case "RequestXCommand":
 		return h.handleRequestXCommand(resp.Body.RequestXCommand)
-	case resp.Body.TransferCompleteResponse != nil:
+	case "TransferCompleteResponse":
 		return h.handleTransferCompleteResponse(resp.Body.TransferCompleteResponse)
-	case resp.Body.RequestDownloadResponse != nil:
+	case "RequestDownloadResponse":
 		return h.handleRequestDownloadResponse(resp.Body.RequestDownloadResponse)
-	case resp.Body.Fault != nil:
+	case "Fault":
 		return h.handleFault(resp.Body.Fault)
-	case resp.Body.GetParameterNames != nil:
+	case "GetParameterNames":
 		return h.handleGetParameterNames(resp.Body.GetParameterNames)
-	// case resp.Body.SetParameterAttributes != nil:
+	// case resp.Body.SetParameterAttributes:
 	// 	return h.handleSetParameterAttributes(resp.Body.SetParameterAttributes)
-	// case resp.Body.GetParameterAttributes != nil:
+	// case resp.Body.GetParameterAttributes:
 	// 	return h.handleGetParameterAttributes(resp.Body.GetParameterAttributes)
 	default:
-		h.logger.Warnf("Unhandled SOAP response type: %s", resp.XMLName.Local)
+		h.logger.Warnf("Unhandled SOAP response type: %s", METHOD)
 		return nil
 	}
 }

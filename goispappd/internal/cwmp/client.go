@@ -76,7 +76,7 @@ func (c *CWMPClient) SendEnvelope(envelope *soap.RequestEnvelope) error {
 	if err != nil {
 		return fmt.Errorf("failed to read response: %w", err)
 	}
-	if err := c.Response.Load(respBody); err != nil {
+	if err := c.Response.Load(respBody, c.logger); err != nil {
 		return fmt.Errorf("failed to load SOAP response: %w", err)
 	}
 	return c.Handler.HandleResponse(c.Response)
@@ -149,7 +149,8 @@ func (c *CWMPClient) SendInform(eventCode string) error {
 	if err != nil {
 		return fmt.Errorf("failed to read response: %w", err)
 	}
-	if err := c.Response.Load(respBody); err != nil {
+	c.logger.Infof("Received SOAP response: %s", string(respBody))
+	if err := c.Response.Load(respBody, c.logger); err != nil {
 		return fmt.Errorf("failed to load SOAP response: %w", err)
 	}
 	if err := c.Handler.HandleResponse(c.Response); err != nil {

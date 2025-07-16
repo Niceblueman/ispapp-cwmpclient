@@ -2,27 +2,24 @@ package soap
 
 import (
 	"encoding/xml"
-
-	"github.com/sirupsen/logrus"
 )
 
 // ResponceEnvelope represents incoming messages from ACS to CPE
 type ResponceEnvelope struct {
-	XMLName *xml.Name `xml:"soap-env:Envelope"`
-	Logger  *logrus.Logger
-	SoapEnv *string `xml:"xmlns:soap-env,attr"`
-	Cwmp    *string `xml:"xmlns:cwmp,attr"`
+	XMLName *xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
+	SoapEnv *string   `xml:"xmlns:soap-env,attr"`
+	Cwmp    *string   `xml:"xmlns:cwmp,attr"`
 	Header  *struct {
-		XMLName *xml.Name `xml:"soap-env:Header"`
+		XMLName *xml.Name `xml:"Header"`
 		ID      struct {
 			XMLName        *xml.Name `xml:"cwmp:ID"`
-			MustUnderstand *string   `xml:"soap-env:mustUnderstand,attr"`
+			MustUnderstand *string   `xml:"mustUnderstand,attr"`
 			Value          *string   `xml:",chardata"`
 		} `xml:"cwmp:ID"`
-	} `xml:"soap-env:Header"`
+	} `xml:"Header"`
 	Body *struct {
 		// ACS-initiated RPC methods
-		XMLName                  *xml.Name                 `xml:"soap-env:Body"`
+		XMLName                  *xml.Name                 `xml:"Body"`
 		GetRPCMethods            *GetRPCMethods            `xml:"cwmp:GetRPCMethods"`
 		GetParameterValues       *GetParameterValues       `xml:"cwmp:GetParameterValues"`
 		SetParameterValues       *SetParameterValues       `xml:"cwmp:SetParameterValues"`
@@ -37,7 +34,7 @@ type ResponceEnvelope struct {
 		TransferCompleteResponse *TransferCompleteResponse `xml:"cwmp:TransferCompleteResponse"`
 		RequestDownloadResponse  *RequestDownloadResponse  `xml:"cwmp:RequestDownloadResponse"`
 		Fault                    *FaultResponse            `xml:"cwmp:Fault,omitempty"`
-	} `xml:"soap-env:Body"`
+	} `xml:"Body"`
 }
 
 // ACS-initiated RPC Methods -------------------------------------------------
@@ -53,7 +50,7 @@ type GetParameterValues struct {
 
 type ParameterNames struct {
 	XMLName   xml.Name `xml:"ParameterNames"`
-	ArrayType string   `xml:"soap-env:arrayType,attr"`
+	ArrayType string   `xml:"arrayType,attr"`
 	Names     []string `xml:"string"`
 }
 type SetParameterValues struct {
@@ -171,7 +168,7 @@ type FaultResponse struct {
 }
 
 type RequestXCommand struct {
-	XMLName    xml.Name `xml:"cwmp:X_Command"`
+	XMLName    xml.Name `xml:"cwmp:RequestX_Command"`
 	CommandKey string   `xml:"cwmp:CommandKey"`
 	Parameters struct {
 		XMLName xml.Name `xml:"cwmp:Parameters"`

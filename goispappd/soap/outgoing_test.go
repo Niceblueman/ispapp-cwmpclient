@@ -16,6 +16,7 @@ func TestLoaders(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt // capture loop variable
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

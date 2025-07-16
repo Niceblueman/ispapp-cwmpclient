@@ -1,0 +1,38 @@
+# filepath: /Volumes/OpenWrt/ispapp-cwmpclient/goispappd/Makefile.debug
+
+# Debug configuration
+DEBUG_HOST ?= 192.168.1.170
+DEBUG_USER ?= root
+DEBUG_PORT ?= 22
+DEBUG_TARGET_DIR ?= /tmp
+TEST_NAME ?= 
+
+# Debug rule to send named test to embedded device
+debug-test:
+	@if [ -z "$(TEST_NAME)" ]; then \
+		echo "Error: TEST_NAME is required. Usage: make debug-test TEST_NAME=your_test_name"; \
+		exit 1; \
+	fi
+	@echo "Building test binary: $(TEST_NAME)"
+	@CGO_ENABLED=0 GOOS=linux GOARCH=mips go build -o $(TEST_NAME) -ldflags="-s -w" ./tests/$(TEST_NAME)
+	@echo "Copying $(TEST_NAME) to $(DEBUG_HOST):$(DEBUG_TARGET_DIR)/"
+	@scp -P $(DEBUG_PORT) $(TEST_NAME) $(DEBUG_USER)@$(DEBUG_HOST):$(DEBUG_TARGET_DIR)/
+	@echo "Making binary executable and running test..."
+	@ssh -p $(DEBUG_PORT) $(DEBUG_USER)@$(DEBUG_HOST) "chmod +x $(DEBUG_TARGET_DIR)/$(TEST_NAME) && echo '=== Starting Test: $(TEST_NAME) ===' && $(DEBUG_TARGET_DIR)/$(TEST_NAME) 2>&1 && echo '=== Test Completed: $(TEST_NAME) ===' || echo '=== Test Failed: $(TEST_NAME) ==='"
+	@echo "Cleaning up remote binary..."
+	@ssh -p $(DEBUG_PORT) $(DEBUG_USER)@$(DEBUG_HOST) "rm -f $(DEBUG_TARGET_DIR)/$(TEST_NAME)"
+	@echo "Cleaning up local binary..."
+	@rm -f $(TEST_NAME)
+
+# Helper rule to set common debug variables
+debug-config:
+	@echo "Current debug configuration:"
+	@echo "  Host: $(DEBUG_HOST)"
+	@echo "  User: $(DEBUG_USER)"
+	@echo "  Port: $(DEBUG_PORT)"
+	@echo "  Target Dir: $(DEBUG_TARGET_DIR)"
+	@echo ""
+	@echo "Usage: make debug-test TEST_NAME=your_test_name"
+	@echo "Override vars: make debug-test TEST_NAME=test DEBUG_HOST=192.168.1.100"
+
+.PHONY: debug-test debug-config

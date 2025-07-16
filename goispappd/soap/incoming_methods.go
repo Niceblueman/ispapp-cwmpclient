@@ -9,15 +9,13 @@ import (
 
 // ACS to CPE soap ResponceEnvelope
 func NewResponceEnvelope(logger *logrus.Logger) *ResponceEnvelope {
-	return &ResponceEnvelope{
-		Logger: logger,
-	}
+	return &ResponceEnvelope{}
 }
 
 // is valid xml for SOAP requests
-func (e *ResponceEnvelope) Load(buf []byte) error {
+func (e *ResponceEnvelope) Load(buf []byte, logger *logrus.Logger) error {
 	if err := xml.Unmarshal(buf, e); err != nil {
-		e.Logger.Errorf("Failed to unmarshal SOAP response: %v", err)
+		logger.Errorf("Failed to unmarshal SOAP response: %v", err)
 		return err
 	}
 	return nil
@@ -80,7 +78,7 @@ func (e *ResponceEnvelope) GetMethod() string {
 	v := reflect.ValueOf(e.Body)
 	t := v.Type()
 
-	for i := range v.NumField() {
+	for i := range make([]struct{}, t.NumField()) {
 		field := v.Field(i)
 		if !field.IsNil() {
 			return t.Field(i).Name

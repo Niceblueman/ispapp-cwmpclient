@@ -22,18 +22,17 @@ PKG_USE_MIPS16:=0
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/../feeds/packages/lang/golang/golang-package.mk
 
-GO_PKG_BUILD_VARS += GO111MODULE=on GOPROXY=direct
-CGO_CFLAGS += \
-	-I$(STAGING_DIR)/usr/include/libubox \
-	-I$(STAGING_DIR)/usr/include/libubus \
-	-I$(STAGING_DIR)/usr/include/libuci
-GO_PKG_LDFLAGS:=-s -w
+# GO_PKG_BUILD_VARS += GO111MODULE=on GOPROXY=direct
+# CGO_CFLAGS += \
+# 	-I$(STAGING_DIR)/usr/include/libubox \
+# 	-I$(STAGING_DIR)/usr/include/libubus \
+# 	-I$(STAGING_DIR)/usr/include/libuci
+# GO_PKG_LDFLAGS:=-s -w
 
 define Package/goispappd/Default
   TITLE:=tr181/tr098/TR-069 CWMP client for OpenWrt.
   URL:=https://ispapp.co
-  DEPENDS:=$(GO_ARCH_DEPENDS) +libubox +libubus +libuci
-  PKGARCH:=all
+  DEPENDS:=$(GO_ARCH_DEPENDS)
 endef
 
 define Package/goispappd
