@@ -27,10 +27,17 @@ CGO_CFLAGS += \
 	-I$(STAGING_DIR)/usr/include/libubox \
 	-I$(STAGING_DIR)/usr/include/libubus \
 	-I$(STAGING_DIR)/usr/include/libuci \
-	-I$(STAGING_DIR)/usr/include/libblobmsg \
 	-I$(STAGING_DIR)/usr/include/libjson-c \
-  -I$(STAGING_DIR)/usr/include/libnl-3 \
-  -I$(STAGING_DIR)/usr/include/libnl-genl-3
+	-I$(STAGING_DIR)/usr/include
+
+CGO_LDFLAGS += \
+	-L$(STAGING_DIR)/usr/lib \
+	-luci \
+	-lubus \
+	-lubox \
+	-lblobmsg_json \
+	-ljson-c
+
 GO_PKG_LDFLAGS:=-s -w
 
 define Package/goispappd/Default
@@ -40,9 +47,8 @@ define Package/goispappd/Default
     +libubox \
     +libubus \
     +libuci \
-    +libblobmsg \
-    +libjson-c \
-    +libnl-tiny
+    +libblobmsg_json \
+    +libjson-c
 endef
 
 define Package/goispappd
