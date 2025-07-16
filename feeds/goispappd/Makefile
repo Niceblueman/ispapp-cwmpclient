@@ -1,14 +1,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=goispappd
-PKG_VERSION:=1.0.26
-PKG_RELEASE:=26
+PKG_VERSION:=1.0.27
+PKG_RELEASE:=27
 
 GO_PKG:=github.com/Niceblueman/goispappd
 
 PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
-PKG_HASH:=2fb0a11e327a76f7244ec5cd1b0cbf37c1ca5cf6c9a72d4ec75de7acba152d35
+PKG_HASH:=54f95ec57e5b2d142aca570d9badf06b57ddb5a99911df44dc6b7c097e9d0e23
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-v$(PKG_VERSION)
 
 PKG_LICENSE:=GPL-3.0
@@ -23,21 +23,7 @@ include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/../feeds/packages/lang/golang/golang-package.mk
 
 GO_PKG_BUILD_VARS += GO111MODULE=on GOPROXY=direct GOSUMDB=off CGO_ENABLED=1
-CGO_CFLAGS += \
-	-I$(STAGING_DIR)/usr/include/libubox \
-	-I$(STAGING_DIR)/usr/include/libubus \
-	-I$(STAGING_DIR)/usr/include/libuci \
-	-I$(STAGING_DIR)/usr/include/libjson-c \
-	-I$(STAGING_DIR)/usr/include
-
-CGO_LDFLAGS += \
-	-L$(STAGING_DIR)/usr/lib \
-	-luci \
-	-lubus \
-	-lubox \
-	-lblobmsg_json \
-	-ljson-c
-
+CGO_CFLAGS += -luci
 GO_PKG_LDFLAGS:=-s -w
 
 define Package/goispappd/Default
