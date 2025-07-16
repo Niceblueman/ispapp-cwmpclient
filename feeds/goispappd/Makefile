@@ -58,8 +58,8 @@ define Build/Compile
 endef
 
 define Package/goispappd/description
-    tr181/tr098/TR-069 CWMP client for OpenWrt.
-    It is a Go port of the original ispappd written in C.
+tr181/tr098/TR-069 CWMP client for OpenWrt.
+It is a Go port of the original ispappd written in C.
 endef
 
 $(eval $(call GoBinPackage,goispappd))
