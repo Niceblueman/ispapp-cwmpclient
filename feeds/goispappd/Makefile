@@ -43,12 +43,8 @@ GO_PKG_LDFLAGS:=-s -w
 define Package/goispappd/Default
   TITLE:=tr181/tr098/TR-069 CWMP client for OpenWrt.
   URL:=https://ispapp.co
-  DEPENDS:=$(GO_ARCH_DEPENDS) \
-    +libubox \
-    +libubus \
-    +libuci \
-    +libblobmsg_json \
-    +libjson-c
+  DEPENDS:=$(GO_ARCH_DEPENDS) +libuci
+
 endef
 
 define Package/goispappd
