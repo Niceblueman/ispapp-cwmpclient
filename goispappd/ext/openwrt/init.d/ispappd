@@ -4,96 +4,18 @@
 START=90
 
 USE_PROCD=1
-PROG="/usr/sbin/ispappcwmp"
+PROG="/usr/sbin/goispappd"
 
-UCI_SET="/sbin/uci -q ${UCI_CONFIG_DIR:+-c $UCI_CONFIG_DIR} set"
-UCI_GET="/sbin/uci -q ${UCI_CONFIG_DIR:+-c $UCI_CONFIG_DIR} get"
-UCI_COMMIT="/sbin/uci -q ${UCI_CONFIG_DIR:+-c $UCI_CONFIG_DIR} commit"
-init_device_info() {
-	local val oval
-	local change=0
-
-	val=$(cat "/etc/device_info" | grep "DEVICE_MANUFACTURER" | cut -f 2 -d '=' | sed -e "s/['\"]//g" -e "s'[]:@/?#[!$&()*+,;=]'_'g" | head -n1 | tr -d '\r\n')
-	oval=`$UCI_GET ispappd.@device[0].manufacturer`
-	[ -n "$val" -a "$val" != "$oval" ] && { $UCI_SET ispappd.@device[0].manufacturer="$val"; change=1; }
-
-	val=$(cat "/etc/device_info" | grep "DEVICE_PRODUCT" | cut -f 2 -d '=' | sed -e "s/['\"]//g" -e "s'[]:@/?#[!$&()*+,;=]'_'g" | head -n1 | tr -d '\r\n')
-	oval=`$UCI_GET ispappd.@device[0].product_class`
-	[ -n "$val" -a "$val" != "$oval" ] && { $UCI_SET ispappd.@device[0].product_class="$val"; change=1; }
-
-	val=$(cat "/etc/device_info" | grep "DEVICE_REVISION" | cut -f 2 -d '=' | sed -e "s/['\"]//g" -e "s'[]:@/?#[!$&()*+,;=]'_'g" | head -n1 | tr -d '\r\n')	
-	oval=`$UCI_GET ispappd.@device[0].hardware_version`
-	[ -n "$val" -a "$val" != "$oval" ] && { $UCI_SET ispappd.@device[0].hardware_version="$val"; change=1; }
-
-	val=`cat "/etc/openwrt_version"`
-	oval=`$UCI_GET ispappd.@device[0].software_version`
-	[ -n "$val" -a "$val" != "$oval" ] && { $UCI_SET ispappd.@device[0].software_version="$val"; change=1; }
-	
-	#The same thing here for OUI and SerialNumber
-
-	# Set periodic_time to current UTC time in ISO 8601 format
-	current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-	$UCI_SET ispappd.@acs[0].periodic_time="$current_time"
-	change=1
-
-	[ "$change" = "1" ] && $UCI_COMMIT ispappd
-}
-init_env() {
-    local val oval
-    local change=0
-
-    val=$(fw_printenv cwmp_username | cut -d'=' -f2-)
-    oval=$($UCI_GET ispappd.@local[0].username)
-    [ -n "$val" ] && [ "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].username="$val"; change=1; }
-
-    val=$(fw_printenv cwmp_url | cut -d'=' -f2-)
-    oval=$($UCI_GET ispappd.@local[0].url)
-    [ -n "$val" ] && [ "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].url="$val"; change=1; }
-
-    val=$(fw_printenv cwmp_password | cut -d'=' -f2-)
-    oval=$($UCI_GET ispappd.@local[0].password)
-    [ -n "$val" ] && [ "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].password="$val"; change=1; }
-
-    val=$(fw_printenv cwmp_provisioning_code | cut -d'=' -f2-)
-    oval=$($UCI_GET ispappd.@local[0].provisioning_code)
-    [ -n "$val" ] && [ "$val" != "$oval" ] && { $UCI_SET ispappd.@local[0].provisioning_code="$val"; change=1; }
-
-    [ "$change" = "1" ] && $UCI_COMMIT ispappd
-}
 start_service() {
-	local enable=`uci -q get ispappd.@local[0].enable`
-	if [ "$enable" == "1" ]; then
-		init_device_info
-		init_env
-		procd_open_instance
-		procd_set_param command "$PROG" -f
-		if [ "$1" = "--getrpcmethod" ]; then
-			procd_append_param command --getrpcmethod
-		elif [ "$1" = "--boot" ]; then
-			procd_append_param command --boot
-		else
-			procd_append_param command
-		fi
-		procd_set_param respawn "3" "7" "0"
-		procd_close_instance
-	fi
+	procd_open_instance
+	procd_append_param command
+	procd_close_instance
 }
 
-boot() {
-	start --boot
-}
 stop_service()
 {
 	# Save any pending UCI changes (credentials, device info, etc.)
-	$UCI_COMMIT ispappd	
-}
-
-save_env() {
-	# Save the environment variables
-	fw_setenv cwmp_username "$($UCI_GET ispappd.@local[0].username)"
-	fw_setenv cwmp_url "$($UCI_GET ispappd.@local[0].url)"
-	fw_setenv cwmp_password "$($UCI_GET ispappd.@local[0].password)"
-	fw_setenv cwmp_provisioning_code "$($UCI_GET ispappd.@local[0].provisioning_code)"
+	$UCI_COMMIT Device
 }
 
 service_triggers()
