@@ -186,9 +186,8 @@ jobs:
           IGNORE_ERRORS: false
           FEEDNAME: ispappd
           FEED_DIR: ${{ github.workspace }}/feeds/
-          GOPACKAGELATEST: true
           ARCH: ${{ matrix.arch }}
-          PACKAGES: goispappd
+          PACKAGES: golang goispappd
           V: s
         
       - name: Store packages
