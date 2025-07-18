@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'feeds/goispappd/*'
+      - '.github/workflows/build-goipk.yml'
 
 jobs:
   changes:
@@ -188,7 +189,6 @@ jobs:
           GOPACKAGELATEST: true
           ARCH: ${{ matrix.arch }}
           PACKAGES: goispappd
-          CONTAINER: 
           V: s
         
       - name: Store packages
