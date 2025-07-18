@@ -16,6 +16,8 @@ openwrt-sdk-*/
 *.a
 *.so
 *.dylib
+goispappd/uci
+goispappd/ubox
 .deps/
 .libs/
 

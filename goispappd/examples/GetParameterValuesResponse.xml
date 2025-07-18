@@ -1,299 +1,567 @@
-<soap-env:Envelope xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
-    xmlns:soap-env="http://schemas.xmlsoap.org/soap/envelope/"
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cwmp="urn:dslforum-org:cwmp-1-0">
-    <soap-env:Header>
-        <cwmp:ID soap-env:mustUnderstand="1">6ryxw22b</cwmp:ID>
-    </soap-env:Header>
-    <soap-env:Body>
-        <cwmp:GetParameterValuesResponse>
-            <ParameterList soap-env:arrayType='cwmp:ParameterValueStruct[542]'>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>pload:1,          UploadTCP:1, MemoryStatus:1, IPInterface:1, EthernetLink:1,          EthernetInterface:1, CellularInterfaceBase:1, WiFiRadio:1, WiFiSSID:1,          WiFiAccessPoint:1, Hosts:1, DHCPv4Client:1, IPPingDetailed:1, IPPing:1,          TraceRoute:1, InformParameters:1, Baseline:1)</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>ich will          return dynamic /export output when Uploaded.</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:          http://192.168.{i}.114:7547/b3b577e61fb156d500a7a57a8f69f210d4d5</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:          36,37,38,39,40,41,42,43,44,45,46,47,48,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:string'>-Bm@2Mbps          20m13s,-79dBm@5.5Mbps 19m45s,-78dBm@11Mbps 27s,-77dBm@6Mbps 2s,-77dBm@9Mbps          5m31s,-77dBm@12Mbps 2s,-78dBm@18Mbps 2s,-78dBm@24Mbps 2s,-77dBm@36Mbps          38s,-77dBm@48Mbps 37s,-77dBm@54Mbps 50s</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:string'>-Bm@6Mbps          15m39s,-74dBm@12Mbps 8m25s,-74dBm@18Mbps 26s,-73dBm@24Mbps          1m34s,-73dBm@36Mbps 1m34s,-74dBm@48Mbps 8m23s,-74dBm@54Mbps 18s</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:string'>-Bm@6Mbps          3m28s,-81dBm@12Mbps 1m56s,-82dBm@18Mbps 1m30s,-82dBm@24Mbps          1m30s,-82dBm@36Mbps 1m30s,-74dBm@48Mbps 29m16s,-64dBm@54Mbps 31m10s</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:string'>-Bm@6Mbps          4m24s,-67dBm@12Mbps 5m3s,-66dBm@18Mbps 5m3s,-57dBm@24Mbps 0s,-58dBm@36Mbps          10s,-61dBm@48Mbps 2s,-59dBm@54Mbps 0s</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:string'>-m@12Mbps          30m20s,-81dBm@18Mbps 30m16s,-70dBm@24Mbps 12m39s,-72dBm@36Mbps          57s,-69dBm@48Mbps 56s,-69dBm@54Mbps 0s</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:int'>-</Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>      <Value xsi:type='xsd:string'>-m@18Mbps          3m7s,-80dBm@24Mbps 13s,-77dBm@36Mbps 2s,-77dBm@48Mbps 5s,-75dBm@54Mbps 0s</Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'>Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>          Device.IP.Diagnostics.DownloadDiagnostics.TestBytesReceivedUnderFullLoading</Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>          Device.IP.Diagnostics.DownloadDiagnostics.TotalBytesReceivedUnderFullLoading</Name>      <Value xsi:type='xsd:unsignedInt'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'>Value>  </ParameterValueStruct>  <ParameterValueStruct>
-      <Name>          Device.IP.Diagnostics.DownloadDiagnostics.PerConnectionResultNumberOfEntries</Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:dateTime'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:boolean'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:unsignedInt'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'></Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>  <ParameterValueStruct>      <Name></Name>      <Value xsi:type='xsd:string'>Value>  </ParameterValueStruct>
-            </ParameterList>
-        </cwmp:GetParameterValuesResponse>
-    </soap-env:Body>
-</soap-env:Envelope>
+Device.
+    RootDataModelVersion                    type: string(32)
+    InterfaceStackNumberOfEntries          type: uint32
+    DeviceSummary                          type: string
 
-Device.RootDataModelVersion
-Device.InterfaceStackNumberOfEntries
-Device.DeviceSummary
-Device.DeviceInfo.SoftwareVersion
-Device.DeviceInfo.ProvisioningCode
-Device.DeviceInfo.Manufacturer
-Device.DeviceInfo.ManufacturerOUI
-Device.DeviceInfo.ModelName
-Device.DeviceInfo.Description
-Device.DeviceInfo.ProductClass
-Device.DeviceInfo.SerialNumber
-Device.DeviceInfo.HardwareVersion
-Device.DeviceInfo.UpTime
-Device.DeviceInfo.VendorConfigFileNumberOfEntries
-Device.DeviceInfo.MemoryStatus.Total
-Device.DeviceInfo.MemoryStatus.Free
-Device.DeviceInfo.ProcessStatus.CPUUsage
-Device.DeviceInfo.VendorConfigFile.{i}.Name
-Device.DeviceInfo.VendorConfigFile.{i}.Description
-Device.DeviceInfo.VendorConfigFile.{i}.UseForBackupRestore
-Device.ManagementServer.ParameterKey
-Device.ManagementServer.ConnectionRequestURL
-Device.ManagementServer.URL
-Device.ManagementServer.Username
-Device.ManagementServer.Password
-Device.ManagementServer.PeriodicInformEnable
-Device.ManagementServer.PeriodicInformInterval
-Device.ManagementServer.ConnectionRequestUsername
-Device.ManagementServer.ConnectionRequestPassword
-Device.ManagementServer.AliasBasedAddressing
-Device.ManagementServer.InformParameterNumberOfEntries
-Device.Cellular.InterfaceNumberOfEntries
-Device.Cellular.AccessPointNumberOfEntries
-Device.Cellular.AccessPoint.{i}.APN
-Device.Cellular.AccessPoint.{i}.Username
-Device.Cellular.AccessPoint.{i}.Password
-Device.Ethernet.InterfaceNumberOfEntries
-Device.Ethernet.LinkNumberOfEntries
-Device.Ethernet.Interface.{i}.Enable
-Device.Ethernet.Interface.{i}.Status
-Device.Ethernet.Interface.{i}.LowerLayers
-Device.Ethernet.Interface.{i}.MACAddress
-Device.Ethernet.Interface.{i}.CurrentBitRate
-Device.Ethernet.Interface.{i}.Stats.BytesSent
-Device.Ethernet.Interface.{i}.Stats.BytesReceived
-Device.Ethernet.Interface.{i}.Stats.PacketsSent
-Device.Ethernet.Interface.{i}.Stats.PacketsReceived
-Device.Ethernet.Interface.{i}.Stats.ErrorsSent
-Device.Ethernet.Interface.{i}.Stats.ErrorsReceived
-Device.Ethernet.Interface.{i}.Stats.DiscardPacketsSent
-Device.Ethernet.Interface.{i}.Stats.DiscardPacketsReceived
-Device.WiFi.RadioNumberOfEntries
-Device.WiFi.SSIDNumberOfEntries
-Device.WiFi.AccessPointNumberOfEntries
-Device.WiFi.Radio.{i}.Enable
-Device.WiFi.Radio.{i}.Status
-Device.WiFi.Radio.{i}.LowerLayers
-Device.WiFi.Radio.{i}.SupportedFrequencyBands
-Device.WiFi.Radio.{i}.OperatingFrequencyBand
-Device.WiFi.Radio.{i}.SupportedStandards
-Device.WiFi.Radio.{i}.OperatingStandards
-Device.WiFi.Radio.{i}.PossibleChannels
-Device.WiFi.Radio.{i}.Channel
-Device.WiFi.Radio.{i}.AutoChannelSupported
-Device.WiFi.Radio.{i}.AutoChannelEnable
-Device.WiFi.Radio.{i}.Stats.Noise
-Device.WiFi.SSID.{i}.LowerLayers
-Device.WiFi.SSID.{i}.Enable
-Device.WiFi.SSID.{i}.Status
-Device.WiFi.SSID.{i}.BSSID
-Device.WiFi.SSID.{i}.MACAddress
-Device.WiFi.SSID.{i}.SSID
-Device.WiFi.SSID.{i}.Stats.BytesSent
-Device.WiFi.SSID.{i}.Stats.BytesReceived
-Device.WiFi.SSID.{i}.Stats.PacketsSent
-Device.WiFi.SSID.{i}.Stats.PacketsReceived
-Device.WiFi.SSID.{i}.Stats.ErrorsSent
-Device.WiFi.SSID.{i}.Stats.ErrorsReceived
-Device.WiFi.SSID.{i}.Stats.DiscardPacketsSent
-Device.WiFi.SSID.{i}.Stats.DiscardPacketsReceived
-Device.WiFi.AccessPoint.{i}.Enable
-Device.WiFi.AccessPoint.{i}.SSIDReference
-Device.WiFi.AccessPoint.{i}.SSIDAdvertisementEnabled
-Device.WiFi.AccessPoint.{i}.Status
-Device.WiFi.AccessPoint.{i}.AssociatedDeviceNumberOfEntries
-Device.WiFi.AccessPoint.{i}.Security.ModesSupported
-Device.WiFi.AccessPoint.{i}.Security.ModeEnabled
-Device.WiFi.AccessPoint.{i}.Security.KeyPassphrase
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.155.MACAddress
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.155.AuthenticationState
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.155.SignalStrength
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.155.Stats.BytesSent
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.155.Stats.BytesReceived
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.155.Stats.PacketsSent
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.155.Stats.PacketsReceived
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.166.MACAddress
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.166.AuthenticationState
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.166.SignalStrength
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.166.Stats.BytesSent
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.166.Stats.BytesReceived
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.166.Stats.PacketsSent
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.166.Stats.PacketsReceived
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.173.MACAddress
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.173.AuthenticationState
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.173.SignalStrength
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.173.Stats.BytesSent
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.173.Stats.BytesReceived
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.173.Stats.PacketsSent
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.173.Stats.PacketsReceived
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.181.MACAddress
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.181.AuthenticationState
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.181.SignalStrength
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.181.Stats.BytesSent
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.181.Stats.BytesReceived
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.181.Stats.PacketsSent
-Device.WiFi.AccessPoint.{i}.AssociatedDevice.181.Stats.PacketsReceived
-Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState
-Device.WiFi.NeighboringWiFiDiagnostic.ResultNumberOfEntries
-Device.PPP.InterfaceNumberOfEntries
-Device.IP.InterfaceNumberOfEntries
-Device.IP.Interface.{i}.Enable
-Device.IP.Interface.{i}.LowerLayers
-Device.IP.Interface.{i}.Status
-Device.IP.Interface.{i}.Type
-Device.IP.Interface.{i}.IPv4AddressNumberOfEntries
-Device.IP.Interface.{i}.IPv4Address.{i}.Enable
-Device.IP.Interface.{i}.IPv4Address.{i}.Status
-Device.IP.Interface.{i}.IPv4Address.{i}.IPAddress
-Device.IP.Interface.{i}.IPv4Address.{i}.SubnetMask
-Device.IP.Interface.{i}.IPv4Address.{i}.AddressingType
-Device.IP.Diagnostics.IPPing.DiagnosticsState
-Device.IP.Diagnostics.IPPing.Interface
-Device.IP.Diagnostics.IPPing.Host
-Device.IP.Diagnostics.IPPing.NumberOfRepetitions
-Device.IP.Diagnostics.IPPing.Timeout
-Device.IP.Diagnostics.IPPing.DataBlockSize
-Device.IP.Diagnostics.IPPing.DSCP
-Device.IP.Diagnostics.IPPing.SuccessCount
-Device.IP.Diagnostics.IPPing.FailureCount
-Device.IP.Diagnostics.IPPing.AverageResponseTime
-Device.IP.Diagnostics.IPPing.MinimumResponseTime
-Device.IP.Diagnostics.IPPing.MaximumResponseTime
-Device.IP.Diagnostics.IPPing.AverageResponseTimeDetailed
-Device.IP.Diagnostics.IPPing.MinimumResponseTimeDetailed
-Device.IP.Diagnostics.IPPing.MaximumResponseTimeDetailed
-Device.IP.Diagnostics.TraceRoute.DiagnosticsState
-Device.IP.Diagnostics.TraceRoute.Interface
-Device.IP.Diagnostics.TraceRoute.Host
-Device.IP.Diagnostics.TraceRoute.NumberOfTries
-Device.IP.Diagnostics.TraceRoute.Timeout
-Device.IP.Diagnostics.TraceRoute.DataBlockSize
-Device.IP.Diagnostics.TraceRoute.DSCP
-Device.IP.Diagnostics.TraceRoute.MaxHopCount
-Device.IP.Diagnostics.TraceRoute.RouteHopsNumberOfEntries
-Device.IP.Diagnostics.TraceRoute.ResponseTime
-Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState
-Device.IP.Diagnostics.DownloadDiagnostics.DownloadURL
-Device.IP.Diagnostics.DownloadDiagnostics.DownloadDiagnosticMaxConnections
-Device.IP.Diagnostics.DownloadDiagnostics.DSCP
-Device.IP.Diagnostics.DownloadDiagnostics.EthernetPriority
-Device.IP.Diagnostics.DownloadDiagnostics.NumberOfConnections
-Device.IP.Diagnostics.DownloadDiagnostics.ROMTime
-Device.IP.Diagnostics.DownloadDiagnostics.BOMTime
-Device.IP.Diagnostics.DownloadDiagnostics.EOMTime
-Device.IP.Diagnostics.DownloadDiagnostics.TestBytesReceived
-Device.IP.Diagnostics.DownloadDiagnostics.TotalBytesReceived
-Device.IP.Diagnostics.DownloadDiagnostics.TotalBytesSent
-Device.IP.Diagnostics.DownloadDiagnostics.TotalBytesSentUnderFullLoading
-Device.IP.Diagnostics.DownloadDiagnostics.PeriodOfFullLoading
-Device.IP.Diagnostics.DownloadDiagnostics.TCPOpenRequestTime
-Device.IP.Diagnostics.DownloadDiagnostics.TCPOpenResponseTime
-Device.IP.Diagnostics.DownloadDiagnostics.EnablePerConnectionResults
-Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState
-Device.IP.Diagnostics.UploadDiagnostics.UploadURL
-Device.IP.Diagnostics.UploadDiagnostics.UploadDiagnosticsMaxConnections
-Device.IP.Diagnostics.UploadDiagnostics.DSCP
-Device.IP.Diagnostics.UploadDiagnostics.EthernetPriority
-Device.IP.Diagnostics.UploadDiagnostics.TestFileLength
-Device.IP.Diagnostics.UploadDiagnostics.NumberOfConnections
-Device.IP.Diagnostics.UploadDiagnostics.ROMTime
-Device.IP.Diagnostics.UploadDiagnostics.BOMTime
-Device.IP.Diagnostics.UploadDiagnostics.EOMTime
-Device.IP.Diagnostics.UploadDiagnostics.TestBytesSent
-Device.IP.Diagnostics.UploadDiagnostics.TotalBytesReceived
-Device.IP.Diagnostics.UploadDiagnostics.TotalBytesSent
-Device.IP.Diagnostics.UploadDiagnostics.TestBytesSentUnderFullLoading
-Device.IP.Diagnostics.UploadDiagnostics.TotalBytesReceivedUnderFullLoading
-Device.IP.Diagnostics.UploadDiagnostics.TotalBytesSentUnderFullLoading
-Device.IP.Diagnostics.UploadDiagnostics.PeriodOfFullLoading
-Device.IP.Diagnostics.UploadDiagnostics.TCPOpenRequestTime
-Device.IP.Diagnostics.UploadDiagnostics.TCPOpenResponseTime
-Device.IP.Diagnostics.UploadDiagnostics.PerConnectionResultNumberOfEntries
-Device.IP.Diagnostics.UploadDiagnostics.EnablePerConnectionResults
-Device.Routing.RouterNumberOfEntries
-Device.Routing.Router.{i}.Enable
-Device.Routing.Router.{i}.Status
-Device.Routing.Router.{i}.IPv4ForwardingNumberOfEntries
-Device.Routing.Router.{i}.IPv4Forwarding.{i}.Interface
-Device.Routing.Router.{i}.IPv4Forwarding.{i}.Enable
-Device.Routing.Router.{i}.IPv4Forwarding.{i}.Status
-Device.Routing.Router.{i}.IPv4Forwarding.{i}.StaticRoute
-Device.Routing.Router.{i}.IPv4Forwarding.{i}.DestIPAddress
-Device.Routing.Router.{i}.IPv4Forwarding.{i}.DestSubnetMask
-Device.Routing.Router.{i}.IPv4Forwarding.{i}.GatewayIPAddress
-Device.Routing.Router.{i}.IPv4Forwarding.{i}.Origin
-Device.DNS.Client.ServerNumberOfEntries
-Device.DHCPv4.ClientNumberOfEntries
-Device.DHCPv4.Client.{i}.Interface
-Device.DHCPv4.Client.{i}.Enable
-Device.DHCPv4.Client.{i}.Status
-Device.DHCPv4.Client.{i}.DHCPStatus
-Device.DHCPv4.Client.{i}.IPAddress
-Device.DHCPv4.Client.{i}.SubnetMask
-Device.DHCPv4.Client.{i}.IPRouters
-Device.DHCPv4.Client.{i}.DNSServers
-Device.DHCPv4.Client.{i}.DHCPServer
-Device.DHCPv4.Server.PoolNumberOfEntries
-Device.InterfaceStack.{i}.HigherLayer
-Device.InterfaceStack.{i}.LowerLayer
-Device.Hosts.HostNumberOfEntries
-Device.Hosts.Host.{i}.PhysAddress
-Device.Hosts.Host.{i}.IPAddress
-Device.Hosts.Host.{i}.DHCPClient
-Device.Hosts.Host.{i}.AssociatedDevice
-Device.Hosts.Host.{i}.Layer1Interface
-Device.Hosts.Host.{i}.Layer3Interface
-Device.Hosts.Host.{i}.HostName
+Device.DeviceInfo.
+    Manufacturer                           type: string(64)
+    ManufacturerOUI                        type: string(6:6)
+    ModelName                              type: string(64), flags: deny-active-notif
+    Description                            type: string(256), flags: deny-active-notif
+    ProductClass                           type: string(64)
+    SerialNumber                           type: string(64)
+    HardwareVersion                        type: string(64)
+    SoftwareVersion                        type: string(64)
+    ProvisioningCode                       type: string(64), access: W
+    UpTime                                 type: uint32, flags: deny-active-notif
+    VendorConfigFileNumberOfEntries        type: uint32
+    X_ISPAPP_SystemIdentity              type: string, access: W
+    X_ISPAPP_ArchName                    type: string
+    X_ISPAPP_BrandingPckgBuildTime       type: UNKNOWN
+    X_ISPAPP_AutosupoutTime              type: UNKNOWN
+    VendorConfigFile.{i}.
+        Name                               type: string(64)
+        Description                        type: string(256)
+        UseForBackupRestore                type: bool
+    MemoryStatus.
+        Total                              type: uint32
+        Free                               type: uint32, flags: deny-active-notif
+    ProcessStatus.
+        CPUUsage                           type: uint32[:100], flags: deny-active-notif
+
+Device.ManagementServer.
+    URL                                    type: URL, access: W
+    Username                               type: string(256), access: W
+    Password                               type: string(256), access: W, flags: hidden
+    PeriodicInformEnable                   type: bool, access: W
+    PeriodicInformInterval                 type: uint32[1:], access: W
+    ParameterKey                           type: string(32), flags: deny-active-notif
+    ConnectionRequestURL                   type: URL
+    ConnectionRequestUsername              type: string(256), access: W
+    ConnectionRequestPassword              type: string(256), access: W, flags: hidden
+    AliasBasedAddressing                   type: bool
+    InformParameterNumberOfEntries         type: uint32
+    InformParameter.{i}.
+        Enable                             type: bool, access: W, default: "false"
+        ParameterName                      type: string(256), access: W, default: ""
+        EventList                          type: list<string>, access: W, default: ""
+
+Device.InterfaceStack.{i}.
+    HigherLayer                            type: strongRef(256)
+    LowerLayer                             type: strongRef(256)
+
+Device.Cellular.
+    InterfaceNumberOfEntries               type: uint32
+    AccessPointNumberOfEntries             type: uint32
+    X_ISPAPP_Antenna                     type: enum, access: W
+    X_ISPAPP_CurrentAntenna              type: string
+    Interface.{i}.
+        Enable                             type: bool, access: W
+        Status                             type: enum, flags: deny-active-notif
+        LowerLayers                        type: list<strongRef>(1024)
+        IMEI                               type: string(15:15)
+        RSSI                               type: int32, flags: deny-active-notif
+        X_ISPAPP_Model                   type: string
+        X_ISPAPP_Revision                type: string
+        X_ISPAPP_ExtRevision             type: string
+        X_ISPAPP_SupportedAccessTechnologies  type: list<enum>
+        X_ISPAPP_AccessTechnologies      type: list<string>, access: W
+        X_ISPAPP_CurrentAccessTechnology type: string
+        X_ISPAPP_SupportedLteBands       type: list<string>
+        X_ISPAPP_LteBands                type: list<string>, access: W
+        X_ISPAPP_LteCellLock             type: list<string>, access: W
+        X_ISPAPP_Supported5GBands        type: list<string>
+        X_ISPAPP_5GBands                 type: list<string>, access: W
+        X_ISPAPP_RSCP                    type: int32, flags: deny-active-notif
+        X_ISPAPP_ECNO                    type: int32, flags: deny-active-notif
+        X_ISPAPP_SINR                    type: int32, flags: deny-active-notif
+        X_ISPAPP_RSRP                    type: int32, flags: deny-active-notif
+        X_ISPAPP_MimoRSRP                type: list<int32>, flags: deny-active-notif
+        X_ISPAPP_RSRQ                    type: int32, flags: deny-active-notif
+        X_ISPAPP_CQI                     type: uint32, flags: deny-active-notif
+        X_ISPAPP_RI                      type: uint32, flags: deny-active-notif
+        X_ISPAPP_MCS                     type: uint32, flags: deny-active-notif
+        X_ISPAPP_TBS                     type: uint32, flags: deny-active-notif
+        X_ISPAPP_RBs                     type: uint32, flags: deny-active-notif
+        X_ISPAPP_Modulation              type: enum, flags: deny-active-notif
+        X_ISPAPP_5G_CQI                  type: uint32, flags: deny-active-notif
+        X_ISPAPP_5G_RI                   type: uint32, flags: deny-active-notif
+        X_ISPAPP_5G_MCS                  type: uint32, flags: deny-active-notif
+        X_ISPAPP_5G_TBS                  type: uint32, flags: deny-active-notif
+        X_ISPAPP_5G_RBs                  type: uint32, flags: deny-active-notif
+        X_ISPAPP_5G_Modulation           type: enum, flags: deny-active-notif
+        X_ISPAPP_5G_DataPath             type: string, flags: deny-active-notif
+        X_ISPAPP_TxPUCCH                 type: int32, flags: deny-active-notif
+        X_ISPAPP_TxPUSCH                 type: int32, flags: deny-active-notif
+        X_ISPAPP_TxSRS                   type: int32, flags: deny-active-notif
+        X_ISPAPP_TxPRACH                 type: int32, flags: deny-active-notif
+        X_ISPAPP_5G_TxPUCCH              type: int32, flags: deny-active-notif
+        X_ISPAPP_5G_TxPUSCH              type: int32, flags: deny-active-notif
+        X_ISPAPP_5G_TxSRS                type: int32, flags: deny-active-notif
+        X_ISPAPP_5G_TxPRACH              type: int32, flags: deny-active-notif
+        X_ISPAPP_5G_Band                 type: uint32, flags: deny-active-notif
+        X_ISPAPP_5G_Bandwidth            type: uint32, flags: deny-active-notif
+        X_ISPAPP_5G_PhysicalCellId       type: uint32, flags: deny-active-notif
+        X_ISPAPP_5G_SINR                 type: int32, flags: deny-active-notif
+        X_ISPAPP_5G_RSRP                 type: int32, flags: deny-active-notif
+        X_ISPAPP_5G_RSRQ                 type: int32, flags: deny-active-notif
+        X_ISPAPP_CellId                  type: uint32
+        X_ISPAPP_BandInfo                type: string
+        X_ISPAPP_LinkDowns               type: uint32
+        X_ISPAPP_AccessPoints            type: list<strongRef>(1024), access: W
+        X_ISPAPP_CarrierInfoNumberOfEntries      type: uint32
+        X_ISPAPP_CarrierInfo5GNumberOfEntries    type: uint32
+        USIM.
+            IMSI                           type: string(14:15)
+            ICCID                          type: string(6:20)
+        Stats.
+            BytesSent                      type: StatsCounter64, flags: deny-active-notif
+            BytesReceived                  type: StatsCounter64, flags: deny-active-notif
+            PacketsSent                    type: StatsCounter64, flags: deny-active-notif
+            PacketsReceived                type: StatsCounter64, flags: deny-active-notif
+            ErrorsSent                     type: StatsCounter64, flags: deny-active-notif
+            ErrorsReceived                 type: StatsCounter64, flags: deny-active-notif
+            DiscardPacketsSent             type: StatsCounter64, flags: deny-active-notif
+            DiscardPacketsReceived         type: StatsCounter64, flags: deny-active-notif
+        X_ISPAPP_CarrierInfo.{i}.
+            Band                           type: uint32, flags: deny-active-notif
+            Fcn                            type: uint32, flags: deny-active-notif
+            Bandwidth                      type: uint32, flags: deny-active-notif
+            PhysicalCellId                 type: uint32, flags: deny-active-notif
+            RSSI                           type: int32, flags: deny-active-notif
+            SINR                           type: int32, flags: deny-active-notif
+            RSRP                           type: int32, flags: deny-active-notif
+            RSRQ                           type: int32, flags: deny-active-notif
+            UplinkCA                       type: bool, flags: deny-active-notif
+        X_ISPAPP_CarrierInfo5G.{i}.
+            Band                           type: uint32, flags: deny-active-notif
+            Bandwidth                      type: uint32, flags: deny-active-notif
+            PhysicalCellId                 type: uint32, flags: deny-active-notif
+            SINR                           type: int32, flags: deny-active-notif
+            RSRP                           type: int32, flags: deny-active-notif
+            RSRQ                           type: int32, flags: deny-active-notif
+            SNR                            type: int32, flags: deny-active-notif
+    AccessPoint.{i}.
+        APN                                type: string(64), access: W
+        Username                           type: string(256), access: W
+        Password                           type: string(256), access: W, flags: hidden
+    X_ISPAPP_CellDiagnostics.
+        DiagnosticsState                   type: DiagnosticsState, access: W
+        Interface                          type: weakRef(256), access: W
+        Seconds                            type: uint32, access: W
+        ResultNumberOfEntries              type: uint32
+        Result.{i}.
+            Band                           type: uint32, flags: deny-active-notif
+            Fcn                            type: uint32, flags: deny-active-notif
+            PhysicalCellId                 type: uint32, flags: deny-active-notif
+            RSSI                           type: int32, flags: deny-active-notif
+            RSRP                           type: int32, flags: deny-active-notif
+            RSRQ                           type: int32, flags: deny-active-notif
+
+Device.Ethernet.
+    InterfaceNumberOfEntries               type: uint32
+    LinkNumberOfEntries                    type: uint32
+    Interface.{i}.
+        Enable                             type: bool, access: W
+        Status                             type: enum
+        LowerLayers                        type: list<strongRef>(1024)
+        MACAddress                         type: MACAddress
+        CurrentBitRate                     type: uint32, flags: deny-active-notif
+        X_ISPAPP_LinkDowns               type: uint32
+        X_ISPAPP_Name                    type: string, access: W
+        X_ISPAPP_Comment                 type: string, access: W
+        Stats.
+            BytesSent                      type: uint64, flags: deny-active-notif
+            BytesReceived                  type: uint64, flags: deny-active-notif
+            PacketsSent                    type: uint64, flags: deny-active-notif
+            PacketsReceived                type: uint64, flags: deny-active-notif
+            ErrorsSent                     type: uint32, flags: deny-active-notif
+            ErrorsReceived                 type: uint32, flags: deny-active-notif
+            DiscardPacketsSent             type: uint32, flags: deny-active-notif
+            DiscardPacketsReceived         type: uint32, flags: deny-active-notif
+    Link.{i}.
+        Enable                             type: bool, access: W, default: "false"
+        Status                             type: enum, default: "Down"
+        LowerLayers                        type: list<strongRef>(1024), access: W, default: ""
+
+Device.WiFi.
+    SSIDNumberOfEntries                    type: uint32
+    SSID.{i}.
+        Enable                             type: bool, access: W, default: "false"
+        Status                             type: enum, default: "Down"
+        LowerLayers                        type: list<strongRef>(1024), access: W, default: ""
+        BSSID                              type: MACAddress
+        MACAddress                         type: MACAddress
+        SSID                               type: string(32), access: W
+        Stats.
+            BytesSent                      type: uint64, flags: deny-active-notif
+            BytesReceived                  type: uint64, flags: deny-active-notif
+            PacketsSent                    type: uint64, flags: deny-active-notif
+            PacketsReceived                type: uint64, flags: deny-active-notif
+            ErrorsSent                     type: uint32
+            ErrorsReceived                 type: uint32, flags: deny-active-notif
+            DiscardPacketsSent             type: uint32, flags: deny-active-notif
+            DiscardPacketsReceived         type: uint32, flags: deny-active-notif
+    RadioNumberOfEntries                   type: uint32
+    Radio.{i}.
+        Enable                             type: bool, access: W
+        Status                             type: enum
+        LowerLayers                        type: list<strongRef>(1024)
+        SupportedFrequencyBands            type: list<enum>
+        OperatingFrequencyBand             type: string, access: W
+        SupportedStandards                 type: list<enum>
+        OperatingStandards                 type: list<string>, access: W
+        PossibleChannels                   type: list<string>(1024)
+        Channel                            type: uint32[1:255], access: W
+        AutoChannelSupported               type: bool
+        AutoChannelEnable                  type: bool, access: W
+        X_ISAPP_SkipDFSChannels         type: enum, access: W
+        Stats.
+            Noise                          type: int32
+        X_ISPAPP_Stats.
+            OverallTxCCQ                   type: uint32[:100], flags: deny-active-notif
+    AccessPointNumberOfEntries             type: uint32
+    AccessPoint.{i}.
+        Enable                             type: bool, access: W, default: "false"
+        Status                             type: enum, default: "Disabled"
+        SSIDReference                      type: strongRef(256), access: W, default: ""
+        SSIDAdvertisementEnabled           type: bool, access: W, default: "true"
+        AssociatedDeviceNumberOfEntries    type: uint32
+        Security.
+            ModesSupported                 type: list<enum>, default: "None,WPA-Personal,WPA2-Personal,WPA-WPA2-Personal,WPA-Enterprise,WPA2-Enterprise,WPA-WPA2-Enterprise,X_ISPAPP_Specific"
+            ModeEnabled                    type: string, access: W, default: "None"
+            KeyPassphrase                  type: string(8:63), access: W, flags: hidden
+        AssociatedDevice.{i}.
+            MACAddress                     type: MACAddress, flags: deny-active-notif
+            AuthenticationState            type: bool, flags: deny-active-notif
+            SignalStrength                 type: int32[-200:]
+            Stats.
+                BytesSent                  type: StatsCounter64
+                BytesReceived              type: StatsCounter64
+                PacketsSent                type: StatsCounter64
+                PacketsReceived            type: StatsCounter64
+            X_ISPAPP_Stats.
+                TxFrames                   type: StatsCounter64, flags: deny-active-notif
+                RxFrames                   type: StatsCounter64, flags: deny-active-notif
+                TxFrameBytes               type: StatsCounter64, flags: deny-active-notif
+                RxFrameBytes               type: StatsCounter64, flags: deny-active-notif
+                TxHwFrames                 type: StatsCounter64, flags: deny-active-notif
+                RxHwFrames                 type: StatsCounter64, flags: deny-active-notif
+                TxHwFrameBytes             type: StatsCounter64, flags: deny-active-notif
+                RxHwFrameBytes             type: StatsCounter64, flags: deny-active-notif
+                TxCCQ                      type: uint32[:100], flags: deny-active-notif
+                RxCCQ                      type: uint32[:100], flags: deny-active-notif
+                SignalToNoise              type: int32, flags: deny-active-notif
+                RxRate                     type: string, flags: deny-active-notif
+                TxRate                     type: string, flags: deny-active-notif
+                LastActivity               type: uint32, flags: deny-active-notif
+                SignalStrengthCh0          type: int32, flags: deny-active-notif
+                SignalStrengthCh1          type: int32, flags: deny-active-notif
+                StrengthAtRates            type: string, flags: deny-active-notif
+                UpTime                     type: uint32, flags: deny-active-notif
+    NeighboringWiFiDiagnostic.
+        DiagnosticsState                   type: DiagnosticsState, access: W
+        ResultNumberOfEntries              type: uint32
+        Result.{i}.
+            Radio                          type: strongRef
+            SSID                           type: string(32)
+            BSSID                          type: MACAddress
+            Channel                        type: uint32[1:255]
+            SignalStrength                 type: int32[-200:]
+            OperatingFrequencyBand         type: enum
+            OperatingStandards             type: list<string>
+            OperatingChannelBandwidth      type: enum
+            Noise                          type: int32[-200:]
+
+Device.PPP.
+    InterfaceNumberOfEntries               type: uint32
+    Interface.{i}.
+        Enable                             type: bool, access: W, default: "false"
+        Status                             type: enum, default: "Down"
+        LowerLayers                        type: list<strongRef>(1024), access: W, default: ""
+        ConnectionStatus                   type: enum, default: "Unconfigured"
+        AutoDisconnectTime                 type: uint32, access: W, default: "0"
+        IdleDisconnectTime                 type: uint32, access: W, default: "0"
+        Username                           type: string(64), access: W
+        Password                           type: string(64), access: W, flags: hidden
+        EncryptionProtocol                 type: enum
+        ConnectionTrigger                  type: enum, access: W, default: "AlwaysOn"
+        X_ISPAPP_Type                    type: enum, access: W, default: ""
+        PPPoE.
+            ACName                         type: string(256), access: W
+            ServiceName                    type: string(256), access: W
+        IPCP.
+            LocalIPAddress                 type: IPv4Address, default: ""
+            RemoteIPAddress                type: IPv4Address, default: ""
+        Stats.
+            BytesSent                      type: uint64, flags: deny-active-notif
+            BytesReceived                  type: uint64, flags: deny-active-notif
+            PacketsSent                    type: uint64, flags: deny-active-notif
+            PacketsReceived                type: uint64, flags: deny-active-notif
+            ErrorsSent                     type: uint32, flags: deny-active-notif
+            ErrorsReceived                 type: uint32, flags: deny-active-notif
+            DiscardPacketsSent             type: uint32, flags: deny-active-notif
+            DiscardPacketsReceived         type: uint32, flags: deny-active-notif
+
+Device.IP.
+    InterfaceNumberOfEntries               type: uint32
+    Interface.{i}.
+        Enable                             type: bool, access: W, default: "false"
+        Status                             type: enum, default: "Down"
+        LowerLayers                        type: list<strongRef>(1024), access: W, default: ""
+        Type                               type: enum, default: "Normal"
+        IPv4AddressNumberOfEntries         type: uint32
+        IPv4Address.{i}.
+            Enable                         type: bool, access: W, default: "false"
+            Status                         type: enum, default: "Disabled"
+            IPAddress                      type: IPv4Address, access: W, default: "255.255.255.255"
+            SubnetMask                     type: IPv4Address, access: W, default: "255.255.255.255"
+            AddressingType                 type: enum, default: "Static"
+    Diagnostics.
+        IPPing.
+            DiagnosticsState               type: DiagnosticsState, access: W
+            Interface                      type: weakRef(256), access: W
+            Host                           type: string(256), access: W
+            NumberOfRepetitions            type: uint32[1:], access: W
+            Timeout                        type: uint32[1:], access: W
+            DataBlockSize                  type: uint32[1:65535], access: W
+            DSCP                           type: uint32[:63], access: W
+            SuccessCount                   type: uint32, flags: deny-active-notif
+            FailureCount                   type: uint32, flags: deny-active-notif
+            AverageResponseTime            type: uint32, flags: deny-active-notif
+            MinimumResponseTime            type: uint32, flags: deny-active-notif
+            MaximumResponseTime            type: uint32, flags: deny-active-notif
+            AverageResponseTimeDetailed    type: uint32, flags: deny-active-notif
+            MinimumResponseTimeDetailed    type: uint32, flags: deny-active-notif
+            MaximumResponseTimeDetailed    type: uint32, flags: deny-active-notif
+        TraceRoute.
+            DiagnosticsState               type: DiagnosticsState, access: W
+            Interface                      type: weakRef(256), access: W
+            Host                           type: string(256), access: W
+            NumberOfTries                  type: uint32[1:3], access: W
+            Timeout                        type: uint32[1:], access: W
+            DataBlockSize                  type: uint32[1:65535], access: W
+            DSCP                           type: uint32[:63], access: W
+            MaxHopCount                    type: uint32[1:64], access: W
+            RouteHopsNumberOfEntries       type: uint32, flags: deny-active-notif
+            ResponseTime                   type: uint32, flags: deny-active-notif
+            RouteHops.{i}.
+                Host                       type: string(256), flags: deny-active-notif
+                HostAddress                type: string, flags: deny-active-notif
+                ErrorCode                  type: uint32, flags: deny-active-notif
+                RTTimes                    type: list<uint32>(16)
+        DownloadDiagnostics.
+            DiagnosticsState               type: DiagnosticsState, access: W
+            DownloadURL                    type: URL, access: W
+            DownloadDiagnosticMaxConnections   type: uint32[1:]
+            DSCP                           type: uint32[:63], access: W
+            EthernetPriority               type: uint32[:7], access: W
+            NumberOfConnections            type: uint32[1:], access: W
+            ROMTime                        type: UNKNOWN, flags: deny-active-notif
+            BOMTime                        type: UNKNOWN, flags: deny-active-notif
+            EOMTime                        type: UNKNOWN, flags: deny-active-notif
+            TestBytesReceived              type: uint32
+            TotalBytesReceived             type: uint32
+            TotalBytesSent                 type: uint32
+            TestBytesReceivedUnderFullLoading  type: uint32
+            TotalBytesReceivedUnderFullLoading type: uint32
+            TotalBytesSentUnderFullLoading type: uint32
+            PeriodOfFullLoading            type: uint32
+            TCPOpenRequestTime             type: UNKNOWN, flags: deny-active-notif
+            TCPOpenResponseTime            type: UNKNOWN, flags: deny-active-notif
+            PerConnectionResultNumberOfEntries type: uint32
+            EnablePerConnectionResults     type: bool, access: W, flags: deny-active-notif
+            PerConnectionResult.{i}.
+                ROMTime                    type: UNKNOWN, flags: deny-active-notif
+                BOMTime                    type: UNKNOWN, flags: deny-active-notif
+                EOMTime                    type: UNKNOWN, flags: deny-active-notif
+                TestBytesReceived          type: uint32, flags: deny-active-notif
+                TCPOpenRequestTime         type: UNKNOWN, flags: deny-active-notif
+                TCPOpenResponseTime        type: UNKNOWN, flags: deny-active-notif
+        UploadDiagnostics.
+            DiagnosticsState               type: DiagnosticsState, access: W
+            UploadURL                      type: URL, access: W
+            UploadDiagnosticsMaxConnections    type: uint32[1:]
+            DSCP                           type: uint32[:63], access: W
+            EthernetPriority               type: uint32[:7], access: W
+            TestFileLength                 type: uint32, access: W
+            NumberOfConnections            type: uint32[1:], access: W
+            ROMTime                        type: UNKNOWN, flags: deny-active-notif
+            BOMTime                        type: UNKNOWN, flags: deny-active-notif
+            EOMTime                        type: UNKNOWN, flags: deny-active-notif
+            TestBytesSent                  type: uint32
+            TotalBytesReceived             type: uint32
+            TotalBytesSent                 type: uint32
+            TestBytesSentUnderFullLoading  type: uint32
+            TotalBytesReceivedUnderFullLoading type: uint32
+            TotalBytesSentUnderFullLoading type: uint32
+            PeriodOfFullLoading            type: uint32
+            TCPOpenRequestTime             type: UNKNOWN, flags: deny-active-notif
+            TCPOpenResponseTime            type: UNKNOWN, flags: deny-active-notif
+            PerConnectionResultNumberOfEntries type: uint32
+            EnablePerConnectionResults     type: bool, access: W, flags: deny-active-notif
+            PerConnectionResult.{i}.
+                ROMTime                    type: UNKNOWN, flags: deny-active-notif
+                BOMTime                    type: UNKNOWN, flags: deny-active-notif
+                EOMTime                    type: UNKNOWN, flags: deny-active-notif
+                TestBytesSent              type: uint32, flags: deny-active-notif
+                TCPOpenRequestTime         type: UNKNOWN, flags: deny-active-notif
+                TCPOpenResponseTime        type: UNKNOWN, flags: deny-active-notif
+
+Device.Routing.
+    RouterNumberOfEntries                  type: uint32
+    Router.{i}.
+        Enable                             type: bool, default: "false"
+        Status                             type: enum, default: "Disabled"
+        IPv4ForwardingNumberOfEntries      type: uint32
+        IPv4Forwarding.{i}.
+            Enable                         type: bool, access: W, default: "false"
+            Status                         type: enum, default: "Disabled"
+            StaticRoute                    type: bool, default: "true"
+            DestIPAddress                  type: IPv4Address, access: W, default: ""
+            DestSubnetMask                 type: IPv4Address, access: W, default: ""
+            GatewayIPAddress               type: IPv4Address, access: W, default: ""
+            Interface                      type: strongRef(256), access: W, default: ""
+            Origin                         type: enum, default: "Static"
+
+Device.Hosts.
+    HostNumberOfEntries                    type: uint32
+    Host.{i}.
+        PhysAddress                        type: string(64)
+        IPAddress                          type: IPAddress
+        DHCPClient                         type: list<strongRef>
+        AssociatedDevice                   type: strongRef(256)
+        Layer1Interface                    type: strongRef(256)
+        Layer3Interface                    type: strongRef(256)
+        HostName                           type: string(64)
+
+Device.DNS.
+    Client.
+        ServerNumberOfEntries              type: uint32
+        Server.{i}.
+            Enable                         type: bool, access: W, default: "false"
+            Status                         type: enum, default: "Disabled"
+            DNSServer                      type: IPAddress, access: W
+            Type                           type: enum, default: "Static"
+
+Device.DHCPv4.
+    ClientNumberOfEntries                  type: uint32
+    Client.{i}.
+        Enable                             type: bool, access: W, default: "false"
+        Interface                          type: strongRef(256), access: W, default: ""
+        Status                             type: enum, default: "Disabled"
+        DHCPStatus                         type: enum
+        IPAddress                          type: IPv4Address, default: ""
+        SubnetMask                         type: IPv4Address, default: ""
+        IPRouters                          type: list<IPv4Address>(256), default: ""
+        DNSServers                         type: list<IPv4Address>(256), default: ""
+        DHCPServer                         type: IPv4Address, default: ""
+    Server.
+        PoolNumberOfEntries                type: uint32
+        Pool.{i}.
+            Enable                         type: bool, access: W, default: "false"
+            Status                         type: enum, default: "Disabled"
+            Interface                      type: strongRef(256), access: W, default: ""
+            MinAddress                     type: IPv4Address, access: W
+            MaxAddress                     type: IPv4Address, access: W
+            SubnetMask                     type: IPv4Address, access: W
+            DNSServers                     type: list<IPv4Address>, access: W
+            DomainName                     type: string(64), access: W
+            IPRouters                      type: list<IPv4Address>, access: W
+            LeaseTime                      type: int32[1:], access: W, default: "86400"
+            StaticAddressNumberOfEntries   type: uint32
+            ClientNumberOfEntries          type: uint32
+            StaticAddress.{i}.
+                Enable                     type: bool, access: W, default: "false"
+                Chaddr                     type: MACAddress, access: W, default: ""
+                Yiaddr                     type: IPv4Address, access: W, default: ""
+            Client.{i}.
+                Chaddr                     type: MACAddress
+                IPv4AddressNumberOfEntries type: uint32
+                IPv4Address.{i}.
+                    IPAddress              type: IPv4Address
+                    LeaseTimeRemaining     type: UNKNOWN
+
+Device.Firewall.
+    X_ISPAPP_ConnTrack.
+        TotalEntries                       type: uint32, flags: deny-active-notif
+    X_ISPAPP_Filter.
+        ChainNumberOfEntries               type: uint32
+        Chain.{i}.
+            Enable                         type: bool, access: W, default: "false"
+            Name                           type: string(64), access: W
+            RuleNumberOfEntries            type: uint32
+            Rule.{i}.
+                Enable                     type: bool, access: W, default: "false"
+                Order                      type: uint32[1:], access: W
+                Description                type: string(256), access: W
+                Target                     type: enum, access: W, default: "Drop"
+                TargetChain                type: strongRef, access: W, default: ""
+                Log                        type: bool, access: W, default: "false"
+                SourceInterfaceGroup       type: enum, access: W, default: "all"
+                SourceInterface            type: strongRef(256), access: W, default: ""
+                SourceInterfaceExclude     type: bool, access: W, default: "false"
+                DestInterfaceGroup         type: enum, access: W, default: "all"
+                DestInterface              type: strongRef(256), access: W, default: ""
+                DestInterfaceExclude       type: bool, access: W, default: "false"
+                DestIPRange                type: IPv4AddressRange, access: W, default: ""
+                DestIPExclude              type: bool, access: W, default: "false"
+                SourceIPRange              type: IPv4AddressRange, access: W, default: ""
+                SourceIPExclude            type: bool, access: W, default: "false"
+                Protocol                   type: int32[-1:255], access: W, default: "-1"
+                ProtocolExclude            type: bool, access: W, default: "false"
+                DestPortList               type: list<Uint32Range>, access: W, default: ""
+                DestPortExclude            type: bool, access: W, default: "false"
+                SourcePortList             type: list<Uint32Range>, access: W, default: ""
+                SourcePortExclude          type: bool, access: W, default: "false"
+                ConnState                  type: list<enum>, access: W, default: ""
+                ConnStateExclude           type: bool, access: W, default: "false"
+    X_ISPAPP_NAT.
+        ChainNumberOfEntries               type: uint32
+        Chain.{i}.
+            Enable                         type: bool, access: W, default: "false"
+            Name                           type: string(64), access: W
+            RuleNumberOfEntries            type: uint32
+            Rule.{i}.
+                Enable                     type: bool, access: W, default: "false"
+                Order                      type: uint32[1:], access: W
+                Description                type: string(256), access: W
+                Target                     type: enum, access: W, default: "Accept"
+                TargetChain                type: strongRef, access: W, default: ""
+                Log                        type: bool, access: W, default: "false"
+                SourceInterfaceGroup       type: enum, access: W, default: "all"
+                SourceInterface            type: strongRef(256), access: W, default: ""
+                SourceInterfaceExclude     type: bool, access: W, default: "false"
+                DestInterfaceGroup         type: enum, access: W, default: "all"
+                DestInterface              type: strongRef(256), access: W, default: ""
+                DestInterfaceExclude       type: bool, access: W, default: "false"
+                DestIPRange                type: IPv4AddressRange, access: W, default: ""
+                DestIPExclude              type: bool, access: W, default: "false"
+                SourceIPRange              type: IPv4AddressRange, access: W, default: ""
+                SourceIPExclude            type: bool, access: W, default: "false"
+                Protocol                   type: int32[-1:255], access: W, default: "-1"
+                ProtocolExclude            type: bool, access: W, default: "false"
+                DestPortList               type: list<Uint32Range>, access: W, default: ""
+                DestPortExclude            type: bool, access: W, default: "false"
+                SourcePortList             type: list<Uint32Range>, access: W, default: ""
+                SourcePortExclude          type: bool, access: W, default: "false"
+                ToAddresses                type: IPv4AddressRange, access: W, default: ""
+                ToPorts                    type: Uint32Range, access: W, default: ""
+
+Device.X_ISPAPP_Interface.
+    GenericNumberOfEntries                 type: uint32
+    Generic.{i}.
+        Enable                             type: bool
+        Status                             type: string
+        Name                               type: string
+        LowerLayers                        type: list<strongRef>(1024)
+
+Device.X_ISPAPP_Monitor.
+    TrafficNumberOfEntries                 type: uint32
+    Traffic.{i}.
+        Enable                             type: bool, access: W, default: "false"
+        Interface                          type: strongRef, access: W
+        RxRate                             type: uint32, default: "4294967295", flags: deny-active-notif
+        TxRate                             type: uint32, default: "4294967295", flags: deny-active-notif
+        MaxRxRate                          type: uint32, default: "4294967295", flags: deny-active-notif
+        MaxTxRate                          type: uint32, default: "4294967295", flags: deny-active-notif

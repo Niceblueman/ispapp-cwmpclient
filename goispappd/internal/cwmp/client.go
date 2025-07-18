@@ -86,6 +86,8 @@ func (c *CWMPClient) SendEnvelope(envelope *soap.RequestEnvelope) error {
 func (c *CWMPClient) periodicInform(ctx context.Context) {
 	ticker := time.NewTicker(c.config.PeriodicInterval)
 	defer ticker.Stop()
+	// run a cron job to automate data collection every 30s
+	
 	for {
 		select {
 		case <-ctx.Done():

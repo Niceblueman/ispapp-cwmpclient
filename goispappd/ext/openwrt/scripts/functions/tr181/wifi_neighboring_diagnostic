@@ -1,0 +1,174 @@
+#!/bin/sh
+# Copyright (C) 2024 ISPAPP CWMP Client
+# WiFi Neighboring Diagnostic Implementation for TR-181
+
+#common_execute_method_param "$parameter" "$permission" "$get_cmd" "$set_cmd" "xsd:$type" "$forcedinform"
+#  $forcedinform should be set to 1 if the parameter is included in the inform message otherwise empty
+#  Default of $type = string
+
+#############################
+#   Entry point functions   #
+#############################
+#   Entry point functions   #
+#############################
+
+prefix_list="$prefix_list $DMROOT.WiFi.NeighboringWiFiDiagnostic."
+entry_execute_method_list="$entry_execute_method_list entry_execute_method_root_WiFiNeighboringDiagnostic"
+
+UCI_GET_VARSTATE="/sbin/uci -q ${UCI_CONFIG_DIR:+-c $UCI_CONFIG_DIR} -P /var/state get"
+UCI_SET_VARSTATE="/sbin/uci -q ${UCI_CONFIG_DIR:+-c $UCI_CONFIG_DIR} -P /var/state set"
+
+entry_execute_method_root_WiFiNeighboringDiagnostic() {
+	case_param "$1" belongto "$DMROOT.WiFi.NeighboringWiFiDiagnostic." && {
+		common_execute_method_obj "$DMROOT.WiFi.NeighboringWiFiDiagnostic." "0"
+		common_execute_method_param "$DMROOT.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState" "1" "wifi_neighboring_get ispappd.@local[0].WiFiNeighboringDiagnosticsState None" "wifi_neighboring_set_diagnostic_state"
+		common_execute_method_param "$DMROOT.WiFi.NeighboringWiFiDiagnostic.ResultNumberOfEntries" "0" "wifi_neighboring_get_result_count" "" "xsd:unsignedInt"
+		common_execute_method_obj "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result." "0" "" "" "wifi_neighboring_browse_results $1"
+		return 0;
+	}
+	return $E_INVALID_PARAMETER_NAME;
+}
+
+sub_entry_WiFiNeighboringDiagnostic_Result() {
+	local j="$2"
+	local result_index="$3"
+	case_param "$1" belongto "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result.$j." && {
+		common_execute_method_obj "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result.$j." "0"
+		common_execute_method_param "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result.$j.Radio" "0" "wifi_neighboring_get_radio $result_index"
+		common_execute_method_param "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result.$j.SSID" "0" "wifi_neighboring_get_ssid $result_index"
+		common_execute_method_param "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result.$j.BSSID" "0" "wifi_neighboring_get_bssid $result_index"
+		common_execute_method_param "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result.$j.Channel" "0" "wifi_neighboring_get_channel $result_index" "" "xsd:unsignedInt"
+		common_execute_method_param "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result.$j.SignalStrength" "0" "wifi_neighboring_get_signal_strength $result_index" "" "xsd:int"
+		common_execute_method_param "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result.$j.OperatingFrequencyBand" "0" "wifi_neighboring_get_frequency_band $result_index"
+		common_execute_method_param "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result.$j.OperatingStandards" "0" "wifi_neighboring_get_operating_standards $result_index"
+		common_execute_method_param "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result.$j.OperatingChannelBandwidth" "0" "wifi_neighboring_get_channel_bandwidth $result_index"
+		common_execute_method_param "$DMROOT.WiFi.NeighboringWiFiDiagnostic.Result.$j.Noise" "0" "wifi_neighboring_get_noise $result_index" "" "xsd:int"
+		return 0
+	}
+	return $E_INVALID_PARAMETER_NAME;
+}
+
+#######################################
+#     Data model browse instances     #
+#######################################
+
+wifi_neighboring_browse_results() {
+	local result_count=`wifi_neighboring_get_result_count`
+	local i=1
+	while [ $i -le $result_count ]; do
+		sub_entry_WiFiNeighboringDiagnostic_Result "$1" "$i" "$i"
+		i=$((i + 1))
+	done
+}
+
+#######################################
+#   Data model parameters functions   #
+#######################################
+
+wifi_neighboring_get() {
+	local val=`$UCI_GET_VARSTATE $1`
+	echo ${val:-$2}
+}
+
+wifi_neighboring_set() {
+	wifi_neighboring_stop_diagnostic
+	if [ "`$UCI_GET_VARSTATE ispappd.@local[0].WiFiNeighboringDiagnosticsState`" != "Requested" ]; then
+		$UCI_SET_VARSTATE ispappd.@local[0].WiFiNeighboringDiagnosticsState=None
+	fi
+	$UCI_SET_VARSTATE $1=$2
+	return 0
+}
+
+wifi_neighboring_set_diagnostic_state() {
+	local val="$1"
+	case $val in 
+		Requested)
+			wifi_neighboring_stop_diagnostic
+			$UCI_SET_VARSTATE ispappd.@local[0].WiFiNeighboringDiagnosticsState=Requested
+			common_execute_command_in_apply_service "/bin/sh $FUNCTION_PATH/wifi_neighboring_launch run &"
+			return 0
+		;;
+		None)
+			wifi_neighboring_stop_diagnostic
+			$UCI_SET_VARSTATE ispappd.@local[0].WiFiNeighboringDiagnosticsState=None
+			return 0
+		;;
+		Canceled)
+			wifi_neighboring_stop_diagnostic
+			$UCI_SET_VARSTATE ispappd.@local[0].WiFiNeighboringDiagnosticsState=Canceled
+			return 0
+		;;
+	esac
+	return $E_INVALID_PARAMETER_VALUE;
+}
+
+wifi_neighboring_stop_diagnostic() {
+	local pids=`ps aux | grep wifi_neighboring_launch | grep -v grep | awk '{print $2}'`
+	if [ -n "$pids" ]; then
+		kill -9 $pids
+		$UCI_SET_VARSTATE ispappd.@local[0].WiFiNeighboringDiagnosticsState=None
+	fi
+}
+
+wifi_neighboring_get_result_count() {
+	local count=`$UCI_GET_VARSTATE ispappd.@local[0].WiFiNeighboringResultCount 2>/dev/null`
+	echo ${count:-0}
+}
+
+#######################################
+#   Result data access functions     #
+#######################################
+
+wifi_neighboring_get_radio() {
+	local index="$1"
+	local radio=`$UCI_GET_VARSTATE ispappd.@local[0].WiFiNeighboringResult_${index}_Radio 2>/dev/null`
+	echo ${radio:-""}
+}
+
+wifi_neighboring_get_ssid() {
+	local index="$1"
+	local ssid=`$UCI_GET_VARSTATE ispappd.@local[0].WiFiNeighboringResult_${index}_SSID 2>/dev/null`
+	echo ${ssid:-""}
+}
+
+wifi_neighboring_get_bssid() {
+	local index="$1"
+	local bssid=`$UCI_GET_VARSTATE ispappd.@local[0].WiFiNeighboringResult_${index}_BSSID 2>/dev/null`
+	echo ${bssid:-""}
+}
+
+wifi_neighboring_get_channel() {
+	local index="$1"
+	local channel=`$UCI_GET_VARSTATE ispappd.@local[0].WiFiNeighboringResult_${index}_Channel 2>/dev/null`
+	echo ${channel:-0}
+}
+
+wifi_neighboring_get_signal_strength() {
+	local index="$1"
+	local signal=`$UCI_GET_VARSTATE ispappd.@local[0].WiFiNeighboringResult_${index}_SignalStrength 2>/dev/null`
+	echo ${signal:-0}
+}
+
+wifi_neighboring_get_frequency_band() {
+	local index="$1"
+	local band=`$UCI_GET_VARSTATE ispappd.@local[0].WiFiNeighboringResult_${index}_FrequencyBand 2>/dev/null`
+	echo ${band:-""}
+}
+
+wifi_neighboring_get_operating_standards() {
+	local index="$1"
+	local standards=`$UCI_GET_VARSTATE ispappd.@local[0].WiFiNeighboringResult_${index}_OperatingStandards 2>/dev/null`
+	echo ${standards:-""}
+}
+
+wifi_neighboring_get_channel_bandwidth() {
+	local index="$1"
+	local bandwidth=`$UCI_GET_VARSTATE ispappd.@local[0].WiFiNeighboringResult_${index}_ChannelBandwidth 2>/dev/null`
+	echo ${bandwidth:-""}
+}
+
+wifi_neighboring_get_noise() {
+	local index="$1"
+	local noise=`$UCI_GET_VARSTATE ispappd.@local[0].WiFiNeighboringResult_${index}_Noise 2>/dev/null`
+	echo ${noise:-0}
+}

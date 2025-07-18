@@ -13,6 +13,7 @@ func TestLoaders(t *testing.T) {
 		name string
 	}{
 		{name: "TestLoadInformResponse"},
+		{name: "TestLoadDevice.OutsideIPAddress"},
 	}
 
 	for _, tt := range tests {
@@ -39,6 +40,28 @@ func TestLoaders(t *testing.T) {
 							t.Logf("Successfully retrieved ManufacturerOUI: %s", informResponse.Body.Inform.DeviceID.OUI)
 						} else {
 							t.Errorf("Failed to get ManufacturerOUI: %v", err)
+						}
+					} else {
+						t.Error("Failed to get function")
+					}
+				})
+			case "TestLoadDevice.OutsideIPAddress":
+				t.Run("LoadDevice.OutsideIPAddress", func(t *testing.T) {
+					// Call the function to test
+					executer := exec.NewExecutor(exec.ExecConfig{
+						Credentials: &exec.SSHCredentials{
+							Username:       "root",
+							PrivateKeyPath: "/Users/kimo/.ssh/id_ed25519",
+						},
+					})
+					informResponse := soap.NewRequestEnvelope()
+					informResponse.Body.Inform = &soap.Inform{}
+					if getter := commands.InformCommands["Device.OutsideIPAddress"]; getter != nil {
+						ssh_host := "192.168.1.170:22"
+						if result, err := getter(executer, &ssh_host); err == nil && result.Success {
+							t.Logf("Successfully retrieved OutsideIPAddress: %s", string(result.Raw))
+						} else {
+							t.Errorf("Failed to get OutsideIPAddress: %v", err)
 						}
 					} else {
 						t.Error("Failed to get function")

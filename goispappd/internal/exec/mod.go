@@ -43,6 +43,7 @@ type ExecConfig struct {
 type SSHCredentials struct {
 	Username       string
 	Password       string
+	Host           *string // NEW: SSH host address
 	PrivateKey     []byte
 	PrivateKeyPath string // NEW: path to private key file
 }
@@ -61,7 +62,7 @@ func NewExecutor(config ExecConfig) *Executor {
 }
 
 // Execute runs a local command
-func (e *Executor) Execute(ctx context.Context, command string, args ...string) (*CommandResult, error) {
+func (e *Executor) NormalExecute(ctx context.Context, command string, args ...string) (*CommandResult, error) {
 	if command == "" {
 		return nil, fmt.Errorf("command cannot be empty")
 	}
@@ -194,6 +195,14 @@ func (e *Executor) buildSSHConfig() (*ssh.ClientConfig, error) {
 
 	config.Auth = authMethods
 	return config, nil
+}
+
+// Execute runs a command as ssh or normal command based on the provided credentials
+func (e *Executor) Execute(ctx context.Context, command string, args ...string) (*CommandResult, error) {
+	if e.config.Credentials != nil && e.config.Credentials.Host != nil {
+		return e.SSHExecute(ctx, *e.config.Credentials.Host, fmt.Sprintf("%s %s", command, strings.Join(args, " ")))
+	}
+	return e.NormalExecute(ctx, command, args...)
 }
 
 // parseOutput determines the output type and parses accordingly

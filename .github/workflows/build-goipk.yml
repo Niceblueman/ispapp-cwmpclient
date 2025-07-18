@@ -177,15 +177,18 @@ jobs:
         with:
           fetch-depth: 0
       - name: Build ispappd-${{ matrix.arch }}
-        uses: openwrt/gh-action-sdk@main
-        continue-on-error: true
+        uses: kmoz000/gh-action-sdk@latest
+        continue-on-error: false
         env:
           NO_REFRESH_CHECK: true
-          IGNORE_ERRORS: true
+          NO_DEFAULT_FEEDS: true
+          IGNORE_ERRORS: false
           FEEDNAME: ispappd
           FEED_DIR: ${{ github.workspace }}/feeds/
+          GOPACKAGELATEST: true
           ARCH: ${{ matrix.arch }}
           PACKAGES: goispappd
+          CONTAINER: 
           V: s
         
       - name: Store packages
