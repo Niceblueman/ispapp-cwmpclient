@@ -41,10 +41,10 @@ $(call Package/goispappd/Default)
   USERID:=goispappd:goispappd
 endef
 
-define Build/Compile
-	@echo "Go version being used:"
-	$(GO_PKG_VARS) go version
-	$(call GoBinPackage/Build/Compile)
+define Package/goispappd/install
+	$(call GoPackage/Package/Install/Bin,$(PKG_INSTALL_DIR))
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/goispappd $(1)/usr/bin/goispappd
 endef
 
 define Package/goispappd/description
