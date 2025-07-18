@@ -20,23 +20,25 @@ PKG_BUILD_PARALLEL := 1
 PKG_USE_MIPS16 := 0
 
 include $(INCLUDE_DIR)/package.mk
-include $(INCLUDE_DIR)/../feeds/packages/lang/golang/golang-package.mk
+include ../../lang/golang/golang-package.mk
 
-GO_PKG_BUILD_VARS += GO111MODULE=on GOPROXY=direct GOSUMDB=off CGO_ENABLED=1
-CGO_CFLAGS += -luci
+GO_PKG_BUILD_VARS += CGO_ENABLED=1
+GO_PKG_GCFLAGS += -luci
 GO_PKG_LDFLAGS := -s -w
+GO_PKG_BUILD_PKG := github.com/Niceblueman/goispappd
 
 define Package/goispappd/Default
   TITLE:=tr181/tr098/TR-069 CWMP client for OpenWrt.
   URL:=https://ispapp.co
   DEPENDS:=$(GO_ARCH_DEPENDS) +libuci
-
 endef
 
 define Package/goispappd
 $(call Package/goispappd/Default)
   SECTION:=utils
   CATEGORY:=Network
+  SUBMENU:=Go Applications
+  USERID:=goispappd:goispappd
 endef
 
 define Build/Compile
