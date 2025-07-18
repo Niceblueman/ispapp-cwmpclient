@@ -178,16 +178,17 @@ jobs:
         with:
           fetch-depth: 0
       - name: Build ispappd-${{ matrix.arch }}
-        uses: kmoz000/gh-action-sdk@latest
+        uses: kmoz000/gh-action-sdk@main
         continue-on-error: false
         env:
           NO_REFRESH_CHECK: true
-          NO_DEFAULT_FEEDS: true
+          # NO_DEFAULT_FEEDS: true
           IGNORE_ERRORS: false
           FEEDNAME: ispappd
           FEED_DIR: ${{ github.workspace }}/feeds/
+          GOPACKAGELATEST: true
           ARCH: ${{ matrix.arch }}
-          PACKAGES: golang goispappd
+          PACKAGES: goispappd
           V: s
         
       - name: Store packages
