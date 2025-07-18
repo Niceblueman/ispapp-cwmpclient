@@ -20,7 +20,7 @@ PKG_BUILD_PARALLEL := 1
 PKG_USE_MIPS16 := 0
 
 include $(INCLUDE_DIR)/package.mk
-include $(INCLUDE_DIR)/../feeds/packages/lang/golang/golang-package.mk
+include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
 GO_PKG_BUILD_VARS += CGO_ENABLED=1
 GO_PKG_GCFLAGS += -luci
