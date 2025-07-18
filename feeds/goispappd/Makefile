@@ -42,9 +42,9 @@ $(call Package/goispappd/Default)
 endef
 
 define Build/Compile
-    @echo "Go version being used:"
-    $(GO_PKG_VARS) go version
-    $(call GoBinPackage/Build/Compile)
+	@echo "Go version being used:"
+	$(GO_PKG_VARS) go version
+	$(call GoBinPackage/Build/Compile)
 endef
 
 define Package/goispappd/description
