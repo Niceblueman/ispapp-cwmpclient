@@ -1,14 +1,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME := goispappd
-PKG_VERSION := 1.0.30
-PKG_RELEASE := 30
+PKG_VERSION := 1.0.31
+PKG_RELEASE := 31
 
 GO_PKG := github.com/Niceblueman/goispappd
 
 PKG_SOURCE := $(PKG_NAME)-v$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL := https://github.com/Niceblueman/ispapp-cwmpclient/releases/download/v$(PKG_VERSION)/
-PKG_HASH := 1bf937e4dd10c77dc278348692adc61fe8fabbc90b6144ac82836ffeb0d6b14d
+PKG_HASH := b1e97d16549c737ce6f59443ac2ac64ef725d3a7943dccd28255d1999d8c3860
 PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)-v$(PKG_VERSION)
 
 PKG_LICENSE := GPL-3.0
