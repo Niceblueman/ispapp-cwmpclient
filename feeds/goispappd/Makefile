@@ -34,11 +34,11 @@ define Package/goispappd/Default
 endef
 
 define Package/goispappd
-$(call Package/goispappd/Default)
-  SECTION:=utils
-  CATEGORY:=Network
-  SUBMENU:=Go Applications
-  USERID:=goispappd:goispappd
+	$(call Package/goispappd/Default)
+	SECTION:=utils
+	CATEGORY:=Network
+	SUBMENU:=Go Applications
+	USERID:=goispappd:goispappd
 endef
 
 define Package/goispappd/install
