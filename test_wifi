@@ -1,0 +1,163 @@
+#!/bin/bash
+
+# WiFi Test Compilation and Remote Execution Script
+# This script compiles the WiFi test and executes it on a remote OpenWrt device
+
+set -e  # Exit on any error
+
+# Configuration
+REMOTE_HOST="192.168.1.170"
+REMOTE_USER="root"
+TEST_PACKAGE="github.com/Niceblueman/goispappd/internal/cron/jobs"
+BINARY_NAME="wifi_test"
+REMOTE_PATH="/tmp/${BINARY_NAME}"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}=== WiFi Test Compilation and Remote Execution ===${NC}"
+
+# Test connectivity to the remote device first
+echo -e "${YELLOW}Step 0: Testing connectivity to ${REMOTE_HOST}...${NC}"
+if ! ping -c 1 -W 3000 ${REMOTE_HOST} >/dev/null 2>&1; then
+    echo -e "${RED}Error: Cannot reach ${REMOTE_HOST}. Please check the IP address and network connectivity.${NC}"
+    exit 1
+fi
+
+if ! ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes ${REMOTE_USER}@${REMOTE_HOST} 'echo "SSH connection successful"' >/dev/null 2>&1; then
+    echo -e "${RED}Error: SSH connection to ${REMOTE_USER}@${REMOTE_HOST} failed. Please check SSH access.${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✓ Connectivity to ${REMOTE_HOST} confirmed${NC}"
+
+# Change to the project directory
+cd /Volumes/OpenWrt/ispapp-cwmpclient/goispappd
+
+echo -e "${YELLOW}Step 1: Building test binary for OpenWrt (MIPS architecture)...${NC}"
+
+# Target architecture is ARMv7l
+echo -e "${BLUE}Configuring for ARMv7l target...${NC}"
+TARGET_ARCH="armv7l"
+GOARCH="arm"
+GOARM="7"  # ARMv7 with hardware floating point
+
+echo -e "${GREEN}✓ Target architecture: ${TARGET_ARCH} (using GOARCH=${GOARCH} GOARM=${GOARM})${NC}"
+
+# Build the test binary for ARMv7l
+echo -e "${BLUE}Building for GOOS=linux GOARCH=${GOARCH} GOARM=${GOARM}...${NC}"
+GOOS=linux GOARCH=${GOARCH} GOARM=${GOARM} CGO_ENABLED=0 go test -c -o ${BINARY_NAME} ${TEST_PACKAGE}
+
+if [ ! -f "${BINARY_NAME}" ]; then
+    echo -e "${RED}Error: Failed to create test binary${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✓ Test binary created successfully${NC}"
+
+echo -e "${YELLOW}Step 2: Copying binary to remote device...${NC}"
+
+# Copy the binary to the remote device
+scp -o StrictHostKeyChecking=no ${BINARY_NAME} ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Failed to copy binary to remote device${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✓ Binary copied to ${REMOTE_HOST}:${REMOTE_PATH}${NC}"
+
+echo -e "${YELLOW}Step 3: Making binary executable and running tests...${NC}"
+
+# Execute the tests on the remote device
+ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 ${REMOTE_USER}@${REMOTE_HOST} << 'EOF'
+    echo "=== Remote Execution on $(hostname) ==="
+    echo "Architecture: $(uname -m)"
+    echo "Kernel: $(uname -r)"
+    echo "Date: $(date)"
+    echo ""
+    
+    # Verify we're running on the expected architecture
+    ACTUAL_ARCH=$(uname -m)
+    if [ "$ACTUAL_ARCH" != "armv7l" ]; then
+        echo "WARNING: Expected armv7l but found $ACTUAL_ARCH"
+    else
+        echo "✓ Confirmed running on armv7l"
+    fi
+    echo ""
+    
+    # Check if we have WiFi interfaces
+    echo "=== System WiFi Interface Check ==="
+    if command -v iw >/dev/null 2>&1; then
+        echo "Available WiFi interfaces:"
+        iw dev 2>/dev/null || echo "No WiFi interfaces found via iw"
+    else
+        echo "iw command not available"
+    fi
+    
+    if [ -d /sys/class/ieee80211 ]; then
+        echo "IEEE 802.11 devices in sysfs:"
+        ls -la /sys/class/ieee80211/ 2>/dev/null || echo "No IEEE 802.11 devices found"
+    fi
+    
+    # Check for WiFi network interfaces
+    echo "Network interfaces:"
+    ip link show | grep -E "(wlan|wifi)" || echo "No wlan/wifi interfaces found"
+    echo ""
+    
+    # Make binary executable
+    chmod +x /tmp/wifi_test
+    
+    echo "=== Running WiFi Interface and Station Tests ==="
+    echo "Running: /tmp/wifi_test -test.v -test.run='TestWiFiInterfacesAndStations'"
+    /tmp/wifi_test -test.v -test.run="TestWiFiInterfacesAndStations" 2>&1
+    TEST1_EXIT=$?
+    echo "Test 1 exit code: $TEST1_EXIT"
+    
+    echo ""
+    echo "=== Running WiFi Capabilities Test ==="
+    echo "Running: /tmp/wifi_test -test.v -test.run='TestWiFiCapabilities'"
+    /tmp/wifi_test -test.v -test.run="TestWiFiCapabilities" 2>&1
+    TEST2_EXIT=$?
+    echo "Test 2 exit code: $TEST2_EXIT"
+    
+    echo ""
+    echo "=== Running WiFi Scan Test ==="
+    echo "Running: /tmp/wifi_test -test.v -test.run='TestWiFiScanResults'"
+    /tmp/wifi_test -test.v -test.run="TestWiFiScanResults" 2>&1
+    TEST3_EXIT=$?
+    echo "Test 3 exit code: $TEST3_EXIT"
+    
+    echo ""
+    echo "=== Test Summary ==="
+    echo "TestWiFiInterfacesAndStations: $([ $TEST1_EXIT -eq 0 ] && echo 'PASS' || echo 'FAIL')"
+    echo "TestWiFiCapabilities: $([ $TEST2_EXIT -eq 0 ] && echo 'PASS' || echo 'FAIL')"
+    echo "TestWiFiScanResults: $([ $TEST3_EXIT -eq 0 ] && echo 'PASS' || echo 'FAIL')"
+    
+    echo ""
+    echo "=== Cleaning up ==="
+    rm -f /tmp/wifi_test
+    
+    echo "Remote execution completed!"
+    
+    # Exit with non-zero if any test failed
+    [ $TEST1_EXIT -eq 0 ] && [ $TEST2_EXIT -eq 0 ] && [ $TEST3_EXIT -eq 0 ]
+EOF
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✓ Tests executed successfully on remote device${NC}"
+else
+    echo -e "${RED}✗ Tests failed or encountered errors${NC}"
+fi
+
+echo -e "${YELLOW}Step 4: Cleaning up local binary...${NC}"
+
+# Clean up the local binary
+rm -f ${BINARY_NAME}
+
+echo -e "${GREEN}✓ Local cleanup completed${NC}"
+echo -e "${BLUE}=== WiFi Test Execution Complete ===${NC}"

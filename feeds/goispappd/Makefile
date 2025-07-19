@@ -22,7 +22,7 @@ PKG_USE_MIPS16 := 0
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
-GO_PKG_BUILD_VARS += CGO_ENABLED=1
+GO_PKG_BUILD_VARS += CGO_ENABLED=1 GO111MODULE=on GOPROXY=direct
 GO_PKG_GCFLAGS += -luci
 GO_PKG_LDFLAGS := -s -w
 GO_PKG_BUILD_PKG := github.com/Niceblueman/goispappd
